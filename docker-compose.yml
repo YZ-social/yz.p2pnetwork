@@ -1,16 +1,16 @@
 version: '3.8'
 
 services:
-  # Bootstrap node - entry point for the DHT network
+  # Bootstrap node with WebSocket bridge for browser clients
   bootstrap:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: libp2p-bootstrap
+    command: ["node", "dist/cli/ws-bridge.js"]
     environment:
       - NODE_ID=bootstrap
       - IS_BOOTSTRAP=true
-      - LISTEN_PORT=4001
       - WS_PORT=8080
       - METRICS_PORT=9090
       - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
@@ -18,7 +18,8 @@ services:
       - MAX_CONNECTIONS=100
     ports:
       - "4001:4001"   # libp2p TCP
-      - "8080:8080"   # WebSocket
+      - "4002:4002"   # libp2p WebSocket
+      - "8080:8080"   # Browser WebSocket API
       - "9090:9090"   # Metrics
     networks:
       - dht-network
