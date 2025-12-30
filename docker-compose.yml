@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Bootstrap node - entry point for the DHT network
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: libp2p-bootstrap
+    environment:
+      - NODE_ID=bootstrap
+      - IS_BOOTSTRAP=true
+      - LISTEN_PORT=4001
+      - WS_PORT=8080
+      - METRICS_PORT=9090
+      - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
+      - K_BUCKET_SIZE=20
+      - MAX_CONNECTIONS=100
+    ports:
+      - "4001:4001"   # libp2p TCP
+      - "8080:8080"   # WebSocket
+      - "9090:9090"   # Metrics
+    networks:
+      - dht-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # DHT nodes - use deploy script to start multiple instances
+  dht-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - LISTEN_PORT=4001
+      - METRICS_PORT=9090
+      - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
+      - BOOTSTRAP_URL=ws://bootstrap:8080
+      - K_BUCKET_SIZE=20
+      - MAX_CONNECTIONS=50
+    networks:
+      - dht-network
+    depends_on:
+      bootstrap:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 128M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Nginx reverse proxy for WSS
+  webserver:
+    image: nginx:alpine
+    container_name: libp2p-webserver
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - dht-network
+    depends_on:
+      - bootstrap
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  dht-network:
+    driver: bridge

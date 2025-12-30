@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.github
+.kiro
+.vscode
+*.md
+*.log
+.gitignore
+.dockerignore
+scripts
+nginx
+docker-compose.yml
