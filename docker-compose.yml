@@ -40,7 +40,7 @@ services:
       - LISTEN_PORT=4001
       - METRICS_PORT=9090
       - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
-      - BOOTSTRAP_URL=ws://bootstrap:8080
+      - BOOTSTRAP_URL=ws://bootstrap:4002
       - K_BUCKET_SIZE=20
       - MAX_CONNECTIONS=50
     networks:
