@@ -145,7 +145,7 @@ function startWebSocketServer() {
       clients.delete(ws);
     });
 
-    ws.on('error', (err) => {
+    ws.on('error', (err: Error) => {
       console.error(`[${NODE_ID}] WebSocket error:`, err);
     });
   });
