@@ -414,12 +414,14 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
 `);
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
+      const connectionInfo = node?.getConnectionInfo();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
         routingTable: info,
+        connections: connectionInfo,
         browserClients: clients.size,
         kvEntries: kvStore.size,
         uptime: Date.now() - startTime,
