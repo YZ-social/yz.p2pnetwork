@@ -32,7 +32,13 @@
     "@libp2p/tcp": "^11.0.9",
     "@libp2p/webrtc": "^5.1.5",
     "@libp2p/websockets": "^10.1.2",
+    "@noble/ciphers": "^2.1.1",
+    "@noble/curves": "^1.4.0",
+    "@noble/hashes": "^1.4.0",
+    "@noble/post-quantum": "^0.2.0",
+    "@types/uuid": "^10.0.0",
     "libp2p": "^3.1.2",
+    "uuid": "^13.0.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
