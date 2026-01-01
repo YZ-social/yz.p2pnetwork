@@ -225,7 +225,31 @@ export class DHTNode {
     }
 
     // Perform initial self-lookup to populate routing table with nearby peers
-    // This is done by the DHT service automatically when peers connect
+    // This helps discover other nodes in the network beyond just the bootstrap peers
+    try {
+      const selfKey = this.node!.peerId.toMultihash().bytes;
+      // Iterate through closest peers to trigger DHT queries
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _peer of this.getClosestPeers(selfKey)) {
+        // Just iterating triggers the DHT lookup which populates routing table
+        // We don't need to do anything with the peers
+      }
+    } catch {
+      // Self-lookup failure is not critical, routing table will populate over time
+    }
+
+    // Perform additional random lookups to discover more peers
+    // This helps build a more complete routing table
+    try {
+      const randomKey = new Uint8Array(32);
+      crypto.getRandomValues(randomKey);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _peer of this.getClosestPeers(randomKey)) {
+        // Just iterating triggers the DHT lookup
+      }
+    } catch {
+      // Random lookup failure is not critical
+    }
   }
 
   /**

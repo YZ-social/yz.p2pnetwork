@@ -437,18 +437,21 @@ export class KeyManager {
     const self = this;
     const libp2p = this.dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = data.stream as any;
-
-      console.log(`[KeyManager] Received key exchange request from ${data.connection?.remotePeer?.toString() || 'unknown'}`);
+    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async ({ stream, connection }: any) => {
+      const remotePeer = connection?.remotePeer?.toString() || 'unknown';
+      console.log(`[KeyManager] Received key exchange request from ${remotePeer}`);
 
       try {
+        if (!stream) {
+          console.error('[KeyManager] No stream in handler data');
+          return;
+        }
+
         // Create the public key record
         const record = self.createPublicKeyRecord(self.peerId!, self.keyPair!.publicKey);
         const serialized = self.serializePublicKeyRecord(record);
         
-        console.log(`[KeyManager] Sending public key (${serialized.length} bytes)`);
+        console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer}`);
 
         // Use an async generator to properly signal end of stream
         async function* generateResponse() {
@@ -456,13 +459,15 @@ export class KeyManager {
         }
 
         // Pipe the response to the stream sink
-        await stream.sink(generateResponse());
-        
-        console.log(`[KeyManager] Public key sent successfully`);
+        if (stream.sink) {
+          await stream.sink(generateResponse());
+          console.log(`[KeyManager] Public key sent successfully to ${remotePeer}`);
+        } else {
+          console.error('[KeyManager] Stream has no sink method');
+        }
       } catch (error) {
         console.error('[KeyManager] Error handling key exchange request:', error);
       }
-      // Don't explicitly close - the sink should handle it
     });
   }
 
