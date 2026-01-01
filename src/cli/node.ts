@@ -89,12 +89,9 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
-  // Set announce addresses for external connectivity
-  if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-    configBuilder.withAnnounceAddresses([
-      `/dns4/${EXTERNAL_HOST}/tcp/${WS_PORT}/wss`,
-    ]);
-  }
+  // Only set announce addresses for bootstrap node (which has external ports exposed)
+  // DHT nodes should NOT set announce addresses so they use their internal Docker addresses
+  // This allows nodes to discover and connect to each other within the Docker network
 
   // Add bootstrap peers if not bootstrap node
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
