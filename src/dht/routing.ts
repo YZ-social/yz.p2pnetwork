@@ -83,14 +83,15 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
       
       if (kb) {
         // The k-bucket library uses a tree structure with 'root'
-        // We need to traverse the tree to find all contacts
+        // We need to traverse the tree to find all peers
+        // Note: The k-bucket uses 'peers' not 'contacts'
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const collectContacts = (node: any, depth: number = 0): void => {
+        const collectPeers = (node: any, depth: number = 0): void => {
           if (!node) return;
           
-          // If this node has contacts, collect them
-          if (node.contacts && Array.isArray(node.contacts)) {
-            for (const contact of node.contacts) {
+          // If this node has peers, collect them
+          if (node.peers && Array.isArray(node.peers)) {
+            for (const contact of node.peers) {
               // Find or create bucket for this depth
               let bucket = buckets.find(b => b.index === depth);
               if (!bucket) {
@@ -115,18 +116,42 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
             }
           }
           
+          // Also check for 'contacts' (older versions)
+          if (node.contacts && Array.isArray(node.contacts)) {
+            for (const contact of node.contacts) {
+              let bucket = buckets.find(b => b.index === depth);
+              if (!bucket) {
+                bucket = {
+                  index: depth,
+                  peers: [],
+                  lastRefresh: new Date(),
+                };
+                buckets.push(bucket);
+              }
+              
+              const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+              
+              bucket.peers.push({
+                id: peerId,
+                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
+                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
+              });
+              totalPeers++;
+            }
+          }
+          
           // Recursively traverse left and right children
           if (node.left) {
-            collectContacts(node.left, depth + 1);
+            collectPeers(node.left, depth + 1);
           }
           if (node.right) {
-            collectContacts(node.right, depth + 1);
+            collectPeers(node.right, depth + 1);
           }
         };
         
         // Start traversal from root
         if (kb.root) {
-          collectContacts(kb.root);
+          collectPeers(kb.root);
         }
         
         // Alternative: try toIterable() if available

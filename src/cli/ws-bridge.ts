@@ -490,9 +490,9 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
         // Check kb.root structure
         const rootProps: string[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let rootContacts: any[] = [];
+        let rootPeers: any[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let rootContactSample: any = null;
+        let rootPeerSample: any = null;
         if (kb?.root) {
           for (const key in kb.root) {
             rootProps.push(key);
@@ -503,14 +503,28 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
               rootProps.push(prop);
             }
           }
-          // Get contacts if available
+          // Get peers if available (k-bucket uses 'peers' not 'contacts')
+          if (kb.root.peers && Array.isArray(kb.root.peers)) {
+            rootPeers = kb.root.peers.map((c: { peer?: { toString?: () => string } }) => 
+              c.peer?.toString?.() ?? String(c)
+            );
+            if (kb.root.peers.length > 0) {
+              const sample = kb.root.peers[0];
+              rootPeerSample = {
+                keys: Object.keys(sample || {}),
+                peerType: typeof sample?.peer,
+                hasPeerToString: typeof sample?.peer?.toString === 'function',
+              };
+            }
+          }
+          // Also check for contacts (older versions)
           if (kb.root.contacts && Array.isArray(kb.root.contacts)) {
-            rootContacts = kb.root.contacts.map((c: { peer?: { toString?: () => string } }) => 
+            rootPeers = kb.root.contacts.map((c: { peer?: { toString?: () => string } }) => 
               c.peer?.toString?.() ?? String(c)
             );
             if (kb.root.contacts.length > 0) {
               const sample = kb.root.contacts[0];
-              rootContactSample = {
+              rootPeerSample = {
                 keys: Object.keys(sample || {}),
                 peerType: typeof sample?.peer,
                 hasPeerToString: typeof sample?.peer?.toString === 'function',
@@ -549,8 +563,8 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
           kbProperties: kbProps,
           kbRootExists: !!kb?.root,
           kbRootProperties: rootProps,
-          kbRootContacts: rootContacts,
-          kbRootContactSample: rootContactSample,
+          kbRootPeers: rootPeers,
+          kbRootPeerSample: rootPeerSample,
           kbRootHasLeft: !!kb?.root?.left,
           kbRootHasRight: !!kb?.root?.right,
           lanDhtExists: !!lanDht,
