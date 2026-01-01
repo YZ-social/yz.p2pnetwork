@@ -431,6 +431,99 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
           peerId: overlay?.peerId,
         }
       }, null, 2));
+    } else if (req.url === '/debug/dht') {
+      // Debug endpoint to inspect DHT internal structure
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      try {
+        const libp2pNode = node?.getLibp2pNode();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const services = (libp2pNode as any)?.services;
+        const dht = services?.dht;
+        
+        // Enumerate all properties on the DHT object
+        const dhtProps: string[] = [];
+        if (dht) {
+          for (const key in dht) {
+            dhtProps.push(key);
+          }
+          // Also get own property names
+          const ownProps = Object.getOwnPropertyNames(dht);
+          for (const prop of ownProps) {
+            if (!dhtProps.includes(prop)) {
+              dhtProps.push(prop);
+            }
+          }
+        }
+        
+        // Check for routing table
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const routingTable = (dht as any)?.routingTable ?? (dht as any)?._routingTable;
+        const rtProps: string[] = [];
+        if (routingTable) {
+          for (const key in routingTable) {
+            rtProps.push(key);
+          }
+          const ownProps = Object.getOwnPropertyNames(routingTable);
+          for (const prop of ownProps) {
+            if (!rtProps.includes(prop)) {
+              rtProps.push(prop);
+            }
+          }
+        }
+        
+        // Check for kb (k-bucket)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const kb = routingTable?.kb ?? routingTable?._kb ?? routingTable?.kBucket;
+        const kbProps: string[] = [];
+        if (kb) {
+          for (const key in kb) {
+            kbProps.push(key);
+          }
+          const ownProps = Object.getOwnPropertyNames(kb);
+          for (const prop of ownProps) {
+            if (!kbProps.includes(prop)) {
+              kbProps.push(prop);
+            }
+          }
+        }
+        
+        // Check for lan/wan DHT
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const lanDht = (dht as any)?.lan ?? (dht as any)?._lan;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wanDht = (dht as any)?.wan ?? (dht as any)?._wan;
+        
+        const lanProps: string[] = [];
+        if (lanDht) {
+          for (const key in lanDht) {
+            lanProps.push(key);
+          }
+        }
+        
+        const wanProps: string[] = [];
+        if (wanDht) {
+          for (const key in wanDht) {
+            wanProps.push(key);
+          }
+        }
+        
+        res.end(JSON.stringify({
+          dhtExists: !!dht,
+          dhtProperties: dhtProps,
+          routingTableExists: !!routingTable,
+          routingTableProperties: rtProps,
+          routingTableSize: routingTable?.size,
+          kbExists: !!kb,
+          kbProperties: kbProps,
+          lanDhtExists: !!lanDht,
+          lanDhtProperties: lanProps,
+          wanDhtExists: !!wanDht,
+          wanDhtProperties: wanProps,
+          connections: node?.getConnectionInfo(),
+        }, null, 2));
+      } catch (err) {
+        res.end(JSON.stringify({ error: String(err) }));
+      }
     } else {
       res.writeHead(404);
       res.end('Not found');

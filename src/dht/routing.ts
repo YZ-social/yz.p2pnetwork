@@ -72,20 +72,34 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
   let totalPeers = 0;
 
   try {
-    // The @libp2p/kad-dht exposes routing table via different methods
-    // depending on the version. We'll try multiple approaches.
+    // The @libp2p/kad-dht v16+ uses a different internal structure
+    // Try multiple approaches to find the routing table
     
-    // Approach 1: Try to access the routingTable property directly
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const routingTable = (dht as any).routingTable ?? (dht as any)._routingTable;
+    let routingTable: any = null;
+    
+    // Approach 1: Direct property access
+    routingTable = (dht as any).routingTable ?? (dht as any)._routingTable;
+    
+    // Approach 2: Check for lan/wan DHT (dual DHT mode)
+    if (!routingTable) {
+      const lanDht = (dht as any).lan ?? (dht as any)._lan;
+      const wanDht = (dht as any).wan ?? (dht as any)._wan;
+      routingTable = lanDht?.routingTable ?? wanDht?.routingTable;
+    }
+    
+    // Approach 3: Check components
+    if (!routingTable && (dht as any).components) {
+      routingTable = (dht as any).components.routingTable;
+    }
     
     if (routingTable) {
       // The routing table typically has a kb (k-buckets) structure
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const kb = routingTable.kb ?? routingTable._kb ?? routingTable;
+      const kb = routingTable.kb ?? routingTable._kb ?? routingTable.kBucket ?? routingTable;
       
+      // Try toIterable() method first (k-bucket library)
       if (kb && typeof kb.toIterable === 'function') {
-        // k-bucket library provides toIterable() method
         for (const contact of kb.toIterable()) {
           const bucketIndex = contact.bucketIndex ?? 0;
           
@@ -100,15 +114,46 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
             buckets.push(bucket);
           }
           
+          // Extract peer ID - could be in different formats
+          const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
+          
           bucket.peers.push({
-            id: contact.id ?? contact.peer ?? contact,
-            multiaddrs: contact.multiaddrs ?? [],
+            id: peerId,
+            multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
             lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
           });
           totalPeers++;
         }
-      } else if (kb && kb.buckets) {
-        // Alternative structure with buckets array
+      }
+      // Try closest() method to get all peers
+      else if (kb && typeof kb.closest === 'function') {
+        // Get closest peers to a random key to enumerate the table
+        const randomKey = new Uint8Array(32);
+        try {
+          const peers = kb.closest(randomKey, 1000); // Get up to 1000 peers
+          for (const contact of peers) {
+            const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
+            
+            // Put all in bucket 0 since we don't have bucket info
+            let bucket = buckets.find(b => b.index === 0);
+            if (!bucket) {
+              bucket = { index: 0, peers: [], lastRefresh: new Date() };
+              buckets.push(bucket);
+            }
+            
+            bucket.peers.push({
+              id: peerId,
+              multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
+              lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
+            });
+            totalPeers++;
+          }
+        } catch {
+          // closest() failed
+        }
+      }
+      // Try buckets array
+      else if (kb && kb.buckets) {
         for (let i = 0; i < kb.buckets.length; i++) {
           const bucketContacts = kb.buckets[i] ?? [];
           if (bucketContacts.length > 0) {
@@ -116,8 +161,8 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             for (const contact of bucketContacts) {
               peers.push({
-                id: contact.id ?? contact.peer ?? contact,
-                multiaddrs: contact.multiaddrs ?? [],
+                id: contact.id ?? contact.peer ?? contact.peerId ?? contact,
+                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
                 lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
               });
               totalPeers++;
@@ -128,6 +173,57 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
               lastRefresh: new Date(),
             });
           }
+        }
+      }
+      // Try size property and iterate
+      else if (routingTable.size !== undefined && typeof routingTable.size === 'number') {
+        // Some implementations expose size and allow iteration
+        if (typeof routingTable[Symbol.iterator] === 'function') {
+          for (const contact of routingTable) {
+            const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
+            let bucket = buckets.find(b => b.index === 0);
+            if (!bucket) {
+              bucket = { index: 0, peers: [], lastRefresh: new Date() };
+              buckets.push(bucket);
+            }
+            bucket.peers.push({
+              id: peerId,
+              multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
+              lastSeen: new Date(),
+            });
+            totalPeers++;
+          }
+        }
+      }
+    }
+    
+    // Fallback: Use libp2p's peer store to get connected peers
+    // This isn't the DHT routing table but gives us peer info
+    if (totalPeers === 0) {
+      const connections = node.getConnections();
+      if (connections.length > 0) {
+        const bucket: BucketInfo = {
+          index: 0,
+          peers: [],
+          lastRefresh: new Date(),
+        };
+        
+        const seenPeers = new Set<string>();
+        for (const conn of connections) {
+          const peerIdStr = conn.remotePeer.toString();
+          if (!seenPeers.has(peerIdStr)) {
+            seenPeers.add(peerIdStr);
+            bucket.peers.push({
+              id: conn.remotePeer,
+              multiaddrs: [conn.remoteAddr],
+              lastSeen: new Date(),
+            });
+            totalPeers++;
+          }
+        }
+        
+        if (bucket.peers.length > 0) {
+          buckets.push(bucket);
         }
       }
     }
