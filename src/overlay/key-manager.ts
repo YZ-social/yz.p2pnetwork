@@ -12,7 +12,7 @@
 
 import { sha256 } from '@noble/hashes/sha256';
 import { HybridCrypto } from './crypto.js';
-import { PUBLIC_KEY_DHT_PREFIX, DEFAULT_ENCRYPTION_CONFIG } from './constants.js';
+import { PUBLIC_KEY_DHT_PREFIX, KEY_EXCHANGE_PROTOCOL_ID, DEFAULT_ENCRYPTION_CONFIG } from './constants.js';
 import { OverlayError, OverlayErrorCode } from './errors.js';
 import type {
   HybridPublicKey,
@@ -266,7 +266,7 @@ export class KeyManager {
   }
 
   /**
-   * Lookup a peer's public key from DHT or cache
+   * Lookup a peer's public key from cache, DHT, or direct request
    *
    * Requirement 10.4: Cache discovered public keys locally
    * Requirement 10.5: Refresh expired keys from DHT
@@ -290,6 +290,7 @@ export class KeyManager {
       );
     }
 
+    // Try DHT first
     try {
       const dhtKey = this.getDHTKey(peerId);
       const data = await this.dht.get(dhtKey);
@@ -312,16 +313,142 @@ export class KeyManager {
       this.publicKeyCache.set(peerId, publicKey);
 
       return publicKey;
-    } catch (error) {
-      if (error instanceof OverlayError) {
-        throw error;
-      }
+    } catch (dhtError) {
+      // DHT lookup failed, try direct request
+      console.log(`DHT lookup failed for ${peerId}, trying direct request...`);
+    }
+
+    // Try direct key request via libp2p protocol
+    try {
+      const publicKey = await this.requestKeyDirectly(peerId);
+      // Cache the key
+      this.publicKeyCache.set(peerId, publicKey);
+      return publicKey;
+    } catch (directError) {
       throw new OverlayError(
         OverlayErrorCode.KEY_NOT_FOUND,
-        `Failed to lookup public key for peer ${peerId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to lookup public key for peer ${peerId}: DHT and direct request both failed`,
+        { cause: directError instanceof Error ? directError : undefined }
+      );
+    }
+  }
+
+  /**
+   * Request a peer's public key directly via libp2p protocol
+   * This is used as a fallback when DHT lookup fails
+   */
+  async requestKeyDirectly(peerId: string): Promise<HybridPublicKey> {
+    if (!this.dht) {
+      throw new OverlayError(
+        OverlayErrorCode.KEY_NOT_FOUND,
+        'DHT not set. Call setDHT() first.'
+      );
+    }
+
+    const libp2p = this.dht.getLibp2pNode();
+    const { peerIdFromString } = await import('@libp2p/peer-id');
+    const targetPeerId = peerIdFromString(peerId);
+
+    try {
+      const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
+      const stream = rawStream as unknown as {
+        source: AsyncIterable<{ subarray(): Uint8Array }>;
+        sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
+        close: () => Promise<void>;
+      };
+
+      try {
+        // Send a key request (just a simple "request" marker)
+        await stream.sink([new TextEncoder().encode('REQUEST')]);
+
+        // Read the response
+        const chunks: Uint8Array[] = [];
+        for await (const chunk of stream.source) {
+          chunks.push(chunk.subarray());
+        }
+
+        if (chunks.length === 0) {
+          throw new Error('No response received');
+        }
+
+        // Concatenate chunks
+        const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
+        const data = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+          data.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        // Deserialize the public key record
+        const record = this.deserializePublicKeyRecord(data);
+
+        if (record.peerId !== peerId) {
+          throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
+        }
+
+        return {
+          x25519: record.x25519,
+          mlkem768: record.mlkem768,
+        };
+      } finally {
+        await stream.close();
+      }
+    } catch (error) {
+      throw new OverlayError(
+        OverlayErrorCode.KEY_NOT_FOUND,
+        `Direct key request failed for peer ${peerId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         { cause: error instanceof Error ? error : undefined }
       );
     }
+  }
+
+  /**
+   * Register the key exchange protocol handler
+   * This allows other nodes to request our public key directly
+   */
+  registerKeyExchangeHandler(): void {
+    if (!this.dht || !this.keyPair || !this.peerId) {
+      return;
+    }
+
+    const libp2p = this.dht.getLibp2pNode();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
+      const stream = data.stream as {
+        source: AsyncIterable<{ subarray(): Uint8Array }>;
+        sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
+        close: () => Promise<void>;
+      };
+
+      try {
+        // Read the request (we don't really need to parse it, just respond)
+        for await (const _ of stream.source) {
+          // Consume the request
+        }
+
+        // Send our public key record
+        const record = this.createPublicKeyRecord(this.peerId!, this.keyPair!.publicKey);
+        const serialized = this.serializePublicKeyRecord(record);
+        await stream.sink([serialized]);
+      } catch (error) {
+        console.error('Error handling key exchange request:', error);
+      } finally {
+        await stream.close();
+      }
+    });
+  }
+
+  /**
+   * Unregister the key exchange protocol handler
+   */
+  unregisterKeyExchangeHandler(): void {
+    if (!this.dht) {
+      return;
+    }
+
+    const libp2p = this.dht.getLibp2pNode();
+    libp2p.unhandle(KEY_EXCHANGE_PROTOCOL_ID);
   }
 
   /**

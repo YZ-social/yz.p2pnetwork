@@ -78,6 +78,11 @@ export const DEFAULT_ATTESTATION_CONFIG = {
 export const OVERLAY_PROTOCOL_ID = '/overlay/1.0.0';
 
 /**
+ * Protocol identifier for direct key exchange
+ */
+export const KEY_EXCHANGE_PROTOCOL_ID = '/overlay/keyexchange/1.0.0';
+
+/**
  * DHT key prefix for public key storage
  */
 export const PUBLIC_KEY_DHT_PREFIX = '/overlay/pubkey/';

@@ -191,6 +191,9 @@ export class OverlayNetwork {
           this.config.encryption.keyPublishInterval
         );
       }
+
+      // Register key exchange handler for direct key requests
+      this.keyManager.registerKeyExchangeHandler();
     }
 
     // Register libp2p protocol handler
@@ -218,6 +221,9 @@ export class OverlayNetwork {
 
     // Unregister protocol handler
     this.unregisterProtocolHandler();
+
+    // Unregister key exchange handler
+    this.keyManager.unregisterKeyExchangeHandler();
 
     // Clean up components
     this.dedupCache.destroy();
