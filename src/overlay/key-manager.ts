@@ -434,28 +434,35 @@ export class KeyManager {
 
     console.log(`[KeyManager] Registering key exchange handler for ${this.peerId}`);
 
+    const self = this;
     const libp2p = this.dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-      const stream = data.stream as {
-        source: AsyncIterable<{ subarray(): Uint8Array }>;
-        sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-        close: () => Promise<void>;
-      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = data.stream as any;
 
-      console.log(`[KeyManager] Received key exchange request`);
+      console.log(`[KeyManager] Received key exchange request from ${data.connection?.remotePeer?.toString() || 'unknown'}`);
 
       try {
-        // Send our public key record immediately (don't wait for request data)
-        const record = this.createPublicKeyRecord(this.peerId!, this.keyPair!.publicKey);
-        const serialized = this.serializePublicKeyRecord(record);
-        await stream.sink([serialized]);
-        console.log(`[KeyManager] Sent public key (${serialized.length} bytes)`);
+        // Create the public key record
+        const record = self.createPublicKeyRecord(self.peerId!, self.keyPair!.publicKey);
+        const serialized = self.serializePublicKeyRecord(record);
+        
+        console.log(`[KeyManager] Sending public key (${serialized.length} bytes)`);
+
+        // Use an async generator to properly signal end of stream
+        async function* generateResponse() {
+          yield serialized;
+        }
+
+        // Pipe the response to the stream sink
+        await stream.sink(generateResponse());
+        
+        console.log(`[KeyManager] Public key sent successfully`);
       } catch (error) {
         console.error('[KeyManager] Error handling key exchange request:', error);
-      } finally {
-        await stream.close();
       }
+      // Don't explicitly close - the sink should handle it
     });
   }
 
