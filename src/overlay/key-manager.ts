@@ -353,51 +353,65 @@ export class KeyManager {
 
     try {
       const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
-      const stream = rawStream as unknown as {
-        source: AsyncIterable<{ subarray(): Uint8Array }>;
-        sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-        close: () => Promise<void>;
-        closeWrite: () => Promise<void>;
-      };
+      
+      // Cast to access the source property
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = rawStream as any;
 
-      try {
-        // Read the response (the handler sends the key immediately on connection)
-        const chunks: Uint8Array[] = [];
+      console.log(`[KeyManager] Connected to ${peerId}, reading response...`);
+
+      // Read the response using the stream's async iterator
+      const chunks: Uint8Array[] = [];
+      
+      // The stream from dialProtocol is a duplex stream
+      // We need to iterate over the source properly
+      if (stream.source) {
         for await (const chunk of stream.source) {
-          chunks.push(chunk.subarray());
+          // Handle both BufferList and Uint8Array
+          if (chunk && typeof chunk.subarray === 'function') {
+            chunks.push(chunk.subarray());
+          } else if (chunk instanceof Uint8Array) {
+            chunks.push(chunk);
+          } else if (chunk) {
+            // Try to convert to Uint8Array
+            chunks.push(new Uint8Array(chunk));
+          }
         }
+      }
 
-        if (chunks.length === 0) {
-          throw new Error('No response received');
-        }
-
-        // Concatenate chunks
-        const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
-        const data = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-          data.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        console.log(`[KeyManager] Received ${data.length} bytes from ${peerId}`);
-
-        // Deserialize the public key record
-        const record = this.deserializePublicKeyRecord(data);
-
-        if (record.peerId !== peerId) {
-          throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
-        }
-
-        console.log(`[KeyManager] Successfully got key from ${peerId} via direct request`);
-
-        return {
-          x25519: record.x25519,
-          mlkem768: record.mlkem768,
-        };
-      } finally {
+      // Close the stream
+      if (stream.close) {
         await stream.close();
       }
+
+      if (chunks.length === 0) {
+        throw new Error('No response received from peer');
+      }
+
+      // Concatenate chunks
+      const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
+      const data = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+        data.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      console.log(`[KeyManager] Received ${data.length} bytes from ${peerId}`);
+
+      // Deserialize the public key record
+      const record = this.deserializePublicKeyRecord(data);
+
+      if (record.peerId !== peerId) {
+        throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
+      }
+
+      console.log(`[KeyManager] Successfully got key from ${peerId} via direct request`);
+
+      return {
+        x25519: record.x25519,
+        mlkem768: record.mlkem768,
+      };
     } catch (error) {
       console.error(`[KeyManager] Direct key request failed for ${peerId}:`, error);
       throw new OverlayError(
