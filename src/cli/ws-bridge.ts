@@ -74,7 +74,8 @@ async function main() {
     ])
     .withKBucketSize(20)
     .withMaxConnections(100)
-    .withRefreshInterval(30000);
+    .withRefreshInterval(30000)
+    .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
   if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
     configBuilder.withAnnounceAddresses([
