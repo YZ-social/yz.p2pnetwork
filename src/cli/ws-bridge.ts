@@ -3,12 +3,16 @@
  * WebSocket Bridge Server for Browser Clients
  * 
  * This server provides a simple WebSocket API for browser clients
- * to interact with the DHT network. It connects to the libp2p DHT
- * and exposes put/get operations over a JSON WebSocket protocol.
+ * to interact with the DHT network and overlay messaging system.
+ * It connects to the libp2p DHT and exposes:
+ * - put/get operations for DHT storage
+ * - overlay echo for encrypted messaging tests
+ * - closest peers lookup
  */
 import { createServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { DHTNode, DHTConfigBuilder } from '../index.js';
+import { OverlayNetwork } from '../overlay/index.js';
 
 const NODE_ID = process.env.NODE_ID || 'bridge';
 const WS_PORT = parseInt(process.env.WS_PORT || '8080', 10);
@@ -18,6 +22,7 @@ const EXTERNAL_HOST = process.env.EXTERNAL_HOST || 'localhost';
 const IS_BOOTSTRAP = process.env.IS_BOOTSTRAP === 'true';
 
 let node: DHTNode | null = null;
+let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
 const clients = new Map<WebSocket, { id: string; connectedAt: number }>();
 
@@ -98,6 +103,27 @@ async function main() {
     }
   }
 
+  // Initialize overlay network
+  overlay = new OverlayNetwork(node, {
+    defaultTTL: 20,
+    responseTimeout: 30000,
+    defaultRedundancy: 3,
+  });
+  await overlay.start();
+  console.log(`[${NODE_ID}] Overlay network started`);
+
+  // Register echo handler for overlay messages
+  overlay.onMessage(async (payload, context) => {
+    console.log(`[${NODE_ID}] Received overlay message from ${context.originPeerId}`);
+    // Echo back the payload with metadata
+    const response = {
+      echo: new TextDecoder().decode(payload),
+      from: node?.peerId.toString(),
+      timestamp: Date.now(),
+    };
+    return new TextEncoder().encode(JSON.stringify(response));
+  });
+
   // Start WebSocket server for browser clients
   startWebSocketServer();
   
@@ -119,13 +145,14 @@ function startWebSocketServer() {
     clients.set(ws, { id: clientId, connectedAt: Date.now() });
     console.log(`[${NODE_ID}] Browser client connected: ${clientId}`);
 
-    // Send welcome message
+    // Send welcome message with full peer ID
     const info = node?.getRoutingTableInfo();
     ws.send(JSON.stringify({
       type: 'welcome',
       nodeId: NODE_ID,
       peerId: node?.peerId.toString(),
       peerCount: info?.totalPeers || 0,
+      overlayEnabled: overlay?.isStarted || false,
       timestamp: Date.now()
     }));
 
@@ -153,7 +180,17 @@ function startWebSocketServer() {
   console.log(`[${NODE_ID}] WebSocket server listening on port ${WS_PORT}`);
 }
 
-async function handleClientMessage(ws: WebSocket, msg: { type: string; key?: string; value?: string; peerId?: string }) {
+interface ClientMessage {
+  type: string;
+  key?: string;
+  value?: string;
+  peerId?: string;
+  targetPeerId?: string;
+  message?: string;
+  count?: number;
+}
+
+async function handleClientMessage(ws: WebSocket, msg: ClientMessage) {
   switch (msg.type) {
     case 'hello':
       console.log(`[${NODE_ID}] Client hello: ${msg.peerId}`);
@@ -209,12 +246,126 @@ async function handleClientMessage(ws: WebSocket, msg: { type: string; key?: str
       break;
 
     case 'peers':
-      const info = node?.getRoutingTableInfo();
-      ws.send(JSON.stringify({
-        type: 'peers',
-        peers: info?.buckets.flatMap(b => b.peers.map(p => p.id.toString())) || [],
-        count: info?.totalPeers || 0
-      }));
+      {
+        const info = node?.getRoutingTableInfo();
+        ws.send(JSON.stringify({
+          type: 'peers',
+          peers: info?.buckets.flatMap(b => b.peers.map(p => p.id.toString())) || [],
+          count: info?.totalPeers || 0
+        }));
+      }
+      break;
+
+    case 'closest_peers':
+      // Get N closest peers to a key
+      if (msg.key) {
+        try {
+          const count = msg.count || 10;
+          const keyBytes = new TextEncoder().encode(msg.key);
+          const peerIds: string[] = [];
+          
+          if (node) {
+            // Try DHT lookup first
+            try {
+              for await (const peer of node.getClosestPeers(keyBytes)) {
+                peerIds.push(peer.id.toString());
+                if (peerIds.length >= count) break;
+              }
+            } catch {
+              // Fall back to routing table
+            }
+            
+            // If not enough from DHT, add from routing table
+            if (peerIds.length < count) {
+              const info = node.getRoutingTableInfo();
+              for (const bucket of info.buckets) {
+                for (const peer of bucket.peers) {
+                  const peerId = peer.id.toString();
+                  if (!peerIds.includes(peerId)) {
+                    peerIds.push(peerId);
+                    if (peerIds.length >= count) break;
+                  }
+                }
+                if (peerIds.length >= count) break;
+              }
+            }
+          }
+          
+          ws.send(JSON.stringify({
+            type: 'closest_peers_response',
+            key: msg.key,
+            peers: peerIds,
+            count: peerIds.length
+          }));
+        } catch (err) {
+          ws.send(JSON.stringify({ type: 'error', message: `Closest peers failed: ${err}` }));
+        }
+      }
+      break;
+
+    case 'overlay_echo':
+      // Send encrypted message via overlay and measure latency
+      if (msg.targetPeerId && msg.message) {
+        const startTime = Date.now();
+        try {
+          if (!overlay || !overlay.isStarted) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Overlay network not available' }));
+            return;
+          }
+          
+          const payload = new TextEncoder().encode(msg.message);
+          const response = await overlay.sendMessage(msg.targetPeerId, payload, {
+            timeout: 30000,
+          });
+          
+          const latency = Date.now() - startTime;
+          const responseData = JSON.parse(new TextDecoder().decode(response));
+          
+          ws.send(JSON.stringify({
+            type: 'overlay_echo_response',
+            targetPeerId: msg.targetPeerId,
+            originalMessage: msg.message,
+            echoResponse: responseData,
+            latencyMs: latency,
+            encrypted: true,
+            success: true
+          }));
+        } catch (err) {
+          const latency = Date.now() - startTime;
+          ws.send(JSON.stringify({
+            type: 'overlay_echo_response',
+            targetPeerId: msg.targetPeerId,
+            originalMessage: msg.message,
+            error: err instanceof Error ? err.message : 'Unknown error',
+            latencyMs: latency,
+            success: false
+          }));
+        }
+      } else {
+        ws.send(JSON.stringify({ type: 'error', message: 'Missing targetPeerId or message' }));
+      }
+      break;
+
+    case 'overlay_info':
+      // Get overlay network info
+      if (overlay) {
+        const config = overlay.getConfig();
+        ws.send(JSON.stringify({
+          type: 'overlay_info_response',
+          peerId: overlay.peerId,
+          isStarted: overlay.isStarted,
+          config: {
+            maxMessageSize: config.maxMessageSize,
+            defaultTTL: config.defaultTTL,
+            dedupeWindowMs: config.dedupeWindowMs,
+            defaultRedundancy: config.defaultRedundancy,
+            responseTimeout: config.responseTimeout,
+            encryptionEnabled: config.encryption.enabled,
+          }
+        }));
+      } else {
+        ws.send(JSON.stringify({ type: 'error', message: 'Overlay network not initialized' }));
+      }
       break;
 
     default:
@@ -250,6 +401,10 @@ browser_clients_total{node="${NODE_ID}"} ${clients.size}
 # HELP kv_entries_total Key-value entries stored
 # TYPE kv_entries_total gauge
 kv_entries_total{node="${NODE_ID}"} ${kvStore.size}
+
+# HELP overlay_enabled Overlay network enabled
+# TYPE overlay_enabled gauge
+overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
 `);
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
@@ -263,6 +418,10 @@ kv_entries_total{node="${NODE_ID}"} ${kvStore.size}
         kvEntries: kvStore.size,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,
+        overlay: {
+          enabled: overlay?.isStarted || false,
+          peerId: overlay?.peerId,
+        }
       }, null, 2));
     } else {
       res.writeHead(404);
@@ -277,6 +436,9 @@ kv_entries_total{node="${NODE_ID}"} ${kvStore.size}
 
 async function shutdown(signal: string) {
   console.log(`[${NODE_ID}] Received ${signal}, shutting down...`);
+  if (overlay) {
+    await overlay.stop();
+  }
   if (node) {
     await node.stop();
   }

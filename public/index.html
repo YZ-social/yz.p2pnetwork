@@ -14,14 +14,8 @@
             min-height: 100vh;
             color: #e2e8f0;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
         .header h1 {
             margin: 0;
             font-size: 2.5em;
@@ -30,13 +24,10 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .header p {
-            color: #a0aec0;
-            margin-top: 10px;
-        }
+        .header p { color: #a0aec0; margin-top: 10px; }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
         }
         .card {
@@ -52,9 +43,7 @@
             font-size: 1.1em;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .card-body {
-            padding: 20px;
-        }
+        .card-body { padding: 20px; }
         .status-bar {
             display: flex;
             flex-wrap: wrap;
@@ -65,26 +54,16 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .status-item {
-            display: flex;
-            flex-direction: column;
-        }
-        .status-label {
-            font-size: 0.85em;
-            color: #a0aec0;
-            margin-bottom: 5px;
-        }
-        .status-value {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #4facfe;
-        }
+        .status-item { display: flex; flex-direction: column; }
+        .status-label { font-size: 0.85em; color: #a0aec0; margin-bottom: 5px; }
+        .status-value { font-size: 1.2em; font-weight: 600; color: #4facfe; }
         .status-value.connected { color: #68d391; }
         .status-value.disconnected { color: #fc8181; }
         #peer-id {
             font-family: monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             word-break: break-all;
+            max-width: 400px;
         }
         .btn {
             padding: 12px 24px;
@@ -95,36 +74,14 @@
             font-size: 14px;
             transition: all 0.2s ease;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: #1a1a2e;
-        }
-        .btn-success {
-            background: linear-gradient(135deg, #68d391 0%, #38a169 100%);
-            color: white;
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #f6e05e 0%, #d69e2e 100%);
-            color: #1a1a2e;
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #fc8181 0%, #c53030 100%);
-            color: white;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+        .btn-primary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #1a1a2e; }
+        .btn-success { background: linear-gradient(135deg, #68d391 0%, #38a169 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f6e05e 0%, #d69e2e 100%); color: #1a1a2e; }
+        .btn-danger { background: linear-gradient(135deg, #fc8181 0%, #c53030 100%); color: white; }
+        .btn-purple { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
         .form-control {
             flex: 1;
             padding: 12px;
@@ -139,30 +96,16 @@
             border-color: #4facfe;
             box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
         }
-        .form-control::placeholder {
-            color: #718096;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
+        .form-control::placeholder { color: #718096; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .stat-item {
             background: rgba(255, 255, 255, 0.05);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
         }
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: 700;
-            color: #4facfe;
-        }
-        .stat-label {
-            font-size: 0.85em;
-            color: #a0aec0;
-            margin-top: 5px;
-        }
+        .stat-value { font-size: 1.8em; font-weight: 700; color: #4facfe; }
+        .stat-label { font-size: 0.85em; color: #a0aec0; margin-top: 5px; }
         .log-output {
             background: #0d1117;
             color: #c9d1d9;
@@ -174,9 +117,7 @@
             border-radius: 8px;
             line-height: 1.6;
         }
-        .log-entry {
-            margin-bottom: 4px;
-        }
+        .log-entry { margin-bottom: 4px; }
         .log-time { color: #8b949e; }
         .log-info { color: #58a6ff; }
         .log-success { color: #3fb950; }
@@ -190,27 +131,40 @@
             font-family: monospace;
             word-break: break-all;
         }
-        .result-label {
-            font-size: 0.85em;
-            color: #a0aec0;
-            margin-bottom: 5px;
-        }
-        .result-value {
-            color: #68d391;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .result-label { font-size: 0.85em; color: #a0aec0; margin-bottom: 5px; }
+        .result-value { color: #68d391; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
         .full-width { grid-column: 1 / -1; }
+        .peer-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .peer-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+            word-break: break-all;
+        }
+        .peer-item:hover { background: rgba(79, 172, 254, 0.2); }
+        .peer-item.selected { background: rgba(79, 172, 254, 0.3); border: 1px solid #4facfe; }
+        .latency { color: #68d391; font-weight: bold; }
+        .latency.slow { color: #f6e05e; }
+        .latency.very-slow { color: #fc8181; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>libp2p DHT Browser Client</h1>
-            <p>Connect to the Kademlia DHT network from your browser</p>
+            <h1>🔐 libp2p Overlay Network</h1>
+            <p>Encrypted P2P messaging with hybrid post-quantum cryptography</p>
         </div>
 
         <div class="status-bar">
@@ -219,12 +173,16 @@
                 <span class="status-value disconnected" id="connection-status">Disconnected</span>
             </div>
             <div class="status-item">
-                <span class="status-label">Peer ID</span>
+                <span class="status-label">Node ID</span>
                 <span class="status-value" id="peer-id">-</span>
             </div>
             <div class="status-item">
                 <span class="status-label">Connected Peers</span>
                 <span class="status-value" id="peer-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Overlay</span>
+                <span class="status-value" id="overlay-status">-</span>
             </div>
             <div class="status-item">
                 <span class="status-label">Uptime</span>
@@ -237,7 +195,7 @@
                 <div class="card-header">🔌 Connection</div>
                 <div class="card-body">
                     <div class="controls">
-                        <button class="btn btn-primary" id="connect-btn">Connect to DHT</button>
+                        <button class="btn btn-primary" id="connect-btn">Connect</button>
                         <button class="btn btn-danger" id="disconnect-btn" disabled>Disconnect</button>
                     </div>
                     <div class="result-box">
@@ -263,6 +221,39 @@
                             <span class="stat-value" id="stat-data-out">0 B</span>
                             <div class="stat-label">Data Out</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🔍 Find Closest Peers</div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="lookup-key" placeholder="Key or address to lookup">
+                        <input type="number" class="form-control" id="lookup-count" placeholder="Count" value="10" style="max-width: 80px;">
+                        <button class="btn btn-warning" id="lookup-btn" disabled>Find</button>
+                    </div>
+                    <div class="peer-list" id="peer-list">
+                        <div style="color: #718096; text-align: center; padding: 20px;">
+                            Enter a key and click Find to discover peers
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🔐 Encrypted Echo Test</div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="echo-target" placeholder="Target Peer ID (click from list or paste)">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="echo-message" placeholder="Message to send">
+                        <button class="btn btn-purple" id="echo-btn" disabled>Send Echo</button>
+                    </div>
+                    <div class="result-box" id="echo-result" style="display: none;">
+                        <div class="result-label">Echo Response</div>
+                        <div class="result-value" id="echo-result-text"></div>
                     </div>
                 </div>
             </div>
@@ -311,7 +302,6 @@
     </div>
 
     <script type="module">
-        // Simple browser DHT client using WebSocket to bootstrap
         const BOOTSTRAP_URL = 'wss://imeyouwe.com/ws';
         const BOOTSTRAP_INFO_URL = 'https://imeyouwe.com/bootstrap/info';
         
@@ -322,21 +312,28 @@
         let dataIn = 0;
         let dataOut = 0;
         let peerCount = 0;
+        let overlayEnabled = false;
+        let selectedPeerId = null;
 
         // DOM elements
         const connectBtn = document.getElementById('connect-btn');
         const disconnectBtn = document.getElementById('disconnect-btn');
         const storeBtn = document.getElementById('store-btn');
         const getBtn = document.getElementById('get-btn');
+        const lookupBtn = document.getElementById('lookup-btn');
+        const echoBtn = document.getElementById('echo-btn');
         const clearLogBtn = document.getElementById('clear-log');
         const logOutput = document.getElementById('log-output');
         const connectionStatus = document.getElementById('connection-status');
         const peerIdEl = document.getElementById('peer-id');
         const peerCountEl = document.getElementById('peer-count');
+        const overlayStatus = document.getElementById('overlay-status');
         const uptimeEl = document.getElementById('uptime');
         const statPeers = document.getElementById('stat-peers');
         const statDataIn = document.getElementById('stat-data-in');
         const statDataOut = document.getElementById('stat-data-out');
+        const peerList = document.getElementById('peer-list');
+        const echoTarget = document.getElementById('echo-target');
 
         function log(message, level = 'info') {
             const time = new Date().toLocaleTimeString();
@@ -362,11 +359,20 @@
             return `${seconds}s`;
         }
 
+        function formatLatency(ms) {
+            let className = 'latency';
+            if (ms > 1000) className += ' very-slow';
+            else if (ms > 500) className += ' slow';
+            return `<span class="${className}">${ms}ms</span>`;
+        }
+
         function updateUI() {
             connectionStatus.textContent = connected ? 'Connected' : 'Disconnected';
             connectionStatus.className = 'status-value ' + (connected ? 'connected' : 'disconnected');
-            peerIdEl.textContent = peerId ? peerId.substring(0, 20) + '...' : '-';
+            peerIdEl.textContent = peerId || '-';
             peerCountEl.textContent = peerCount;
+            overlayStatus.textContent = overlayEnabled ? 'Enabled' : 'Disabled';
+            overlayStatus.style.color = overlayEnabled ? '#68d391' : '#fc8181';
             statPeers.textContent = peerCount;
             statDataIn.textContent = formatBytes(dataIn);
             statDataOut.textContent = formatBytes(dataOut);
@@ -379,6 +385,8 @@
             disconnectBtn.disabled = !connected;
             storeBtn.disabled = !connected;
             getBtn.disabled = !connected;
+            lookupBtn.disabled = !connected;
+            echoBtn.disabled = !connected || !overlayEnabled;
         }
 
         async function fetchBootstrapInfo() {
@@ -387,6 +395,9 @@
                 const info = await response.json();
                 log(`Bootstrap node: ${info.peerId}`, 'info');
                 log(`Bootstrap has ${info.routingTable.totalPeers} peers`, 'info');
+                if (info.overlay?.enabled) {
+                    log('Overlay network is enabled on bootstrap', 'success');
+                }
                 return info;
             } catch (error) {
                 log(`Failed to fetch bootstrap info: ${error.message}`, 'error');
@@ -397,7 +408,6 @@
         async function connect() {
             log('Connecting to DHT network...', 'info');
             
-            // First get bootstrap info
             const bootstrapInfo = await fetchBootstrapInfo();
             if (!bootstrapInfo) {
                 log('Could not reach bootstrap node', 'error');
@@ -411,19 +421,6 @@
                     connected = true;
                     startTime = Date.now();
                     log('WebSocket connected to bootstrap', 'success');
-                    
-                    // Generate a simple peer ID for this browser session
-                    peerId = 'browser-' + Math.random().toString(36).substring(2, 15);
-                    
-                    // Send hello message
-                    const hello = JSON.stringify({
-                        type: 'hello',
-                        peerId: peerId,
-                        timestamp: Date.now()
-                    });
-                    ws.send(hello);
-                    dataOut += hello.length;
-                    
                     updateUI();
                 };
 
@@ -440,6 +437,7 @@
 
                 ws.onclose = () => {
                     connected = false;
+                    overlayEnabled = false;
                     log('Disconnected from bootstrap', 'warn');
                     updateUI();
                 };
@@ -455,8 +453,14 @@
         function handleMessage(msg) {
             switch (msg.type) {
                 case 'welcome':
-                    log(`Welcome from bootstrap. Network has ${msg.peerCount || 0} peers`, 'success');
+                    peerId = msg.peerId;
                     peerCount = msg.peerCount || 0;
+                    overlayEnabled = msg.overlayEnabled || false;
+                    log(`Welcome! Node ID: ${peerId}`, 'success');
+                    log(`Network has ${peerCount} peers`, 'info');
+                    if (overlayEnabled) {
+                        log('🔐 Overlay network with E2E encryption is available', 'success');
+                    }
                     break;
                 case 'peers':
                     peerCount = msg.peers?.length || 0;
@@ -475,6 +479,22 @@
                         showGetResult('Not found');
                     }
                     break;
+                case 'closest_peers_response':
+                    log(`Found ${msg.count} peers closest to "${msg.key}"`, 'success');
+                    displayPeerList(msg.peers);
+                    break;
+                case 'overlay_echo_response':
+                    if (msg.success) {
+                        log(`🔐 Echo response received in ${formatLatency(msg.latencyMs)}`, 'success');
+                        showEchoResult(msg);
+                    } else {
+                        log(`Echo failed: ${msg.error}`, 'error');
+                        showEchoError(msg);
+                    }
+                    break;
+                case 'overlay_info_response':
+                    log(`Overlay config: TTL=${msg.config.defaultTTL}, Timeout=${msg.config.responseTimeout}ms`, 'info');
+                    break;
                 case 'error':
                     log(`Error: ${msg.message}`, 'error');
                     break;
@@ -482,6 +502,29 @@
                     log(`Received: ${msg.type}`, 'info');
             }
         }
+
+        function displayPeerList(peers) {
+            if (!peers || peers.length === 0) {
+                peerList.innerHTML = '<div style="color: #718096; text-align: center; padding: 20px;">No peers found</div>';
+                return;
+            }
+            
+            peerList.innerHTML = peers.map((p, i) => 
+                `<div class="peer-item" data-peer="${p}" onclick="selectPeer('${p}')">${i + 1}. ${p}</div>`
+            ).join('');
+        }
+
+        window.selectPeer = function(peerId) {
+            selectedPeerId = peerId;
+            echoTarget.value = peerId;
+            
+            // Update selection UI
+            document.querySelectorAll('.peer-item').forEach(el => {
+                el.classList.toggle('selected', el.dataset.peer === peerId);
+            });
+            
+            log(`Selected peer: ${peerId.substring(0, 20)}...`, 'info');
+        };
 
         function disconnect() {
             if (ws) {
@@ -491,7 +534,54 @@
             connected = false;
             peerId = null;
             startTime = null;
+            overlayEnabled = false;
             log('Disconnected', 'info');
+            updateUI();
+        }
+
+        function lookupClosestPeers() {
+            const key = document.getElementById('lookup-key').value.trim();
+            const count = parseInt(document.getElementById('lookup-count').value) || 10;
+            
+            if (!key) {
+                log('Please enter a key to lookup', 'warn');
+                return;
+            }
+
+            const msg = JSON.stringify({
+                type: 'closest_peers',
+                key: key,
+                count: count
+            });
+            
+            ws.send(msg);
+            dataOut += msg.length;
+            log(`Looking up ${count} closest peers to "${key}"...`, 'info');
+            updateUI();
+        }
+
+        function sendEcho() {
+            const targetPeerId = echoTarget.value.trim();
+            const message = document.getElementById('echo-message').value.trim();
+            
+            if (!targetPeerId) {
+                log('Please select or enter a target peer ID', 'warn');
+                return;
+            }
+            if (!message) {
+                log('Please enter a message to send', 'warn');
+                return;
+            }
+
+            const msg = JSON.stringify({
+                type: 'overlay_echo',
+                targetPeerId: targetPeerId,
+                message: message
+            });
+            
+            ws.send(msg);
+            dataOut += msg.length;
+            log(`🔐 Sending encrypted echo to ${targetPeerId.substring(0, 20)}...`, 'info');
             updateUI();
         }
 
@@ -549,12 +639,53 @@
             el.style.display = 'block';
         }
 
+        function showEchoResult(msg) {
+            const el = document.getElementById('echo-result');
+            const resultText = document.getElementById('echo-result-text');
+            resultText.innerHTML = `
+                <div><strong>✅ Success</strong></div>
+                <div>Latency: ${formatLatency(msg.latencyMs)}</div>
+                <div>Original: "${msg.originalMessage}"</div>
+                <div>Echo from: ${msg.echoResponse?.from || 'unknown'}</div>
+                <div>Response: "${msg.echoResponse?.echo || ''}"</div>
+                <div style="color: #9f7aea; margin-top: 8px;">🔐 End-to-end encrypted with X25519 + ML-KEM-768</div>
+            `;
+            el.style.display = 'block';
+        }
+
+        function showEchoError(msg) {
+            const el = document.getElementById('echo-result');
+            const resultText = document.getElementById('echo-result-text');
+            resultText.innerHTML = `
+                <div style="color: #fc8181;"><strong>❌ Failed</strong></div>
+                <div>Error: ${msg.error}</div>
+                <div>Latency: ${msg.latencyMs}ms</div>
+            `;
+            el.style.display = 'block';
+        }
+
         // Event listeners
         connectBtn.addEventListener('click', connect);
         disconnectBtn.addEventListener('click', disconnect);
         storeBtn.addEventListener('click', storeValue);
         getBtn.addEventListener('click', getValue);
+        lookupBtn.addEventListener('click', lookupClosestPeers);
+        echoBtn.addEventListener('click', sendEcho);
         clearLogBtn.addEventListener('click', () => { logOutput.innerHTML = ''; });
+
+        // Enter key handlers
+        document.getElementById('lookup-key').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') lookupClosestPeers();
+        });
+        document.getElementById('echo-message').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendEcho();
+        });
+        document.getElementById('store-value').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') storeValue();
+        });
+        document.getElementById('get-key').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') getValue();
+        });
 
         // Update uptime every second
         setInterval(() => {
