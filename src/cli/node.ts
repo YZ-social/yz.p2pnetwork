@@ -86,7 +86,8 @@ async function main() {
     ])
     .withKBucketSize(K_BUCKET_SIZE)
     .withMaxConnections(MAX_CONNECTIONS)
-    .withRefreshInterval(30000);
+    .withRefreshInterval(30000)
+    .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
   // Set announce addresses for external connectivity
   if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
