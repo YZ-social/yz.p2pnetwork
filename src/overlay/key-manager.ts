@@ -349,19 +349,19 @@ export class KeyManager {
     const { peerIdFromString } = await import('@libp2p/peer-id');
     const targetPeerId = peerIdFromString(peerId);
 
+    console.log(`[KeyManager] Attempting direct key request to ${peerId}`);
+
     try {
       const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
       const stream = rawStream as unknown as {
         source: AsyncIterable<{ subarray(): Uint8Array }>;
         sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
         close: () => Promise<void>;
+        closeWrite: () => Promise<void>;
       };
 
       try {
-        // Send a key request (just a simple "request" marker)
-        await stream.sink([new TextEncoder().encode('REQUEST')]);
-
-        // Read the response
+        // Read the response (the handler sends the key immediately on connection)
         const chunks: Uint8Array[] = [];
         for await (const chunk of stream.source) {
           chunks.push(chunk.subarray());
@@ -380,12 +380,16 @@ export class KeyManager {
           offset += chunk.length;
         }
 
+        console.log(`[KeyManager] Received ${data.length} bytes from ${peerId}`);
+
         // Deserialize the public key record
         const record = this.deserializePublicKeyRecord(data);
 
         if (record.peerId !== peerId) {
           throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
         }
+
+        console.log(`[KeyManager] Successfully got key from ${peerId} via direct request`);
 
         return {
           x25519: record.x25519,
@@ -395,6 +399,7 @@ export class KeyManager {
         await stream.close();
       }
     } catch (error) {
+      console.error(`[KeyManager] Direct key request failed for ${peerId}:`, error);
       throw new OverlayError(
         OverlayErrorCode.KEY_NOT_FOUND,
         `Direct key request failed for peer ${peerId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -409,8 +414,11 @@ export class KeyManager {
    */
   registerKeyExchangeHandler(): void {
     if (!this.dht || !this.keyPair || !this.peerId) {
+      console.log('[KeyManager] Cannot register key exchange handler: missing dht, keyPair, or peerId');
       return;
     }
+
+    console.log(`[KeyManager] Registering key exchange handler for ${this.peerId}`);
 
     const libp2p = this.dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -421,18 +429,16 @@ export class KeyManager {
         close: () => Promise<void>;
       };
 
-      try {
-        // Read the request (we don't really need to parse it, just respond)
-        for await (const _ of stream.source) {
-          // Consume the request
-        }
+      console.log(`[KeyManager] Received key exchange request`);
 
-        // Send our public key record
+      try {
+        // Send our public key record immediately (don't wait for request data)
         const record = this.createPublicKeyRecord(this.peerId!, this.keyPair!.publicKey);
         const serialized = this.serializePublicKeyRecord(record);
         await stream.sink([serialized]);
+        console.log(`[KeyManager] Sent public key (${serialized.length} bytes)`);
       } catch (error) {
-        console.error('Error handling key exchange request:', error);
+        console.error('[KeyManager] Error handling key exchange request:', error);
       } finally {
         await stream.close();
       }
