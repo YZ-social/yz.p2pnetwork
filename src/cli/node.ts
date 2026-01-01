@@ -22,6 +22,56 @@ let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
 
+// Helper function to discover peers through DHT lookups
+async function discoverPeers(): Promise<void> {
+  if (!node) return;
+  
+  try {
+    // Get the libp2p node to access DHT directly
+    const libp2pNode = node.getLibp2pNode();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dht = (libp2pNode as any).services?.dht;
+    
+    if (!dht) return;
+    
+    // Perform self-lookup to find peers close to us
+    const selfKey = node.peerId.toMultihash().bytes;
+    let discoveredCount = 0;
+    
+    try {
+      for await (const event of dht.getClosestPeers(selfKey)) {
+        if (event.name === 'PEER_RESPONSE' || event.name === 'FINAL_PEER') {
+          discoveredCount++;
+        }
+      }
+    } catch {
+      // Ignore lookup errors
+    }
+    
+    // Perform random lookups to discover more peers
+    for (let i = 0; i < 3; i++) {
+      const randomKey = new Uint8Array(32);
+      crypto.getRandomValues(randomKey);
+      
+      try {
+        for await (const event of dht.getClosestPeers(randomKey)) {
+          if (event.name === 'PEER_RESPONSE' || event.name === 'FINAL_PEER') {
+            discoveredCount++;
+          }
+        }
+      } catch {
+        // Ignore lookup errors
+      }
+    }
+    
+    if (discoveredCount > 0) {
+      console.log(`[${NODE_ID}] Peer discovery: found ${discoveredCount} peer responses`);
+    }
+  } catch {
+    // Ignore discovery errors
+  }
+}
+
 // Helper to fetch bootstrap peer ID from bootstrap node's /info endpoint
 async function fetchBootstrapPeerId(bootstrapHost: string): Promise<string | null> {
   const metricsUrl = `http://${bootstrapHost}:9090/info`;
@@ -120,10 +170,25 @@ async function main() {
       // Wait for DHT to stabilize before starting overlay
       console.log(`[${NODE_ID}] Waiting for DHT to stabilize...`);
       await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Perform additional peer discovery
+      console.log(`[${NODE_ID}] Performing peer discovery...`);
+      await discoverPeers();
     } catch (err) {
       console.error(`[${NODE_ID}] Bootstrap failed:`, err);
     }
   }
+
+  // Periodic peer discovery to build routing table
+  setInterval(async () => {
+    if (node) {
+      try {
+        await discoverPeers();
+      } catch {
+        // Ignore discovery errors
+      }
+    }
+  }, 60000); // Every 60 seconds
 
   // Initialize overlay network with shorter key publish interval for faster propagation
   overlay = new OverlayNetwork(node, {
