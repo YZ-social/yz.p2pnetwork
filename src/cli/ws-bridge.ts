@@ -103,11 +103,16 @@ async function main() {
     }
   }
 
-  // Initialize overlay network
+  // Initialize overlay network with shorter key publish interval for faster propagation
   overlay = new OverlayNetwork(node, {
     defaultTTL: 20,
     responseTimeout: 30000,
     defaultRedundancy: 3,
+    encryption: {
+      enabled: true,
+      keyPublishInterval: 30000, // Republish keys every 30 seconds
+      keyCacheTTL: 60000, // Cache keys for 1 minute
+    },
   });
   await overlay.start();
   console.log(`[${NODE_ID}] Overlay network started`);

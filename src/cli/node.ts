@@ -118,19 +118,40 @@ async function main() {
     try {
       await node.bootstrap();
       console.log(`[${NODE_ID}] Bootstrap complete`);
+      
+      // Wait for DHT to stabilize before starting overlay
+      console.log(`[${NODE_ID}] Waiting for DHT to stabilize...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
     } catch (err) {
       console.error(`[${NODE_ID}] Bootstrap failed:`, err);
     }
   }
 
-  // Initialize overlay network
+  // Initialize overlay network with shorter key publish interval for faster propagation
   overlay = new OverlayNetwork(node, {
     defaultTTL: 20,
     responseTimeout: 30000,
     defaultRedundancy: 3,
+    encryption: {
+      enabled: true,
+      keyPublishInterval: 30000, // Republish keys every 30 seconds
+      keyCacheTTL: 60000, // Cache keys for 1 minute
+    },
   });
-  await overlay.start();
-  console.log(`[${NODE_ID}] Overlay network started`);
+  
+  // Start overlay with retry logic for key publishing
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await overlay.start();
+      console.log(`[${NODE_ID}] Overlay network started, public key published`);
+      break;
+    } catch (err) {
+      console.error(`[${NODE_ID}] Overlay start attempt ${attempt + 1} failed:`, err);
+      if (attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
 
   // Register echo handler for overlay messages
   overlay.onMessage(async (payload, context) => {
