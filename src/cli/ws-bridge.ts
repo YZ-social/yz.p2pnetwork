@@ -487,6 +487,38 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
           }
         }
         
+        // Check kb.root structure
+        const rootProps: string[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let rootContacts: any[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let rootContactSample: any = null;
+        if (kb?.root) {
+          for (const key in kb.root) {
+            rootProps.push(key);
+          }
+          const ownProps = Object.getOwnPropertyNames(kb.root);
+          for (const prop of ownProps) {
+            if (!rootProps.includes(prop)) {
+              rootProps.push(prop);
+            }
+          }
+          // Get contacts if available
+          if (kb.root.contacts && Array.isArray(kb.root.contacts)) {
+            rootContacts = kb.root.contacts.map((c: { peer?: { toString?: () => string } }) => 
+              c.peer?.toString?.() ?? String(c)
+            );
+            if (kb.root.contacts.length > 0) {
+              const sample = kb.root.contacts[0];
+              rootContactSample = {
+                keys: Object.keys(sample || {}),
+                peerType: typeof sample?.peer,
+                hasPeerToString: typeof sample?.peer?.toString === 'function',
+              };
+            }
+          }
+        }
+        
         // Check for lan/wan DHT
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const lanDht = (dht as any)?.lan ?? (dht as any)?._lan;
@@ -515,6 +547,12 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
           routingTableSize: routingTable?.size,
           kbExists: !!kb,
           kbProperties: kbProps,
+          kbRootExists: !!kb?.root,
+          kbRootProperties: rootProps,
+          kbRootContacts: rootContacts,
+          kbRootContactSample: rootContactSample,
+          kbRootHasLeft: !!kb?.root?.left,
+          kbRootHasRight: !!kb?.root?.right,
           lanDhtExists: !!lanDht,
           lanDhtProperties: lanProps,
           wanDhtExists: !!wanDht,

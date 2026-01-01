@@ -73,131 +73,115 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
 
   try {
     // The @libp2p/kad-dht v16+ uses a different internal structure
-    // Try multiple approaches to find the routing table
-    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let routingTable: any = null;
-    
-    // Approach 1: Direct property access
-    routingTable = (dht as any).routingTable ?? (dht as any)._routingTable;
-    
-    // Approach 2: Check for lan/wan DHT (dual DHT mode)
-    if (!routingTable) {
-      const lanDht = (dht as any).lan ?? (dht as any)._lan;
-      const wanDht = (dht as any).wan ?? (dht as any)._wan;
-      routingTable = lanDht?.routingTable ?? wanDht?.routingTable;
-    }
-    
-    // Approach 3: Check components
-    if (!routingTable && (dht as any).components) {
-      routingTable = (dht as any).components.routingTable;
-    }
+    const routingTable = (dht as any).routingTable;
     
     if (routingTable) {
-      // The routing table typically has a kb (k-buckets) structure
+      // The routing table has a kb (k-bucket) property
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const kb = routingTable.kb ?? routingTable._kb ?? routingTable.kBucket ?? routingTable;
+      const kb = routingTable.kb;
       
-      // Try toIterable() method first (k-bucket library)
-      if (kb && typeof kb.toIterable === 'function') {
-        for (const contact of kb.toIterable()) {
-          const bucketIndex = contact.bucketIndex ?? 0;
+      if (kb) {
+        // The k-bucket library uses a tree structure with 'root'
+        // We need to traverse the tree to find all contacts
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const collectContacts = (node: any, depth: number = 0): void => {
+          if (!node) return;
           
-          // Find or create bucket
-          let bucket = buckets.find(b => b.index === bucketIndex);
-          if (!bucket) {
-            bucket = {
-              index: bucketIndex,
-              peers: [],
-              lastRefresh: new Date(),
-            };
-            buckets.push(bucket);
-          }
-          
-          // Extract peer ID - could be in different formats
-          const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
-          
-          bucket.peers.push({
-            id: peerId,
-            multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-            lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
-          });
-          totalPeers++;
-        }
-      }
-      // Try closest() method to get all peers
-      else if (kb && typeof kb.closest === 'function') {
-        // Get closest peers to a random key to enumerate the table
-        const randomKey = new Uint8Array(32);
-        try {
-          const peers = kb.closest(randomKey, 1000); // Get up to 1000 peers
-          for (const contact of peers) {
-            const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
-            
-            // Put all in bucket 0 since we don't have bucket info
-            let bucket = buckets.find(b => b.index === 0);
-            if (!bucket) {
-              bucket = { index: 0, peers: [], lastRefresh: new Date() };
-              buckets.push(bucket);
-            }
-            
-            bucket.peers.push({
-              id: peerId,
-              multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-              lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
-            });
-            totalPeers++;
-          }
-        } catch {
-          // closest() failed
-        }
-      }
-      // Try buckets array
-      else if (kb && kb.buckets) {
-        for (let i = 0; i < kb.buckets.length; i++) {
-          const bucketContacts = kb.buckets[i] ?? [];
-          if (bucketContacts.length > 0) {
-            const peers: RoutingPeerInfo[] = [];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            for (const contact of bucketContacts) {
-              peers.push({
-                id: contact.id ?? contact.peer ?? contact.peerId ?? contact,
+          // If this node has contacts, collect them
+          if (node.contacts && Array.isArray(node.contacts)) {
+            for (const contact of node.contacts) {
+              // Find or create bucket for this depth
+              let bucket = buckets.find(b => b.index === depth);
+              if (!bucket) {
+                bucket = {
+                  index: depth,
+                  peers: [],
+                  lastRefresh: new Date(),
+                };
+                buckets.push(bucket);
+              }
+              
+              // Extract peer info from contact
+              // Contact structure: { peer: PeerId, lastPing: number, ... }
+              const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+              
+              bucket.peers.push({
+                id: peerId,
                 multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-                lastSeen: contact.lastSeen ? new Date(contact.lastSeen) : new Date(),
+                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
               });
               totalPeers++;
             }
-            buckets.push({
-              index: i,
-              peers,
-              lastRefresh: new Date(),
-            });
+          }
+          
+          // Recursively traverse left and right children
+          if (node.left) {
+            collectContacts(node.left, depth + 1);
+          }
+          if (node.right) {
+            collectContacts(node.right, depth + 1);
+          }
+        };
+        
+        // Start traversal from root
+        if (kb.root) {
+          collectContacts(kb.root);
+        }
+        
+        // Alternative: try toIterable() if available
+        if (totalPeers === 0 && typeof kb.toIterable === 'function') {
+          try {
+            for (const contact of kb.toIterable()) {
+              let bucket = buckets.find(b => b.index === 0);
+              if (!bucket) {
+                bucket = { index: 0, peers: [], lastRefresh: new Date() };
+                buckets.push(bucket);
+              }
+              
+              const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+              bucket.peers.push({
+                id: peerId,
+                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
+                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
+              });
+              totalPeers++;
+            }
+          } catch {
+            // toIterable failed
           }
         }
-      }
-      // Try size property and iterate
-      else if (routingTable.size !== undefined && typeof routingTable.size === 'number') {
-        // Some implementations expose size and allow iteration
-        if (typeof routingTable[Symbol.iterator] === 'function') {
-          for (const contact of routingTable) {
-            const peerId = contact.id ?? contact.peer ?? contact.peerId ?? contact;
-            let bucket = buckets.find(b => b.index === 0);
-            if (!bucket) {
-              bucket = { index: 0, peers: [], lastRefresh: new Date() };
-              buckets.push(bucket);
+        
+        // Alternative: try closest() to enumerate peers
+        if (totalPeers === 0 && typeof kb.closest === 'function') {
+          try {
+            const randomKey = new Uint8Array(32);
+            const peers = kb.closest(randomKey, 1000);
+            if (peers && Array.isArray(peers)) {
+              let bucket = buckets.find(b => b.index === 0);
+              if (!bucket) {
+                bucket = { index: 0, peers: [], lastRefresh: new Date() };
+                buckets.push(bucket);
+              }
+              
+              for (const contact of peers) {
+                const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+                bucket.peers.push({
+                  id: peerId,
+                  multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
+                  lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
+                });
+                totalPeers++;
+              }
             }
-            bucket.peers.push({
-              id: peerId,
-              multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-              lastSeen: new Date(),
-            });
-            totalPeers++;
+          } catch {
+            // closest failed
           }
         }
       }
     }
     
-    // Fallback: Use libp2p's peer store to get connected peers
+    // Fallback: Use libp2p's connections to get connected peers
     // This isn't the DHT routing table but gives us peer info
     if (totalPeers === 0) {
       const connections = node.getConnections();
