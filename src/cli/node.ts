@@ -4,6 +4,7 @@
  */
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { DHTNode, DHTConfigBuilder } from '../index.js';
+import { OverlayNetwork } from '../overlay/index.js';
 
 // Configuration from environment
 const NODE_ID = process.env.NODE_ID || 'node-0';
@@ -18,6 +19,7 @@ const K_BUCKET_SIZE = parseInt(process.env.K_BUCKET_SIZE || '20', 10);
 const MAX_CONNECTIONS = parseInt(process.env.MAX_CONNECTIONS || '50', 10);
 
 let node: DHTNode | null = null;
+let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
 
 // Helper to fetch bootstrap peer ID from bootstrap node's /info endpoint
@@ -121,6 +123,28 @@ async function main() {
     }
   }
 
+  // Initialize overlay network
+  overlay = new OverlayNetwork(node, {
+    defaultTTL: 20,
+    responseTimeout: 30000,
+    defaultRedundancy: 3,
+  });
+  await overlay.start();
+  console.log(`[${NODE_ID}] Overlay network started`);
+
+  // Register echo handler for overlay messages
+  overlay.onMessage(async (payload, context) => {
+    console.log(`[${NODE_ID}] Received overlay message from ${context.originPeerId}`);
+    // Echo back the payload with metadata
+    const response = {
+      echo: new TextDecoder().decode(payload),
+      from: node?.peerId.toString(),
+      nodeId: NODE_ID,
+      timestamp: Date.now(),
+    };
+    return new TextEncoder().encode(JSON.stringify(response));
+  });
+
   // Start metrics/health server
   startMetricsServer();
 
@@ -168,6 +192,10 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
         routingTable: info,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,
+        overlay: {
+          enabled: overlay?.isStarted || false,
+          peerId: overlay?.peerId,
+        }
       }, null, 2));
     } else {
       res.writeHead(404);
@@ -183,6 +211,9 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
 // Graceful shutdown
 async function shutdown(signal: string) {
   console.log(`[${NODE_ID}] Received ${signal}, shutting down...`);
+  if (overlay) {
+    await overlay.stop();
+  }
   if (node) {
     await node.stop();
   }
