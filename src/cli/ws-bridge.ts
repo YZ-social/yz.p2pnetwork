@@ -87,9 +87,11 @@ async function main() {
 
   // Set announce addresses with ONLY the public WSS address
   // This ensures the bootstrap node advertises its public address for external connectivity
-  // Format: /dns4/{host}/tcp/443/wss{path} where path is /ws for bootstrap
+  // Format: /dns4/{host}/tcp/443/wss/x-peerpath/{url-encoded-path}
+  // The x-peerpath protocol allows encoding the WebSocket path in the multiaddr
   if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-    const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}`;
+    const encodedPath = encodeURIComponent(PUBLIC_PATH.replace(/^\//, '')); // Remove leading slash and encode
+    const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss/x-peerpath/${encodedPath}`;
     configBuilder.withAnnounceAddresses([publicAnnounceAddress]);
     console.log(`[${NODE_ID}] Public announce address: ${publicAnnounceAddress}`);
   }
@@ -426,8 +428,9 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
       const connectionInfo = node?.getConnectionInfo();
+      const encodedPathForInfo = encodeURIComponent(PUBLIC_PATH.replace(/^\//, ''));
       const publicAnnounceAddress = (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') 
-        ? `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}` 
+        ? `/dns4/${EXTERNAL_HOST}/tcp/443/wss/x-peerpath/${encodedPathForInfo}` 
         : null;
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
