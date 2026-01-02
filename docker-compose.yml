@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Bootstrap node with WebSocket bridge for browser clients
   bootstrap:
@@ -31,15 +29,21 @@ services:
       retries: 3
       start_period: 30s
 
-  # DHT nodes - use deploy script to start multiple instances
+  # DHT nodes - use deploy script to start multiple instances with unique NODE_INDEX
+  # Each node gets a unique index for public address routing (e.g., /dht/node-1, /dht/node-2)
+  # The deploy script creates individual containers: dht-node-1, dht-node-2, etc.
   dht-node:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["node", "dist/cli/node.js"]
     environment:
+      - NODE_ID=node-${NODE_INDEX:-1}
+      - NODE_INDEX=${NODE_INDEX:-1}
       - LISTEN_PORT=4001
       - METRICS_PORT=9090
       - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
+      - PUBLIC_PATH=/dht/node-${NODE_INDEX:-1}
       - BOOTSTRAP_URL=ws://bootstrap:4002
       - K_BUCKET_SIZE=20
       - MAX_CONNECTIONS=50
@@ -73,6 +77,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/dht-nodes.conf:/etc/nginx/conf.d/dht-nodes.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./public:/usr/share/nginx/html:ro
     networks:

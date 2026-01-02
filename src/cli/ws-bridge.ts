@@ -20,6 +20,7 @@ const METRICS_PORT = parseInt(process.env.METRICS_PORT || '9090', 10);
 const BOOTSTRAP_URL = process.env.BOOTSTRAP_URL || '';
 const EXTERNAL_HOST = process.env.EXTERNAL_HOST || 'localhost';
 const IS_BOOTSTRAP = process.env.IS_BOOTSTRAP === 'true';
+const PUBLIC_PATH = process.env.PUBLIC_PATH || '/ws';  // Path for nginx routing (bootstrap uses /ws)
 
 let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
@@ -53,6 +54,13 @@ async function fetchBootstrapPeerId(bootstrapHost: string): Promise<string | nul
 
 async function main() {
   console.log(`[${NODE_ID}] Starting WebSocket Bridge...`);
+  console.log(`[${NODE_ID}] Configuration:`);
+  console.log(`  - WebSocket Port: ${WS_PORT}`);
+  console.log(`  - Metrics Port: ${METRICS_PORT}`);
+  console.log(`  - Bootstrap Mode: ${IS_BOOTSTRAP}`);
+  console.log(`  - External Host: ${EXTERNAL_HOST}`);
+  console.log(`  - Public Path: ${PUBLIC_PATH}`);
+  console.log(`  - Bootstrap URL: ${BOOTSTRAP_URL || 'none'}`);
   
   // Build bootstrap multiaddr if we're not the bootstrap node
   let bootstrapPeers: string[] = [];
@@ -77,10 +85,13 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
+  // Set announce addresses with ONLY the public WSS address
+  // This ensures the bootstrap node advertises its public address for external connectivity
+  // Format: /dns4/{host}/tcp/443/wss{path} where path is /ws for bootstrap
   if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-    configBuilder.withAnnounceAddresses([
-      `/dns4/${EXTERNAL_HOST}/tcp/4002/wss`,
-    ]);
+    const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}`;
+    configBuilder.withAnnounceAddresses([publicAnnounceAddress]);
+    console.log(`[${NODE_ID}] Public announce address: ${publicAnnounceAddress}`);
   }
 
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
@@ -415,11 +426,15 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
       const connectionInfo = node?.getConnectionInfo();
+      const publicAnnounceAddress = (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') 
+        ? `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}` 
+        : null;
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
+        announceAddresses: publicAnnounceAddress ? [publicAnnounceAddress] : [],
         routingTable: info,
         connections: connectionInfo,
         browserClients: clients.size,

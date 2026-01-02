@@ -27,7 +27,13 @@ echo ""
 
 # Stop all containers
 echo "Stopping all containers..."
-docker compose down
+docker compose down --remove-orphans
+echo "Done."
+echo ""
+
+# Remove individually named DHT node containers
+echo "Removing DHT node containers..."
+docker rm -f $(docker ps -aq --filter 'name=libp2p-dht-dht-node-') 2>/dev/null || true
 echo "Done."
 echo ""
 

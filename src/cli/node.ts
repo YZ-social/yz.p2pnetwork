@@ -8,6 +8,7 @@ import { OverlayNetwork } from '../overlay/index.js';
 
 // Configuration from environment
 const NODE_ID = process.env.NODE_ID || 'node-0';
+const NODE_INDEX = process.env.NODE_INDEX || '1';  // Unique index for public address routing
 const LISTEN_PORT = parseInt(process.env.LISTEN_PORT || '4001', 10);
 const WS_PORT = parseInt(process.env.WS_PORT || '8080', 10);
 const METRICS_PORT = parseInt(process.env.METRICS_PORT || '9090', 10);
@@ -15,6 +16,7 @@ const BOOTSTRAP_URL = process.env.BOOTSTRAP_URL || '';  // e.g., ws://bootstrap:
 const BOOTSTRAP_PEER_ID = process.env.BOOTSTRAP_PEER_ID || '';
 const IS_BOOTSTRAP = process.env.IS_BOOTSTRAP === 'true';
 const EXTERNAL_HOST = process.env.EXTERNAL_HOST || 'localhost';
+const PUBLIC_PATH = process.env.PUBLIC_PATH || `/dht/node-${NODE_INDEX}`;  // Path for nginx routing
 const K_BUCKET_SIZE = parseInt(process.env.K_BUCKET_SIZE || '20', 10);
 const MAX_CONNECTIONS = parseInt(process.env.MAX_CONNECTIONS || '50', 10);
 
@@ -99,11 +101,13 @@ async function fetchBootstrapPeerId(bootstrapHost: string): Promise<string | nul
 async function main() {
   console.log(`[${NODE_ID}] Starting DHT node...`);
   console.log(`[${NODE_ID}] Configuration:`);
+  console.log(`  - Node Index: ${NODE_INDEX}`);
   console.log(`  - Listen Port: ${LISTEN_PORT}`);
   console.log(`  - WebSocket Port: ${WS_PORT}`);
   console.log(`  - Metrics Port: ${METRICS_PORT}`);
   console.log(`  - Bootstrap Mode: ${IS_BOOTSTRAP}`);
   console.log(`  - External Host: ${EXTERNAL_HOST}`);
+  console.log(`  - Public Path: ${PUBLIC_PATH}`);
   console.log(`  - Bootstrap URL: ${BOOTSTRAP_URL || 'none'}`);
 
   // Build bootstrap multiaddr if we're not the bootstrap node
@@ -139,9 +143,12 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
-  // Only set announce addresses for bootstrap node (which has external ports exposed)
-  // DHT nodes should NOT set announce addresses so they use their internal Docker addresses
-  // This allows nodes to discover and connect to each other within the Docker network
+  // Set announce addresses with ONLY the public WSS address
+  // This ensures all nodes advertise their public address for external connectivity
+  // Format: /dns4/{host}/tcp/443/wss{path}
+  const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}`;
+  configBuilder.withAnnounceAddresses([publicAnnounceAddress]);
+  console.log(`[${NODE_ID}] Public announce address: ${publicAnnounceAddress}`);
 
   // Add bootstrap peers if not bootstrap node
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
@@ -268,11 +275,14 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
 `);
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
+      const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss${PUBLIC_PATH}`;
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
+        nodeIndex: NODE_INDEX,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
+        announceAddresses: [publicAnnounceAddress],
         routingTable: info,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,

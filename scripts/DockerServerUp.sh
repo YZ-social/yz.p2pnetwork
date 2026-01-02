@@ -4,6 +4,7 @@
 #
 # This script pulls the latest code, builds Docker images, and starts
 # the DHT network with bootstrap node, webserver, and DHT nodes.
+# Each DHT node gets a unique NODE_INDEX for public address routing.
 #
 # Usage: ./scripts/DockerServerUp.sh [num_dht_nodes]
 #   num_dht_nodes: Number of DHT nodes to start (default: 15)
@@ -28,25 +29,38 @@ echo ""
 cd "$PROJECT_DIR"
 
 # Step 1: Pull latest code from git
-echo "[1/5] Pulling latest code from git..."
+echo "[1/6] Pulling latest code from git..."
 git pull
 echo "      Done."
 echo ""
 
-# Step 2: Build Docker images
-echo "[2/5] Building Docker images..."
+# Step 2: Generate nginx config for DHT nodes
+echo "[2/6] Generating nginx config for $DHT_NODES nodes..."
+if [ -f "scripts/generate-nginx-config.sh" ]; then
+    chmod +x scripts/generate-nginx-config.sh
+    ./scripts/generate-nginx-config.sh $DHT_NODES
+    echo "      Done."
+else
+    echo "      Warning: generate-nginx-config.sh not found, skipping."
+fi
+echo ""
+
+# Step 3: Build Docker images
+echo "[3/6] Building Docker images..."
 docker compose build
 echo "      Done."
 echo ""
 
-# Step 3: Stop any existing containers
-echo "[3/5] Stopping existing containers..."
-docker compose down 2>/dev/null || true
+# Step 4: Stop any existing containers
+echo "[4/6] Stopping existing containers..."
+docker compose down --remove-orphans 2>/dev/null || true
+# Remove old DHT node containers
+docker rm -f $(docker ps -aq --filter 'name=libp2p-dht-dht-node-') 2>/dev/null || true
 echo "      Done."
 echo ""
 
-# Step 4: Start bootstrap node and webserver
-echo "[4/5] Starting bootstrap node and webserver..."
+# Step 5: Start bootstrap node and webserver
+echo "[5/6] Starting bootstrap node and webserver..."
 docker compose up -d bootstrap webserver
 echo "      Waiting for bootstrap node to be healthy..."
 
@@ -63,9 +77,18 @@ for i in {1..60}; do
 done
 echo ""
 
-# Step 5: Start DHT nodes
-echo "[5/5] Starting $DHT_NODES DHT nodes..."
-docker compose up -d --scale dht-node=$DHT_NODES
+# Step 6: Start DHT nodes with unique NODE_INDEX
+echo "[6/6] Starting $DHT_NODES DHT nodes with unique indices..."
+for i in $(seq 1 $DHT_NODES); do
+    echo "      Starting dht-node-$i..."
+    NODE_INDEX=$i docker compose run -d \
+        --name libp2p-dht-dht-node-$i \
+        --no-deps \
+        -e NODE_INDEX=$i \
+        -e NODE_ID=node-$i \
+        -e PUBLIC_PATH=/dht/node-$i \
+        dht-node
+done
 echo "      Done."
 echo ""
 
@@ -78,7 +101,7 @@ echo ""
 echo "=========================================="
 echo "  Network Status"
 echo "=========================================="
-docker compose ps
+docker ps --filter 'name=libp2p-dht' --format 'table {{.Names}}\t{{.Status}}'
 echo ""
 
 # Try to get bootstrap info
@@ -96,6 +119,11 @@ echo "  - WebSocket:     wss://imeyouwe.com/ws"
 echo "  - Bootstrap Info: https://imeyouwe.com/bootstrap/info"
 echo "  - Metrics:       https://imeyouwe.com/bootstrap/metrics"
 echo ""
+echo "DHT Nodes:"
+for i in $(seq 1 $DHT_NODES); do
+    echo "  - Node $i: https://imeyouwe.com/dht/node-$i"
+done
+echo ""
 echo "To view logs:      docker compose logs -f"
-echo "To stop network:   docker compose down"
+echo "To stop network:   ./scripts/DockerServerDown.sh"
 echo ""
