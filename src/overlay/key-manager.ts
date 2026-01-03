@@ -450,18 +450,21 @@ export class KeyManager {
    * Register the key exchange protocol handler
    * This allows other nodes to request our public key directly
    */
-  registerKeyExchangeHandler(): void {
+  async registerKeyExchangeHandler(): Promise<void> {
     if (!this.dht || !this.keyPair || !this.peerId) {
       console.log('[KeyManager] Cannot register key exchange handler: missing dht, keyPair, or peerId');
       return;
     }
 
-    console.log(`[KeyManager] Registering key exchange handler for ${this.peerId}`);
+    console.log(`[KeyManager] Registering key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
+    console.log(`[KeyManager] Registering for peer: ${this.peerId}`);
 
     const self = this;
     const libp2p = this.dht.getLibp2pNode();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (handlerData: any) => {
+    
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (handlerData: any) => {
       // The handler can receive either:
       // 1. An object with { stream, connection } properties (newer libp2p API)
       // 2. The stream directly (YamuxStream) - this is what we're seeing
@@ -501,6 +504,10 @@ export class KeyManager {
         console.error('[KeyManager] Error handling key exchange request:', error);
       }
     });
+      console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
+    } catch (error) {
+      console.error(`[KeyManager] Failed to register key exchange handler:`, error);
+    }
   }
 
   /**

@@ -193,7 +193,7 @@ export class OverlayNetwork {
       }
 
       // Register key exchange handler for direct key requests
-      this.keyManager.registerKeyExchangeHandler();
+      await this.keyManager.registerKeyExchangeHandler();
     }
 
     // Register libp2p protocol handler
