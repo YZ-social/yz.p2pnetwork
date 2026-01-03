@@ -14,7 +14,7 @@ services:
       - EXTERNAL_HOST=${EXTERNAL_HOST:-imeyouwe.com}
       - K_BUCKET_SIZE=20
       - MAX_CONNECTIONS=100
-      - DEBUG=libp2p:kad-dht*
+      - DEBUG=libp2p:kad-dht*,libp2p:ping*
     ports:
       - "4001:4001"   # libp2p TCP
       - "4002:4002"   # libp2p WebSocket
@@ -48,7 +48,7 @@ services:
       - BOOTSTRAP_URL=ws://bootstrap:4002
       - K_BUCKET_SIZE=20
       - MAX_CONNECTIONS=50
-      - DEBUG=libp2p:kad-dht*
+      - DEBUG=libp2p:kad-dht*,libp2p:ping*
     networks:
       - dht-network
     depends_on:
