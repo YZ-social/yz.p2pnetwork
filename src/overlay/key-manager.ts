@@ -461,13 +461,16 @@ export class KeyManager {
     const self = this;
     const libp2p = this.dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async ({ stream, connection }: any) => {
+    libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
+      // Extract stream and connection from the data object (same pattern as overlay handler)
+      const stream = data.stream;
+      const connection = data.connection;
       const remotePeer = connection?.remotePeer?.toString() || 'unknown';
       console.log(`[KeyManager] Received key exchange request from ${remotePeer}`);
 
       try {
         if (!stream) {
-          console.error('[KeyManager] No stream in handler data');
+          console.error('[KeyManager] No stream in handler data. Data keys:', Object.keys(data || {}));
           return;
         }
 
