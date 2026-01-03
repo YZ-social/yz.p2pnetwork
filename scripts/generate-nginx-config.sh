@@ -36,10 +36,11 @@ cat > "$OUTPUT_FILE" << 'EOF'
 EOF
 
 # Generate location blocks for each node (using dynamic upstream resolution)
+# Note: DHT nodes listen on port 8080 for WebSocket connections (WS_PORT in docker-compose.yml)
 for i in $(seq 1 $NUM_NODES); do
     cat >> "$OUTPUT_FILE" << EOF
 location /dht/node-$i {
-    set \$dht_node_$i libp2p-dht-dht-node-$i:4001;
+    set \$dht_node_$i libp2p-dht-dht-node-$i:8080;
     proxy_pass http://\$dht_node_$i;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
