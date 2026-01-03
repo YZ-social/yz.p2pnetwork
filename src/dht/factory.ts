@@ -91,6 +91,11 @@ function buildLibp2pOptions(config: DHTNodeConfig) {
       protocol: config.protocol ?? DEFAULT_CONFIG.protocol,
       clientMode: config.clientMode ?? false,
       kBucketSize: config.kBucketSize ?? DEFAULT_CONFIG.kBucketSize,
+      // Allow queries even with few peers (important for small networks)
+      allowQueryWithZeroPeers: true,
+      // Refresh routing table more frequently
+      querySelfInterval: 30000, // 30 seconds
+      initialQuerySelfInterval: 5000, // 5 seconds after start
     }),
   };
 
