@@ -85,16 +85,14 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
-  // Set announce addresses with ONLY the public WSS address
-  // This ensures the bootstrap node advertises its public address for external connectivity
-  // Format: /dns4/{host}/tcp/443/wss/x-peerpath/{url-encoded-path}
-  // The x-peerpath protocol allows encoding the WebSocket path in the multiaddr
-  if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-    const encodedPath = encodeURIComponent(PUBLIC_PATH.replace(/^\//, '')); // Remove leading slash and encode
-    const publicAnnounceAddress = `/dns4/${EXTERNAL_HOST}/tcp/443/wss/x-peerpath/${encodedPath}`;
-    configBuilder.withAnnounceAddresses([publicAnnounceAddress]);
-    console.log(`[${NODE_ID}] Public announce address: ${publicAnnounceAddress}`);
-  }
+  // NOTE: We do NOT set announce addresses because libp2p multiaddr doesn't support
+  // path-based routing (e.g., /dht/node-1). The nodes will use their internal Docker
+  // addresses for DHT communication. External clients connect via nginx which routes
+  // based on the URL path to the correct container.
+  //
+  // For the bootstrap node, external clients connect via wss://imeyouwe.com/ws
+  // which nginx routes to this container's WebSocket port.
+  console.log(`[${NODE_ID}] Public endpoint: wss://${EXTERNAL_HOST}${PUBLIC_PATH}`);
 
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
     configBuilder.withBootstrapPeers(bootstrapPeers);
@@ -428,16 +426,16 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
       const connectionInfo = node?.getConnectionInfo();
-      const encodedPathForInfo = encodeURIComponent(PUBLIC_PATH.replace(/^\//, ''));
-      const publicAnnounceAddress = (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') 
-        ? `/dns4/${EXTERNAL_HOST}/tcp/443/wss/x-peerpath/${encodedPathForInfo}` 
+      // Note: We show the public endpoint URL, not a multiaddr (since libp2p doesn't support path-based multiaddrs)
+      const publicEndpoint = (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') 
+        ? `wss://${EXTERNAL_HOST}${PUBLIC_PATH}` 
         : null;
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
-        announceAddresses: publicAnnounceAddress ? [publicAnnounceAddress] : [],
+        publicEndpoint: publicEndpoint,
         routingTable: info,
         connections: connectionInfo,
         browserClients: clients.size,
