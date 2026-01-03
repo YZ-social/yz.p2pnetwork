@@ -464,70 +464,32 @@ export class KeyManager {
     
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (handlerData: any) => {
-        // Debug: log what we received
-        console.log(`[KeyManager] Handler received - type: ${typeof handlerData}, constructor: ${handlerData?.constructor?.name}`);
+      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
+        // Use the exact same pattern as overlay.ts - cast data.stream directly
+        const stream = data.stream as {
+          source: AsyncIterable<{ subarray(): Uint8Array }>;
+          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
+          close: () => Promise<void>;
+        };
         
-        // The libp2p handler receives an object with { stream, connection } properties
-        // But the stream itself might be passed directly in some cases
-        // Try multiple ways to get the stream
-        let stream: any = null;
-        let remotePeer = 'unknown';
-        
-        // Method 1: Check if handlerData has stream property (standard libp2p API)
-        if (handlerData?.stream) {
-          stream = handlerData.stream;
-          remotePeer = handlerData.connection?.remotePeer?.toString() || 'via-stream-prop';
-          console.log(`[KeyManager] Got stream from handlerData.stream`);
-        }
-        // Method 2: Check if handlerData IS the stream (has sink and source)
-        else if (handlerData && typeof handlerData.sink === 'function' && handlerData.source) {
-          stream = handlerData;
-          remotePeer = 'direct-stream';
-          console.log(`[KeyManager] handlerData IS the stream`);
-        }
-        // Method 3: Check for common stream-like properties
-        else if (handlerData) {
-          const props = Object.getOwnPropertyNames(handlerData);
-          console.log(`[KeyManager] handlerData properties: ${props.slice(0, 20).join(', ')}`);
-          
-          // If it has sink/source as properties (even if sink is not detected as function)
-          if ('sink' in handlerData && 'source' in handlerData) {
-            stream = handlerData;
-            remotePeer = 'stream-like';
-            console.log(`[KeyManager] handlerData has sink/source properties, treating as stream`);
-          }
-        }
-        
-        console.log(`[KeyManager] Received key exchange request from ${remotePeer}`);
+        const remotePeer = data.connection?.remotePeer?.toString() || 'unknown';
+        console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
         try {
-          if (!stream) {
-            console.error('[KeyManager] No stream found in handler data');
-            console.error(`[KeyManager] handlerData keys: ${handlerData ? Object.keys(handlerData).join(', ') : 'null'}`);
-            return;
-          }
-
           // Create the public key record
           const record = self.createPublicKeyRecord(self.peerId!, self.keyPair!.publicKey);
           const serialized = self.serializePublicKeyRecord(record);
           
-          console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer}`);
+          console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // Use an async generator to properly signal end of stream
-          async function* generateResponse() {
-            yield serialized;
-          }
-
-          // Pipe the response to the stream sink
-          if (stream.sink) {
-            await stream.sink(generateResponse());
-            console.log(`[KeyManager] Public key sent successfully to ${remotePeer}`);
-          } else {
-            console.error('[KeyManager] Stream has no sink method');
-          }
+          // Send the response - use array like overlay.ts does
+          await stream.sink([serialized]);
+          console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
+        } finally {
+          // Close the stream like overlay.ts does
+          await stream.close();
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
