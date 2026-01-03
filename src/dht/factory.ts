@@ -96,6 +96,11 @@ function buildLibp2pOptions(config: DHTNodeConfig) {
       // Refresh routing table more frequently
       querySelfInterval: 30000, // 30 seconds
       initialQuerySelfInterval: 5000, // 5 seconds after start
+      // CRITICAL: Allow private addresses in the routing table
+      // By default, kad-dht filters out private addresses (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+      // This breaks peer discovery in Docker networks and private LANs
+      // We use a pass-through mapper that keeps all addresses
+      peerInfoMapper: (peerInfo) => peerInfo,
     }),
   };
 
