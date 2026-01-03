@@ -77,7 +77,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/dht-nodes.conf:/etc/nginx/conf.d/dht-nodes.conf:ro
+      - ./nginx/dht-nodes.conf:/etc/nginx/dht-nodes.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./public:/usr/share/nginx/html:ro
     networks:
