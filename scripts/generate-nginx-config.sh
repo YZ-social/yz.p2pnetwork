@@ -2,8 +2,9 @@
 # Generate nginx configuration for DHT nodes
 # Usage: ./scripts/generate-nginx-config.sh [NUM_NODES]
 #
-# This script generates nginx upstream and location blocks for routing
+# This script generates nginx location blocks for routing
 # WebSocket connections to individual DHT nodes.
+# Uses dynamic upstream resolution with Docker DNS.
 #
 # Requirements: 2.1, 2.2, 2.3, 2.5, 6.1, 6.2
 
@@ -28,37 +29,18 @@ cat > "$OUTPUT_FILE" << 'EOF'
 # Auto-generated DHT node routing configuration
 # Do not edit manually - regenerate with scripts/generate-nginx-config.sh
 #
-# This file is included by nginx.conf and provides:
-# - Upstream blocks for each DHT node
-# - Location blocks for /dht/node-N paths with WebSocket support
+# This file is included inside the server block of nginx.conf
+# It provides location blocks for /dht/node-N paths with WebSocket support
+# Uses dynamic upstream resolution with Docker DNS resolver
 
 EOF
 
-# Generate upstream blocks for each node
-echo "# ============================================" >> "$OUTPUT_FILE"
-echo "# Upstream definitions for DHT nodes" >> "$OUTPUT_FILE"
-echo "# ============================================" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-
-for i in $(seq 1 $NUM_NODES); do
-    cat >> "$OUTPUT_FILE" << EOF
-upstream dht-node-$i {
-    server libp2p-dht-dht-node-$i:4001;
-}
-
-EOF
-done
-
-# Generate location blocks for each node
-echo "# ============================================" >> "$OUTPUT_FILE"
-echo "# Location blocks for DHT node WebSocket routing" >> "$OUTPUT_FILE"
-echo "# ============================================" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-
+# Generate location blocks for each node (using dynamic upstream resolution)
 for i in $(seq 1 $NUM_NODES); do
     cat >> "$OUTPUT_FILE" << EOF
 location /dht/node-$i {
-    proxy_pass http://dht-node-$i;
+    set \$dht_node_$i libp2p-dht-dht-node-$i:4001;
+    proxy_pass http://\$dht_node_$i;
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -76,7 +58,7 @@ done
 echo "Generated $OUTPUT_FILE with $NUM_NODES node configurations"
 echo ""
 echo "To use this configuration:"
-echo "  1. Add 'include /etc/nginx/conf.d/dht-nodes.conf;' to your nginx server block"
+echo "  1. Ensure 'include /etc/nginx/conf.d/dht-nodes.conf;' is in your nginx server block"
 echo "  2. Reload nginx: nginx -s reload"
 echo ""
 echo "Node endpoints will be available at:"
