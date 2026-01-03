@@ -279,40 +279,60 @@ async function handleClientMessage(ws: WebSocket, msg: ClientMessage) {
         try {
           const count = msg.count || 10;
           const keyBytes = new TextEncoder().encode(msg.key);
-          const peerIds: string[] = [];
+          const peers: Array<{ id: string; multiaddrs: string[]; connected: boolean }> = [];
+          
+          // Get list of connected peers
+          const connectedPeers = new Set(node?.getConnectionInfo().connectedPeers || []);
           
           if (node) {
             // Try DHT lookup first
             try {
               for await (const peer of node.getClosestPeers(keyBytes)) {
-                peerIds.push(peer.id.toString());
-                if (peerIds.length >= count) break;
+                const multiaddrs = peer.multiaddrs?.map(ma => ma.toString()) || [];
+                const peerId = peer.id.toString();
+                peers.push({
+                  id: peerId,
+                  multiaddrs: multiaddrs,
+                  connected: connectedPeers.has(peerId)
+                });
+                if (peers.length >= count) break;
               }
             } catch {
               // Fall back to routing table
             }
             
             // If not enough from DHT, add from routing table
-            if (peerIds.length < count) {
+            if (peers.length < count) {
               const info = node.getRoutingTableInfo();
+              const existingIds = new Set(peers.map(p => p.id));
               for (const bucket of info.buckets) {
                 for (const peer of bucket.peers) {
                   const peerId = peer.id.toString();
-                  if (!peerIds.includes(peerId)) {
-                    peerIds.push(peerId);
-                    if (peerIds.length >= count) break;
+                  if (!existingIds.has(peerId)) {
+                    peers.push({
+                      id: peerId,
+                      multiaddrs: peer.multiaddrs?.map(ma => ma.toString()) || [],
+                      connected: connectedPeers.has(peerId)
+                    });
+                    existingIds.add(peerId);
+                    if (peers.length >= count) break;
                   }
                 }
-                if (peerIds.length >= count) break;
+                if (peers.length >= count) break;
               }
             }
           }
           
+          // Sort to put connected peers first
+          peers.sort((a, b) => (b.connected ? 1 : 0) - (a.connected ? 1 : 0));
+          
           ws.send(JSON.stringify({
             type: 'closest_peers_response',
             key: msg.key,
-            peers: peerIds,
-            count: peerIds.length
+            peers: peers.map(p => p.id),
+            peerDetails: peers,
+            count: peers.length,
+            connectedCount: peers.filter(p => p.connected).length
           }));
         } catch (err) {
           ws.send(JSON.stringify({ type: 'error', message: `Closest peers failed: ${err}` }));
@@ -329,6 +349,17 @@ async function handleClientMessage(ws: WebSocket, msg: ClientMessage) {
             ws.send(JSON.stringify({ type: 'error', message: 'Overlay network not available' }));
             return;
           }
+          
+          console.log(`[${NODE_ID}] Overlay echo request to ${msg.targetPeerId}`);
+          
+          // Check if target is connected
+          const connectionInfo = node?.getConnectionInfo();
+          const isConnected = connectionInfo?.connectedPeers.includes(msg.targetPeerId);
+          console.log(`[${NODE_ID}] Target ${msg.targetPeerId.slice(0, 16)}... connected: ${isConnected}`);
+          
+          // Log routing table info
+          const routingInfo = node?.getRoutingTableInfo();
+          console.log(`[${NODE_ID}] Routing table has ${routingInfo?.totalPeers || 0} peers`);
           
           const payload = new TextEncoder().encode(msg.message);
           const response = await overlay.sendMessage(msg.targetPeerId, payload, {
@@ -349,6 +380,7 @@ async function handleClientMessage(ws: WebSocket, msg: ClientMessage) {
           }));
         } catch (err) {
           const latency = Date.now() - startTime;
+          console.error(`[${NODE_ID}] Overlay echo failed:`, err);
           ws.send(JSON.stringify({
             type: 'overlay_echo_response',
             targetPeerId: msg.targetPeerId,

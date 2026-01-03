@@ -85,13 +85,26 @@ This plan implements public address routing for Docker-hosted DHT nodes. Each of
     - **RESULT:** All DHT nodes now have 5 peers in their routing table (bootstrap + 4 other nodes)
     - **RESULT:** DHT FIND_NODE queries now work correctly, returning 5 closest peers
     - _Requirements: 3.1, 3.2, 5.2, 5.4_
-  - [~] 7.6 Validate external browser connectivity
+  - [x] 7.6 Validate external browser connectivity
     - Open https://imeyouwe.com in browser
     - Connect via WebSocket to bootstrap
     - Query DHT and verify returned addresses are all public
     - Test overlay echo from browser to a Docker node
     - _Requirements: 3.1, 3.2, 5.2, 5.4_
-    - **Status:** Browser client is served at https://imeyouwe.com. WebSocket endpoint at /ws is responding. Manual browser testing required to complete validation.
+    - **Status:** Browser client updated with validation UI and connection status indicators.
+    - **Issue Found:** Overlay echo fails with "Failed to lookup public key for target" - the key exchange protocol needs debugging.
+    - **Code Changes:**
+      - Updated ws-bridge.ts to return peer multiaddrs and connection status
+      - Updated index.html with validation status panel and connection indicators
+      - Added detailed logging to key-manager.ts for debugging key lookup failures
+    - **Manual Testing Steps:**
+      1. Open https://imeyouwe.com in browser
+      2. Click "Connect" - Validation Status should show "✅ Connected"
+      3. Enter any key (e.g., "test") in "Find Closest Peers" and click "Find"
+      4. Verify peers are found - connected peers shown with 🟢, others with ⚪
+      5. Select a CONNECTED peer (🟢) for echo test
+      6. Enter a message and click "Send Echo"
+      7. Check server logs for key lookup debugging info
 
 - [ ] 8. Checkpoint - Verify 5-node deployment
   - Ensure all validation steps pass

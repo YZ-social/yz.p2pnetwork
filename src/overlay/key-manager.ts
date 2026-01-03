@@ -276,9 +276,12 @@ export class KeyManager {
    * @throws OverlayError if key not found
    */
   async lookupPublicKey(peerId: string): Promise<HybridPublicKey> {
+    console.log(`[KeyManager] Looking up public key for ${peerId.slice(0, 16)}...`);
+    
     // Check cache first
     const cached = this.publicKeyCache.get(peerId);
     if (cached) {
+      console.log(`[KeyManager] Found key in cache for ${peerId.slice(0, 16)}...`);
       return cached;
     }
 
@@ -293,7 +296,9 @@ export class KeyManager {
     // Try DHT first
     try {
       const dhtKey = this.getDHTKey(peerId);
+      console.log(`[KeyManager] Trying DHT lookup for key: ${new TextDecoder().decode(dhtKey)}`);
       const data = await this.dht.get(dhtKey);
+      console.log(`[KeyManager] DHT returned ${data.length} bytes for ${peerId.slice(0, 16)}...`);
       const record = this.deserializePublicKeyRecord(data);
 
       // Validate the record
@@ -311,20 +316,23 @@ export class KeyManager {
 
       // Cache the key
       this.publicKeyCache.set(peerId, publicKey);
+      console.log(`[KeyManager] Successfully got key from DHT for ${peerId.slice(0, 16)}...`);
 
       return publicKey;
     } catch (dhtError) {
       // DHT lookup failed, try direct request
-      console.log(`DHT lookup failed for ${peerId}, trying direct request...`);
+      console.log(`[KeyManager] DHT lookup failed for ${peerId.slice(0, 16)}...: ${dhtError instanceof Error ? dhtError.message : 'Unknown error'}`);
     }
 
     // Try direct key request via libp2p protocol
     try {
+      console.log(`[KeyManager] Trying direct key request to ${peerId.slice(0, 16)}...`);
       const publicKey = await this.requestKeyDirectly(peerId);
       // Cache the key
       this.publicKeyCache.set(peerId, publicKey);
       return publicKey;
     } catch (directError) {
+      console.error(`[KeyManager] Direct key request also failed for ${peerId.slice(0, 16)}...:`, directError);
       throw new OverlayError(
         OverlayErrorCode.KEY_NOT_FOUND,
         `Failed to lookup public key for peer ${peerId}: DHT and direct request both failed`,
@@ -349,16 +357,25 @@ export class KeyManager {
     const { peerIdFromString } = await import('@libp2p/peer-id');
     const targetPeerId = peerIdFromString(peerId);
 
-    console.log(`[KeyManager] Attempting direct key request to ${peerId}`);
+    console.log(`[KeyManager] Attempting direct key request to ${peerId.slice(0, 16)}...`);
+    
+    // Check if we're connected to this peer
+    const connections = libp2p.getConnections(targetPeerId);
+    console.log(`[KeyManager] Have ${connections.length} connections to ${peerId.slice(0, 16)}...`);
+    
+    if (connections.length > 0) {
+      console.log(`[KeyManager] Connection addresses: ${connections.map(c => c.remoteAddr.toString()).join(', ')}`);
+    }
 
     try {
+      console.log(`[KeyManager] Dialing protocol ${KEY_EXCHANGE_PROTOCOL_ID} to ${peerId.slice(0, 16)}...`);
       const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
       
       // Cast to access the source property
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stream = rawStream as any;
 
-      console.log(`[KeyManager] Connected to ${peerId}, reading response...`);
+      console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}..., reading response...`);
 
       // Read the response using the stream's async iterator
       const chunks: Uint8Array[] = [];
@@ -397,7 +414,7 @@ export class KeyManager {
         offset += chunk.length;
       }
 
-      console.log(`[KeyManager] Received ${data.length} bytes from ${peerId}`);
+      console.log(`[KeyManager] Received ${data.length} bytes from ${peerId.slice(0, 16)}...`);
 
       // Deserialize the public key record
       const record = this.deserializePublicKeyRecord(data);
@@ -406,17 +423,24 @@ export class KeyManager {
         throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
       }
 
-      console.log(`[KeyManager] Successfully got key from ${peerId} via direct request`);
+      console.log(`[KeyManager] Successfully got key from ${peerId.slice(0, 16)}... via direct request`);
 
       return {
         x25519: record.x25519,
         mlkem768: record.mlkem768,
       };
     } catch (error) {
-      console.error(`[KeyManager] Direct key request failed for ${peerId}:`, error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[KeyManager] Direct key request failed for ${peerId.slice(0, 16)}...: ${errorMsg}`);
+      
+      // Log more details about the error
+      if (error instanceof Error && error.stack) {
+        console.error(`[KeyManager] Stack trace: ${error.stack}`);
+      }
+      
       throw new OverlayError(
         OverlayErrorCode.KEY_NOT_FOUND,
-        `Direct key request failed for peer ${peerId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Direct key request failed for peer ${peerId}: ${errorMsg}`,
         { cause: error instanceof Error ? error : undefined }
       );
     }

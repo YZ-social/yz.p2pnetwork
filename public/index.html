@@ -192,6 +192,29 @@
 
         <div class="grid">
             <div class="card">
+                <div class="card-header">✅ Validation Status</div>
+                <div class="card-body">
+                    <div id="validation-status">
+                        <div class="stat-item" style="margin-bottom: 10px;">
+                            <span class="stat-label">1. WebSocket Connection</span>
+                            <span class="stat-value disconnected" id="val-ws">❌ Not Connected</span>
+                        </div>
+                        <div class="stat-item" style="margin-bottom: 10px;">
+                            <span class="stat-label">2. DHT Query (Public Addresses)</span>
+                            <span class="stat-value" id="val-dht" style="color: #718096;">⏳ Not Tested</span>
+                        </div>
+                        <div class="stat-item" style="margin-bottom: 10px;">
+                            <span class="stat-label">3. Overlay Echo</span>
+                            <span class="stat-value" id="val-echo" style="color: #718096;">⏳ Not Tested</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 12px; color: #a0aec0;">
+                        Requirements: 3.1, 3.2, 5.2, 5.4
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-header">🔌 Connection</div>
                 <div class="card-body">
                     <div class="controls">
@@ -334,6 +357,13 @@
         const statDataOut = document.getElementById('stat-data-out');
         const peerList = document.getElementById('peer-list');
         const echoTarget = document.getElementById('echo-target');
+        const valWs = document.getElementById('val-ws');
+        const valDht = document.getElementById('val-dht');
+        const valEcho = document.getElementById('val-echo');
+        
+        // Validation state
+        let dhtValidated = false;
+        let echoValidated = false;
 
         function log(message, level = 'info') {
             const time = new Date().toLocaleTimeString();
@@ -387,6 +417,25 @@
             getBtn.disabled = !connected;
             lookupBtn.disabled = !connected;
             echoBtn.disabled = !connected || !overlayEnabled;
+            
+            // Update validation status
+            if (connected) {
+                valWs.textContent = '✅ Connected';
+                valWs.style.color = '#68d391';
+            } else {
+                valWs.textContent = '❌ Not Connected';
+                valWs.style.color = '#fc8181';
+            }
+            
+            if (dhtValidated) {
+                valDht.textContent = '✅ Passed';
+                valDht.style.color = '#68d391';
+            }
+            
+            if (echoValidated) {
+                valEcho.textContent = '✅ Passed';
+                valEcho.style.color = '#68d391';
+            }
         }
 
         async function fetchBootstrapInfo() {
@@ -480,13 +529,41 @@
                     }
                     break;
                 case 'closest_peers_response':
-                    log(`Found ${msg.count} peers closest to "${msg.key}"`, 'success');
-                    displayPeerList(msg.peers);
+                    log(`Found ${msg.count} peers closest to "${msg.key}" (${msg.connectedCount || 0} connected)`, 'success');
+                    // Log address info for validation
+                    let hasAnyPrivate = false;
+                    if (msg.peerDetails) {
+                        for (const peer of msg.peerDetails) {
+                            const addrs = peer.multiaddrs || [];
+                            const hasPrivate = addrs.some(a => a.includes('/ip4/172.') || a.includes('/ip4/10.') || a.includes('/ip4/192.168.'));
+                            const connStatus = peer.connected ? '🟢' : '⚪';
+                            if (hasPrivate) {
+                                log(`${connStatus} Peer ${peer.id.substring(0, 16)}... has private addresses: ${addrs.join(', ')}`, 'warn');
+                                hasAnyPrivate = true;
+                            } else if (addrs.length > 0) {
+                                log(`${connStatus} Peer ${peer.id.substring(0, 16)}... addresses: ${addrs.join(', ')}`, 'success');
+                            } else {
+                                log(`${connStatus} Peer ${peer.id.substring(0, 16)}... (no addresses)`, 'info');
+                            }
+                        }
+                    }
+                    // Mark DHT validation based on whether we found peers
+                    if (msg.count > 0) {
+                        dhtValidated = true;
+                        if (hasAnyPrivate) {
+                            valDht.textContent = '⚠️ Has Private Addrs';
+                            valDht.style.color = '#f6e05e';
+                        }
+                        updateUI();
+                    }
+                    displayPeerList(msg.peers, msg.peerDetails);
                     break;
                 case 'overlay_echo_response':
                     if (msg.success) {
                         log(`🔐 Echo response received in ${formatLatency(msg.latencyMs)}`, 'success');
                         showEchoResult(msg);
+                        echoValidated = true;
+                        updateUI();
                     } else {
                         log(`Echo failed: ${msg.error}`, 'error');
                         showEchoError(msg);
@@ -503,15 +580,41 @@
             }
         }
 
-        function displayPeerList(peers) {
+        function displayPeerList(peers, peerDetails) {
             if (!peers || peers.length === 0) {
                 peerList.innerHTML = '<div style="color: #718096; text-align: center; padding: 20px;">No peers found</div>';
                 return;
             }
             
-            peerList.innerHTML = peers.map((p, i) => 
-                `<div class="peer-item" data-peer="${p}" onclick="selectPeer('${p}')">${i + 1}. ${p}</div>`
-            ).join('');
+            // Create a map of peer details for easy lookup
+            const detailsMap = new Map();
+            if (peerDetails) {
+                for (const detail of peerDetails) {
+                    detailsMap.set(detail.id, detail);
+                }
+            }
+            
+            peerList.innerHTML = peers.map((p, i) => {
+                const detail = detailsMap.get(p);
+                const addrs = detail?.multiaddrs || [];
+                const isConnected = detail?.connected || false;
+                const hasPrivateAddr = addrs.some(a => a.includes('/ip4/172.') || a.includes('/ip4/10.') || a.includes('/ip4/192.168.'));
+                const hasPublicAddr = addrs.some(a => a.includes('/dns4/') || a.includes('imeyouwe.com'));
+                
+                let statusIcon = isConnected ? '🟢' : '⚪';
+                let addrInfo = '';
+                if (addrs.length > 0) {
+                    const addrClass = hasPrivateAddr && !hasPublicAddr ? 'color: #fc8181;' : 'color: #68d391;';
+                    addrInfo = `<div style="font-size: 10px; margin-top: 4px; ${addrClass}">${addrs.slice(0, 2).join('<br>')}</div>`;
+                    if (hasPrivateAddr && !hasPublicAddr) {
+                        addrInfo += '<div style="font-size: 9px; color: #f6e05e;">⚠️ Private address only</div>';
+                    }
+                }
+                
+                const connStatus = isConnected ? '<span style="color: #68d391; font-size: 10px;">Connected</span>' : '<span style="color: #718096; font-size: 10px;">Not connected</span>';
+                
+                return `<div class="peer-item" data-peer="${p}" onclick="selectPeer('${p}')">${statusIcon} ${i + 1}. ${p.substring(0, 20)}... ${connStatus}${addrInfo}</div>`;
+            }).join('');
         }
 
         window.selectPeer = function(peerId) {
