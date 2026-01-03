@@ -49,19 +49,23 @@ async function discoverPeers(): Promise<void> {
           for (const peer of event.closer) {
             const peerId = peer.id.toString();
             if (peerId !== myPeerId && peer.multiaddrs?.length > 0) {
-              discoveredPeers.set(peerId, peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+              const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+              discoveredPeers.set(peerId, addrs);
+              console.log(`[${NODE_ID}] DHT discovered peer ${peerId.slice(0, 16)}... with addrs: ${addrs.join(', ')}`);
             }
           }
         }
         if (event.name === 'FINAL_PEER' && event.peer) {
           const peerId = event.peer.id.toString();
           if (peerId !== myPeerId && event.peer.multiaddrs?.length > 0) {
-            discoveredPeers.set(peerId, event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+            const addrs = event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+            discoveredPeers.set(peerId, addrs);
+            console.log(`[${NODE_ID}] DHT discovered peer ${peerId.slice(0, 16)}... with addrs: ${addrs.join(', ')}`);
           }
         }
       }
-    } catch {
-      // Ignore lookup errors
+    } catch (err) {
+      console.log(`[${NODE_ID}] Self-lookup error: ${err}`);
     }
     
     // Perform random lookups to discover more peers
@@ -75,14 +79,16 @@ async function discoverPeers(): Promise<void> {
             for (const peer of event.closer) {
               const peerId = peer.id.toString();
               if (peerId !== myPeerId && peer.multiaddrs?.length > 0) {
-                discoveredPeers.set(peerId, peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+                const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+                discoveredPeers.set(peerId, addrs);
               }
             }
           }
           if (event.name === 'FINAL_PEER' && event.peer) {
             const peerId = event.peer.id.toString();
             if (peerId !== myPeerId && event.peer.multiaddrs?.length > 0) {
-              discoveredPeers.set(peerId, event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+              const addrs = event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+              discoveredPeers.set(peerId, addrs);
             }
           }
         }
@@ -91,31 +97,41 @@ async function discoverPeers(): Promise<void> {
       }
     }
     
+    console.log(`[${NODE_ID}] Peer discovery: found ${discoveredPeers.size} unique peers`);
+    
     // Now connect to discovered peers that we're not already connected to
     const connectedPeers = new Set(node.getConnectionInfo().connectedPeers);
     let connectedCount = 0;
+    let failedCount = 0;
     
     for (const [peerId, multiaddrs] of discoveredPeers) {
-      if (connectedPeers.has(peerId)) continue; // Already connected
+      if (connectedPeers.has(peerId)) {
+        console.log(`[${NODE_ID}] Already connected to ${peerId.slice(0, 16)}...`);
+        continue;
+      }
       
       // Try to connect to this peer
+      let connected = false;
       for (const addr of multiaddrs) {
         try {
+          console.log(`[${NODE_ID}] Trying to connect to ${peerId.slice(0, 16)}... at ${addr}`);
           await libp2pNode.dial(multiaddr(addr));
           connectedCount++;
-          console.log(`[${NODE_ID}] Connected to discovered peer: ${peerId.slice(0, 20)}...`);
+          console.log(`[${NODE_ID}] Connected to discovered peer: ${peerId.slice(0, 16)}...`);
+          connected = true;
           break; // Successfully connected, no need to try other addresses
-        } catch {
-          // Try next address
+        } catch (err) {
+          console.log(`[${NODE_ID}] Failed to connect to ${addr}: ${err}`);
         }
+      }
+      if (!connected) {
+        failedCount++;
       }
     }
     
-    if (discoveredPeers.size > 0 || connectedCount > 0) {
-      console.log(`[${NODE_ID}] Peer discovery: found ${discoveredPeers.size} peers, connected to ${connectedCount} new peers`);
-    }
-  } catch {
-    // Ignore discovery errors
+    console.log(`[${NODE_ID}] Peer discovery complete: connected to ${connectedCount} new peers, ${failedCount} failed`);
+  } catch (err) {
+    console.log(`[${NODE_ID}] Peer discovery error: ${err}`);
   }
 }
 
