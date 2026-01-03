@@ -462,41 +462,16 @@ export class KeyManager {
     const libp2p = this.dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (handlerData: any) => {
-      // Debug: log what we received - try multiple access patterns
-      console.log(`[KeyManager] Handler called with data type: ${typeof handlerData}`);
-      console.log(`[KeyManager] Data is null/undefined: ${handlerData == null}`);
-      console.log(`[KeyManager] Data constructor: ${handlerData?.constructor?.name}`);
-      console.log(`[KeyManager] Data toString: ${String(handlerData)}`);
+      // The handler can receive either:
+      // 1. An object with { stream, connection } properties (newer libp2p API)
+      // 2. The stream directly (YamuxStream) - this is what we're seeing
+      // Check if handlerData IS the stream (has sink/source) or contains stream property
+      const isStreamDirect = handlerData && typeof handlerData.sink === 'function' && handlerData.source;
+      const stream = isStreamDirect ? handlerData : handlerData?.stream;
+      const connection = isStreamDirect ? undefined : handlerData?.connection;
+      const remotePeer = connection?.remotePeer?.toString() || 'direct-stream';
       
-      // Try to enumerate all properties including non-enumerable
-      if (handlerData) {
-        const ownProps = Object.getOwnPropertyNames(handlerData);
-        console.log(`[KeyManager] Own property names: ${ownProps.join(', ')}`);
-        console.log(`[KeyManager] Object.keys: ${Object.keys(handlerData).join(', ')}`);
-        
-        // Try direct property access
-        console.log(`[KeyManager] handlerData.stream: ${handlerData.stream}`);
-        console.log(`[KeyManager] handlerData['stream']: ${handlerData['stream']}`);
-        console.log(`[KeyManager] handlerData.connection: ${handlerData.connection}`);
-        
-        // Check if it's iterable or has entries
-        if (typeof handlerData[Symbol.iterator] === 'function') {
-          console.log(`[KeyManager] Data is iterable`);
-        }
-        
-        // Try JSON stringify
-        try {
-          console.log(`[KeyManager] JSON: ${JSON.stringify(handlerData, null, 2)}`);
-        } catch (e) {
-          console.log(`[KeyManager] Cannot JSON stringify: ${e}`);
-        }
-      }
-      
-      // Extract stream and connection from the data object (same pattern as overlay handler)
-      const stream = handlerData?.stream;
-      const connection = handlerData?.connection;
-      const remotePeer = connection?.remotePeer?.toString() || 'unknown';
-      console.log(`[KeyManager] Received key exchange request from ${remotePeer}`);
+      console.log(`[KeyManager] Received key exchange request from ${remotePeer} (stream direct: ${isStreamDirect})`);
 
       try {
         if (!stream) {
