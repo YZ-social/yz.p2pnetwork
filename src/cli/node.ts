@@ -175,11 +175,21 @@ async function main() {
     console.log(`  - ${addr.toString()}`);
   }
 
-  // Bootstrap if we have peers
+  // Start metrics/health server EARLY so health checks pass during bootstrap
+  startMetricsServer();
+
+  // Bootstrap if we have peers (with timeout)
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
     console.log(`[${NODE_ID}] Bootstrapping...`);
     try {
-      await node.bootstrap();
+      // Add timeout to bootstrap to prevent hanging
+      const bootstrapTimeout = 30000; // 30 seconds
+      await Promise.race([
+        node.bootstrap(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Bootstrap timeout')), bootstrapTimeout)
+        )
+      ]);
       console.log(`[${NODE_ID}] Bootstrap complete`);
       
       // Wait for DHT to stabilize before starting overlay
@@ -191,6 +201,7 @@ async function main() {
       await discoverPeers();
     } catch (err) {
       console.error(`[${NODE_ID}] Bootstrap failed:`, err);
+      // Continue anyway - the node can still function and discover peers later
     }
   }
 
@@ -243,9 +254,6 @@ async function main() {
     };
     return new TextEncoder().encode(JSON.stringify(response));
   });
-
-  // Start metrics/health server
-  startMetricsServer();
 
   // Log routing table periodically
   setInterval(() => {
