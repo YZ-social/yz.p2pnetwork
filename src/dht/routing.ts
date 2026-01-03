@@ -46,10 +46,59 @@ export interface RoutingTableInfo {
 }
 
 /**
+ * Get addresses for a peer from the peer store.
+ * The peer store contains listening addresses from the identify protocol,
+ * which are the correct addresses for connecting to a peer.
+ * 
+ * @param node - The libp2p node
+ * @param peerId - The peer ID to get addresses for
+ * @returns Array of multiaddrs from the peer store, or empty array if not found
+ */
+async function getPeerStoreAddresses(node: Libp2p, peerId: PeerId): Promise<Multiaddr[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const peerStore = (node as any).peerStore;
+    if (!peerStore) return [];
+    
+    // Try the new API first (libp2p 1.x)
+    if (typeof peerStore.get === 'function') {
+      try {
+        const peerData = await peerStore.get(peerId);
+        if (peerData?.addresses && peerData.addresses.length > 0) {
+          return peerData.addresses.map((a: { multiaddr: Multiaddr }) => a.multiaddr);
+        }
+      } catch {
+        // Peer not in store
+      }
+    }
+    
+    // Try addressBook API (older versions)
+    if (peerStore.addressBook) {
+      try {
+        const addrs = await peerStore.addressBook.get(peerId);
+        if (addrs && addrs.length > 0) {
+          return addrs.map((a: { multiaddr: Multiaddr }) => a.multiaddr);
+        }
+      } catch {
+        // Not found
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return [];
+}
+
+/**
  * Extract routing table information from a libp2p node with DHT service.
  * 
  * This function accesses the internal DHT routing table to provide
  * diagnostic information about the current state of peer organization.
+ * 
+ * IMPORTANT: This function uses addresses from the peer store (populated by
+ * the identify protocol) rather than the addresses stored in the DHT's k-bucket.
+ * The k-bucket may store ephemeral connection addresses, while the peer store
+ * has the correct listening addresses that other peers can connect to.
  * 
  * @param node - The libp2p node with DHT service
  * @returns RoutingTableInfo containing bucket and peer information
@@ -66,11 +115,9 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
   const dht = services.dht;
   const localPeerId = node.peerId.toString();
 
-  // Try to access the routing table from the DHT
-  // The kad-dht implementation stores the routing table internally
-  const buckets: BucketInfo[] = [];
-  let totalPeers = 0;
-
+  // Collect peer IDs from the DHT routing table
+  const peerIds: PeerId[] = [];
+  
   try {
     // The @libp2p/kad-dht v16+ uses a different internal structure
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,94 +130,53 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
       
       if (kb) {
         // The k-bucket library uses a tree structure with 'root'
-        // We need to traverse the tree to find all peers
-        // Note: The k-bucket uses 'peers' not 'contacts'
+        // We need to traverse the tree to find all peer IDs
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const collectPeers = (node: any, depth: number = 0): void => {
-          if (!node) return;
+        const collectPeerIds = (kbNode: any): void => {
+          if (!kbNode) return;
           
-          // If this node has peers, collect them
-          if (node.peers && Array.isArray(node.peers)) {
-            for (const contact of node.peers) {
-              // Find or create bucket for this depth
-              let bucket = buckets.find(b => b.index === depth);
-              if (!bucket) {
-                bucket = {
-                  index: depth,
-                  peers: [],
-                  lastRefresh: new Date(),
-                };
-                buckets.push(bucket);
-              }
-              
-              // Extract peer info from contact
-              // Contact structure: { peer: PeerId, lastPing: number, ... }
+          // If this node has peers, collect their IDs
+          if (kbNode.peers && Array.isArray(kbNode.peers)) {
+            for (const contact of kbNode.peers) {
               const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
-              
-              bucket.peers.push({
-                id: peerId,
-                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
-              });
-              totalPeers++;
+              if (peerId) {
+                peerIds.push(peerId);
+              }
             }
           }
           
           // Also check for 'contacts' (older versions)
-          if (node.contacts && Array.isArray(node.contacts)) {
-            for (const contact of node.contacts) {
-              let bucket = buckets.find(b => b.index === depth);
-              if (!bucket) {
-                bucket = {
-                  index: depth,
-                  peers: [],
-                  lastRefresh: new Date(),
-                };
-                buckets.push(bucket);
-              }
-              
+          if (kbNode.contacts && Array.isArray(kbNode.contacts)) {
+            for (const contact of kbNode.contacts) {
               const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
-              
-              bucket.peers.push({
-                id: peerId,
-                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
-              });
-              totalPeers++;
+              if (peerId) {
+                peerIds.push(peerId);
+              }
             }
           }
           
           // Recursively traverse left and right children
-          if (node.left) {
-            collectPeers(node.left, depth + 1);
+          if (kbNode.left) {
+            collectPeerIds(kbNode.left);
           }
-          if (node.right) {
-            collectPeers(node.right, depth + 1);
+          if (kbNode.right) {
+            collectPeerIds(kbNode.right);
           }
         };
         
         // Start traversal from root
         if (kb.root) {
-          collectPeers(kb.root);
+          collectPeerIds(kb.root);
         }
         
         // Alternative: try toIterable() if available
-        if (totalPeers === 0 && typeof kb.toIterable === 'function') {
+        if (peerIds.length === 0 && typeof kb.toIterable === 'function') {
           try {
             for (const contact of kb.toIterable()) {
-              let bucket = buckets.find(b => b.index === 0);
-              if (!bucket) {
-                bucket = { index: 0, peers: [], lastRefresh: new Date() };
-                buckets.push(bucket);
-              }
-              
               const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
-              bucket.peers.push({
-                id: peerId,
-                multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-                lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
-              });
-              totalPeers++;
+              if (peerId) {
+                peerIds.push(peerId);
+              }
             }
           } catch {
             // toIterable failed
@@ -178,25 +184,16 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
         }
         
         // Alternative: try closest() to enumerate peers
-        if (totalPeers === 0 && typeof kb.closest === 'function') {
+        if (peerIds.length === 0 && typeof kb.closest === 'function') {
           try {
             const randomKey = new Uint8Array(32);
             const peers = kb.closest(randomKey, 1000);
             if (peers && Array.isArray(peers)) {
-              let bucket = buckets.find(b => b.index === 0);
-              if (!bucket) {
-                bucket = { index: 0, peers: [], lastRefresh: new Date() };
-                buckets.push(bucket);
-              }
-              
               for (const contact of peers) {
                 const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
-                bucket.peers.push({
-                  id: peerId,
-                  multiaddrs: contact.multiaddrs ?? contact.addresses ?? [],
-                  lastSeen: contact.lastPing ? new Date(contact.lastPing) : new Date(),
-                });
-                totalPeers++;
+                if (peerId) {
+                  peerIds.push(peerId);
+                }
               }
             }
           } catch {
@@ -205,48 +202,199 @@ export function getRoutingTableInfo(node: Libp2p): RoutingTableInfo {
         }
       }
     }
-    
-    // Fallback: Use libp2p's connections to get connected peers
-    // This isn't the DHT routing table but gives us peer info
-    if (totalPeers === 0) {
-      const connections = node.getConnections();
-      if (connections.length > 0) {
-        const bucket: BucketInfo = {
-          index: 0,
-          peers: [],
-          lastRefresh: new Date(),
-        };
-        
-        const seenPeers = new Set<string>();
-        for (const conn of connections) {
-          const peerIdStr = conn.remotePeer.toString();
-          if (!seenPeers.has(peerIdStr)) {
-            seenPeers.add(peerIdStr);
-            bucket.peers.push({
-              id: conn.remotePeer,
-              multiaddrs: [conn.remoteAddr],
-              lastSeen: new Date(),
-            });
-            totalPeers++;
-          }
-        }
-        
-        if (bucket.peers.length > 0) {
-          buckets.push(bucket);
-        }
+  } catch {
+    // If we can't access the routing table, fall back to connections
+  }
+  
+  // If no peers from routing table, use connections
+  if (peerIds.length === 0) {
+    const connections = node.getConnections();
+    const seenPeers = new Set<string>();
+    for (const conn of connections) {
+      const peerIdStr = conn.remotePeer.toString();
+      if (!seenPeers.has(peerIdStr)) {
+        seenPeers.add(peerIdStr);
+        peerIds.push(conn.remotePeer);
       }
     }
-  } catch {
-    // If we can't access the routing table, return empty buckets
-    // This is not an error - the node might just not have any peers yet
   }
 
-  // Sort buckets by index
-  buckets.sort((a, b) => a.index - b.index);
+  // Now build the routing table info using peer store addresses
+  // We do this synchronously by using a simpler approach
+  const buckets: BucketInfo[] = [];
+  const bucket: BucketInfo = {
+    index: 0,
+    peers: [],
+    lastRefresh: new Date(),
+  };
+  
+  // Get connection addresses as fallback
+  const connectionAddrs = new Map<string, Multiaddr>();
+  for (const conn of node.getConnections()) {
+    connectionAddrs.set(conn.remotePeer.toString(), conn.remoteAddr);
+  }
+  
+  // For each peer, try to get addresses from peer store synchronously
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const peerStore = (node as any).peerStore;
+  
+  for (const peerId of peerIds) {
+    let addrs: Multiaddr[] = [];
+    
+    // Try to get addresses from peer store cache
+    if (peerStore) {
+      try {
+        // The peer store may have a synchronous cache
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const cache = (peerStore as any).store?.datastore?.data;
+        if (cache) {
+          // Try to find cached addresses
+          for (const [key, value] of cache.entries?.() ?? []) {
+            if (key.includes(peerId.toString()) && key.includes('addrs')) {
+              // Found address data
+              if (value && Array.isArray(value)) {
+                addrs = value;
+              }
+            }
+          }
+        }
+      } catch {
+        // Cache access failed
+      }
+    }
+    
+    // Fall back to connection address if no peer store addresses
+    if (addrs.length === 0) {
+      const connAddr = connectionAddrs.get(peerId.toString());
+      if (connAddr) {
+        addrs = [connAddr];
+      }
+    }
+    
+    bucket.peers.push({
+      id: peerId,
+      multiaddrs: addrs,
+      lastSeen: new Date(),
+    });
+  }
+  
+  if (bucket.peers.length > 0) {
+    buckets.push(bucket);
+  }
 
   return {
     localPeerId,
     buckets,
-    totalPeers,
+    totalPeers: peerIds.length,
+  };
+}
+
+/**
+ * Async version of getRoutingTableInfo that properly fetches addresses from peer store.
+ * Use this when you need accurate listening addresses for peers.
+ * 
+ * @param node - The libp2p node with DHT service
+ * @returns Promise resolving to RoutingTableInfo with peer store addresses
+ */
+export async function getRoutingTableInfoAsync(node: Libp2p): Promise<RoutingTableInfo> {
+  // Access the DHT service
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const services = (node as any).services;
+  if (!services?.dht) {
+    throw new Error('DHT service is not available on this node');
+  }
+
+  const dht = services.dht;
+  const localPeerId = node.peerId.toString();
+
+  // Collect peer IDs from the DHT routing table
+  const peerIds: PeerId[] = [];
+  
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const routingTable = (dht as any).routingTable;
+    
+    if (routingTable?.kb) {
+      const kb = routingTable.kb;
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const collectPeerIds = (kbNode: any): void => {
+        if (!kbNode) return;
+        
+        if (kbNode.peers && Array.isArray(kbNode.peers)) {
+          for (const contact of kbNode.peers) {
+            const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+            if (peerId) peerIds.push(peerId);
+          }
+        }
+        
+        if (kbNode.contacts && Array.isArray(kbNode.contacts)) {
+          for (const contact of kbNode.contacts) {
+            const peerId = contact.peer ?? contact.id ?? contact.peerId ?? contact;
+            if (peerId) peerIds.push(peerId);
+          }
+        }
+        
+        if (kbNode.left) collectPeerIds(kbNode.left);
+        if (kbNode.right) collectPeerIds(kbNode.right);
+      };
+      
+      if (kb.root) collectPeerIds(kb.root);
+    }
+  } catch {
+    // Fall back to connections
+  }
+  
+  // If no peers from routing table, use connections
+  if (peerIds.length === 0) {
+    const connections = node.getConnections();
+    const seenPeers = new Set<string>();
+    for (const conn of connections) {
+      const peerIdStr = conn.remotePeer.toString();
+      if (!seenPeers.has(peerIdStr)) {
+        seenPeers.add(peerIdStr);
+        peerIds.push(conn.remotePeer);
+      }
+    }
+  }
+
+  // Get connection addresses as fallback
+  const connectionAddrs = new Map<string, Multiaddr>();
+  for (const conn of node.getConnections()) {
+    connectionAddrs.set(conn.remotePeer.toString(), conn.remoteAddr);
+  }
+
+  // Build routing table info with peer store addresses
+  const bucket: BucketInfo = {
+    index: 0,
+    peers: [],
+    lastRefresh: new Date(),
+  };
+  
+  for (const peerId of peerIds) {
+    // Get addresses from peer store (async)
+    let addrs = await getPeerStoreAddresses(node, peerId);
+    
+    // Fall back to connection address if no peer store addresses
+    if (addrs.length === 0) {
+      const connAddr = connectionAddrs.get(peerId.toString());
+      if (connAddr) {
+        addrs = [connAddr];
+      }
+    }
+    
+    bucket.peers.push({
+      id: peerId,
+      multiaddrs: addrs,
+      lastSeen: new Date(),
+    });
+  }
+  
+  const buckets: BucketInfo[] = bucket.peers.length > 0 ? [bucket] : [];
+
+  return {
+    localPeerId,
+    buckets,
+    totalPeers: peerIds.length,
   };
 }

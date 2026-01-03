@@ -34,42 +34,83 @@ async function discoverPeers(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dht = (libp2pNode as any).services?.dht;
     
-    if (!dht) return;
+    if (!dht) {
+      console.log(`[${NODE_ID}] DHT service not available`);
+      return;
+    }
     
     // Collect discovered peers from DHT queries
     const discoveredPeers = new Map<string, string[]>(); // peerId -> multiaddrs
     const myPeerId = node.peerId.toString();
     
+    // First, try to get peers from the peer store (populated by identify protocol)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const peerStore = (libp2pNode as any).peerStore;
+    if (peerStore) {
+      try {
+        // Get all peers from peer store
+        const allPeers = await peerStore.all();
+        console.log(`[${NODE_ID}] Peer store has ${allPeers?.length || 0} peers`);
+        
+        for (const peerData of allPeers || []) {
+          const peerId = peerData.id.toString();
+          if (peerId !== myPeerId && peerData.addresses?.length > 0) {
+            const addrs = peerData.addresses.map((a: { multiaddr: { toString: () => string } }) => a.multiaddr.toString());
+            discoveredPeers.set(peerId, addrs);
+            console.log(`[${NODE_ID}] Peer store has ${peerId.slice(0, 16)}... with addrs: ${addrs.join(', ')}`);
+          }
+        }
+      } catch (err) {
+        console.log(`[${NODE_ID}] Error reading peer store: ${err}`);
+      }
+    }
+    
     // Perform self-lookup to find peers close to us
     const selfKey = node.peerId.toMultihash().bytes;
+    console.log(`[${NODE_ID}] Starting DHT self-lookup...`);
     
+    let eventCount = 0;
     try {
       for await (const event of dht.getClosestPeers(selfKey)) {
+        eventCount++;
+        console.log(`[${NODE_ID}] DHT event: ${event.name}`);
+        
         if (event.name === 'PEER_RESPONSE' && event.closer) {
           for (const peer of event.closer) {
             const peerId = peer.id.toString();
-            if (peerId !== myPeerId && peer.multiaddrs?.length > 0) {
-              const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
-              discoveredPeers.set(peerId, addrs);
-              console.log(`[${NODE_ID}] DHT discovered peer ${peerId.slice(0, 16)}... with addrs: ${addrs.join(', ')}`);
+            if (peerId !== myPeerId) {
+              const addrs = peer.multiaddrs?.map((ma: { toString: () => string }) => ma.toString()) || [];
+              console.log(`[${NODE_ID}] DHT PEER_RESPONSE: ${peerId.slice(0, 16)}... addrs: ${addrs.join(', ') || 'none'}`);
+              if (addrs.length > 0) {
+                discoveredPeers.set(peerId, addrs);
+              }
             }
           }
         }
         if (event.name === 'FINAL_PEER' && event.peer) {
           const peerId = event.peer.id.toString();
-          if (peerId !== myPeerId && event.peer.multiaddrs?.length > 0) {
-            const addrs = event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
-            discoveredPeers.set(peerId, addrs);
-            console.log(`[${NODE_ID}] DHT discovered peer ${peerId.slice(0, 16)}... with addrs: ${addrs.join(', ')}`);
+          if (peerId !== myPeerId) {
+            const addrs = event.peer.multiaddrs?.map((ma: { toString: () => string }) => ma.toString()) || [];
+            console.log(`[${NODE_ID}] DHT FINAL_PEER: ${peerId.slice(0, 16)}... addrs: ${addrs.join(', ') || 'none'}`);
+            if (addrs.length > 0) {
+              discoveredPeers.set(peerId, addrs);
+            }
           }
+        }
+        if (event.name === 'QUERY_ERROR') {
+          console.log(`[${NODE_ID}] DHT QUERY_ERROR: ${event.error}`);
+        }
+        if (event.name === 'DIAL_PEER') {
+          console.log(`[${NODE_ID}] DHT DIAL_PEER: ${event.peer?.toString?.()?.slice(0, 16)}...`);
         }
       }
     } catch (err) {
-      console.log(`[${NODE_ID}] Self-lookup error: ${err}`);
+      console.log(`[${NODE_ID}] Self-lookup error after ${eventCount} events: ${err}`);
     }
+    console.log(`[${NODE_ID}] Self-lookup complete, received ${eventCount} events`);
     
     // Perform random lookups to discover more peers
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       const randomKey = new Uint8Array(32);
       crypto.getRandomValues(randomKey);
       
@@ -106,7 +147,6 @@ async function discoverPeers(): Promise<void> {
     
     for (const [peerId, multiaddrs] of discoveredPeers) {
       if (connectedPeers.has(peerId)) {
-        console.log(`[${NODE_ID}] Already connected to ${peerId.slice(0, 16)}...`);
         continue;
       }
       
