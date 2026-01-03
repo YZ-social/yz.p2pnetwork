@@ -224,29 +224,54 @@ export class DHTNode {
       );
     }
 
+    // DHT queries for peer discovery are done asynchronously to avoid blocking
+    // In small networks, these queries may time out, so we don't wait for them
+    // The routing table will populate over time as peers connect and exchange info
+    this.performBackgroundPeerDiscovery().catch(() => {
+      // Ignore background discovery errors
+    });
+  }
+
+  /**
+   * Perform background peer discovery through DHT queries.
+   * This is non-blocking and runs after bootstrap completes.
+   */
+  private async performBackgroundPeerDiscovery(): Promise<void> {
+    // Add a small delay to let connections stabilize
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Set a timeout for DHT queries to prevent hanging
+    const queryTimeout = 5000; // 5 seconds max per query
+
     // Perform initial self-lookup to populate routing table with nearby peers
-    // This helps discover other nodes in the network beyond just the bootstrap peers
     try {
       const selfKey = this.node!.peerId.toMultihash().bytes;
-      // Iterate through closest peers to trigger DHT queries
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of this.getClosestPeers(selfKey)) {
-        // Just iterating triggers the DHT lookup which populates routing table
-        // We don't need to do anything with the peers
-      }
+      await Promise.race([
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _peer of this.getClosestPeers(selfKey)) {
+            // Just iterating triggers the DHT lookup
+          }
+        })(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), queryTimeout))
+      ]);
     } catch {
-      // Self-lookup failure is not critical, routing table will populate over time
+      // Self-lookup failure is not critical
     }
 
     // Perform additional random lookups to discover more peers
-    // This helps build a more complete routing table
     try {
       const randomKey = new Uint8Array(32);
       crypto.getRandomValues(randomKey);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _peer of this.getClosestPeers(randomKey)) {
-        // Just iterating triggers the DHT lookup
-      }
+      await Promise.race([
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _peer of this.getClosestPeers(randomKey)) {
+            // Just iterating triggers the DHT lookup
+          }
+        })(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), queryTimeout))
+      ]);
     } catch {
       // Random lookup failure is not critical
     }

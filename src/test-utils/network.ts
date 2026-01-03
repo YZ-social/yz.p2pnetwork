@@ -158,19 +158,18 @@ async function createTestNode(
 }
 
 /**
- * Connects all nodes in the network to each other.
- * Each node connects to the first node (star topology for simplicity).
+ * Connects all nodes in the network to each other in a mesh topology.
+ * Each node connects to multiple other nodes to ensure proper DHT routing.
  * 
  * @param nodes - Array of started DHT nodes
  */
 async function connectAllNodes(nodes: DHTNode[]): Promise<void> {
   if (nodes.length < 2) return;
 
-  // Get the first node's multiaddrs for others to connect to
+  // First, connect all nodes to the first node (hub)
   const firstNode = nodes[0];
   const firstNodeAddrs = firstNode.multiaddrs.map(ma => ma.toString());
 
-  // Connect all other nodes to the first node
   for (let i = 1; i < nodes.length; i++) {
     const node = nodes[i];
     try {
@@ -180,8 +179,41 @@ async function connectAllNodes(nodes: DHTNode[]): Promise<void> {
     }
   }
 
-  // Give nodes time to establish connections
+  // Give nodes time to establish initial connections
   await delay(100);
+
+  // Now create mesh connections: each node connects to at least 2 other nodes
+  // This ensures the network isn't just a star topology
+  for (let i = 1; i < nodes.length; i++) {
+    const node = nodes[i];
+    
+    // Connect to the next node in the ring (creates a ring topology on top of star)
+    const nextIndex = (i % (nodes.length - 1)) + 1;
+    if (nextIndex !== i && nextIndex < nodes.length) {
+      const nextNode = nodes[nextIndex];
+      const nextNodeAddrs = nextNode.multiaddrs.map(ma => ma.toString());
+      try {
+        await node.bootstrap(nextNodeAddrs);
+      } catch {
+        // Ignore connection errors
+      }
+    }
+    
+    // Also connect to a node 2 positions away for better connectivity
+    const skipIndex = ((i + 1) % (nodes.length - 1)) + 1;
+    if (skipIndex !== i && skipIndex !== nextIndex && skipIndex < nodes.length) {
+      const skipNode = nodes[skipIndex];
+      const skipNodeAddrs = skipNode.multiaddrs.map(ma => ma.toString());
+      try {
+        await node.bootstrap(skipNodeAddrs);
+      } catch {
+        // Ignore connection errors
+      }
+    }
+  }
+
+  // Give nodes time to establish mesh connections
+  await delay(200);
 }
 
 /**

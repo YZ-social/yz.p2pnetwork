@@ -3,6 +3,7 @@
  * CLI entry point for running a DHT node in Docker
  */
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { multiaddr } from '@multiformats/multiaddr';
 import { DHTNode, DHTConfigBuilder } from '../index.js';
 import { OverlayNetwork } from '../overlay/index.js';
 
@@ -24,26 +25,39 @@ let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
 
-// Helper function to discover peers through DHT lookups
+// Helper function to discover peers through DHT lookups and connect to them
 async function discoverPeers(): Promise<void> {
   if (!node) return;
   
   try {
-    // Get the libp2p node to access DHT directly
     const libp2pNode = node.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dht = (libp2pNode as any).services?.dht;
     
     if (!dht) return;
     
+    // Collect discovered peers from DHT queries
+    const discoveredPeers = new Map<string, string[]>(); // peerId -> multiaddrs
+    const myPeerId = node.peerId.toString();
+    
     // Perform self-lookup to find peers close to us
     const selfKey = node.peerId.toMultihash().bytes;
-    let discoveredCount = 0;
     
     try {
       for await (const event of dht.getClosestPeers(selfKey)) {
-        if (event.name === 'PEER_RESPONSE' || event.name === 'FINAL_PEER') {
-          discoveredCount++;
+        if (event.name === 'PEER_RESPONSE' && event.closer) {
+          for (const peer of event.closer) {
+            const peerId = peer.id.toString();
+            if (peerId !== myPeerId && peer.multiaddrs?.length > 0) {
+              discoveredPeers.set(peerId, peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+            }
+          }
+        }
+        if (event.name === 'FINAL_PEER' && event.peer) {
+          const peerId = event.peer.id.toString();
+          if (peerId !== myPeerId && event.peer.multiaddrs?.length > 0) {
+            discoveredPeers.set(peerId, event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+          }
         }
       }
     } catch {
@@ -57,8 +71,19 @@ async function discoverPeers(): Promise<void> {
       
       try {
         for await (const event of dht.getClosestPeers(randomKey)) {
-          if (event.name === 'PEER_RESPONSE' || event.name === 'FINAL_PEER') {
-            discoveredCount++;
+          if (event.name === 'PEER_RESPONSE' && event.closer) {
+            for (const peer of event.closer) {
+              const peerId = peer.id.toString();
+              if (peerId !== myPeerId && peer.multiaddrs?.length > 0) {
+                discoveredPeers.set(peerId, peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+              }
+            }
+          }
+          if (event.name === 'FINAL_PEER' && event.peer) {
+            const peerId = event.peer.id.toString();
+            if (peerId !== myPeerId && event.peer.multiaddrs?.length > 0) {
+              discoveredPeers.set(peerId, event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()));
+            }
           }
         }
       } catch {
@@ -66,8 +91,28 @@ async function discoverPeers(): Promise<void> {
       }
     }
     
-    if (discoveredCount > 0) {
-      console.log(`[${NODE_ID}] Peer discovery: found ${discoveredCount} peer responses`);
+    // Now connect to discovered peers that we're not already connected to
+    const connectedPeers = new Set(node.getConnectionInfo().connectedPeers);
+    let connectedCount = 0;
+    
+    for (const [peerId, multiaddrs] of discoveredPeers) {
+      if (connectedPeers.has(peerId)) continue; // Already connected
+      
+      // Try to connect to this peer
+      for (const addr of multiaddrs) {
+        try {
+          await libp2pNode.dial(multiaddr(addr));
+          connectedCount++;
+          console.log(`[${NODE_ID}] Connected to discovered peer: ${peerId.slice(0, 20)}...`);
+          break; // Successfully connected, no need to try other addresses
+        } catch {
+          // Try next address
+        }
+      }
+    }
+    
+    if (discoveredPeers.size > 0 || connectedCount > 0) {
+      console.log(`[${NODE_ID}] Peer discovery: found ${discoveredPeers.size} peers, connected to ${connectedCount} new peers`);
     }
   } catch {
     // Ignore discovery errors
