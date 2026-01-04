@@ -518,9 +518,15 @@ export class KeyManager {
             // Standard duplex stream
             await stream.sink([serialized]);
             console.log(`[KeyManager] Public key sent via sink()`);
+          } else if (typeof stream.sendData === 'function') {
+            // Yamux stream sendData method
+            const { Uint8ArrayList } = await import('uint8arraylist');
+            await stream.sendData(new Uint8ArrayList(serialized));
+            console.log(`[KeyManager] Public key sent via sendData()`);
           } else if (typeof stream.push === 'function') {
-            // Push-based stream
-            stream.push(serialized);
+            // Push-based stream - need to wrap in Uint8ArrayList
+            const { Uint8ArrayList } = await import('uint8arraylist');
+            stream.push(new Uint8ArrayList(serialized));
             stream.push(null); // Signal end
             console.log(`[KeyManager] Public key sent via push()`);
           } else if (typeof stream.write === 'function') {
