@@ -367,83 +367,110 @@ export class KeyManager {
       console.log(`[KeyManager] Connection addresses: ${connections.map(c => c.remoteAddr.toString()).join(', ')}`);
     }
 
-    try {
-      console.log(`[KeyManager] Dialing protocol ${KEY_EXCHANGE_PROTOCOL_ID} to ${peerId.slice(0, 16)}...`);
-      const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
-      
-      // Cast to access the source property
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = rawStream as any;
+    // Retry logic with exponential backoff for protocol negotiation failures
+    // This handles the race condition where the target node hasn't registered the handler yet
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 second
+    let lastError: Error | undefined;
 
-      console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}..., reading response...`);
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        console.log(`[KeyManager] Dialing protocol ${KEY_EXCHANGE_PROTOCOL_ID} to ${peerId.slice(0, 16)}... (attempt ${attempt + 1}/${maxRetries})`);
+        const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
+        
+        // Cast to access the source property
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const stream = rawStream as any;
 
-      // Read the response using the stream's async iterator
-      const chunks: Uint8Array[] = [];
-      
-      // The stream from dialProtocol is a duplex stream
-      // We need to iterate over the source properly
-      if (stream.source) {
-        for await (const chunk of stream.source) {
-          // Handle both BufferList and Uint8Array
-          if (chunk && typeof chunk.subarray === 'function') {
-            chunks.push(chunk.subarray());
-          } else if (chunk instanceof Uint8Array) {
-            chunks.push(chunk);
-          } else if (chunk) {
-            // Try to convert to Uint8Array
-            chunks.push(new Uint8Array(chunk));
+        console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}..., reading response...`);
+
+        // Read the response using the stream's async iterator
+        const chunks: Uint8Array[] = [];
+        
+        // The stream from dialProtocol is a duplex stream
+        // We need to iterate over the source properly
+        if (stream.source) {
+          for await (const chunk of stream.source) {
+            // Handle both BufferList and Uint8Array
+            if (chunk && typeof chunk.subarray === 'function') {
+              chunks.push(chunk.subarray());
+            } else if (chunk instanceof Uint8Array) {
+              chunks.push(chunk);
+            } else if (chunk) {
+              // Try to convert to Uint8Array
+              chunks.push(new Uint8Array(chunk));
+            }
           }
         }
+
+        // Close the stream
+        if (stream.close) {
+          await stream.close();
+        }
+
+        if (chunks.length === 0) {
+          throw new Error('No response received from peer');
+        }
+
+        // Concatenate chunks
+        const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
+        const data = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+          data.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        console.log(`[KeyManager] Received ${data.length} bytes from ${peerId.slice(0, 16)}...`);
+
+        // Deserialize the public key record
+        const record = this.deserializePublicKeyRecord(data);
+
+        if (record.peerId !== peerId) {
+          throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
+        }
+
+        console.log(`[KeyManager] Successfully got key from ${peerId.slice(0, 16)}... via direct request`);
+
+        return {
+          x25519: record.x25519,
+          mlkem768: record.mlkem768,
+        };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        const errorMsg = lastError.message;
+        console.error(`[KeyManager] Direct key request attempt ${attempt + 1} failed for ${peerId.slice(0, 16)}...: ${errorMsg}`);
+        
+        // Check if this is a protocol negotiation error (target hasn't registered handler yet)
+        const isProtocolError = errorMsg.includes('could not negotiate') || 
+                                errorMsg.includes('Protocol selection failed') ||
+                                errorMsg.includes('UnsupportedProtocolError');
+        
+        if (isProtocolError && attempt < maxRetries - 1) {
+          // Wait with exponential backoff before retrying
+          const delay = baseDelay * Math.pow(2, attempt);
+          console.log(`[KeyManager] Protocol not available yet, retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        // For other errors or last attempt, throw immediately
+        if (!isProtocolError || attempt === maxRetries - 1) {
+          throw new OverlayError(
+            OverlayErrorCode.KEY_NOT_FOUND,
+            `Direct key request failed for peer ${peerId}: ${errorMsg}`,
+            { cause: lastError }
+          );
+        }
       }
-
-      // Close the stream
-      if (stream.close) {
-        await stream.close();
-      }
-
-      if (chunks.length === 0) {
-        throw new Error('No response received from peer');
-      }
-
-      // Concatenate chunks
-      const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
-      const data = new Uint8Array(totalLength);
-      let offset = 0;
-      for (const chunk of chunks) {
-        data.set(chunk, offset);
-        offset += chunk.length;
-      }
-
-      console.log(`[KeyManager] Received ${data.length} bytes from ${peerId.slice(0, 16)}...`);
-
-      // Deserialize the public key record
-      const record = this.deserializePublicKeyRecord(data);
-
-      if (record.peerId !== peerId) {
-        throw new Error(`Peer ID mismatch: expected ${peerId}, got ${record.peerId}`);
-      }
-
-      console.log(`[KeyManager] Successfully got key from ${peerId.slice(0, 16)}... via direct request`);
-
-      return {
-        x25519: record.x25519,
-        mlkem768: record.mlkem768,
-      };
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`[KeyManager] Direct key request failed for ${peerId.slice(0, 16)}...: ${errorMsg}`);
-      
-      // Log more details about the error
-      if (error instanceof Error && error.stack) {
-        console.error(`[KeyManager] Stack trace: ${error.stack}`);
-      }
-      
-      throw new OverlayError(
-        OverlayErrorCode.KEY_NOT_FOUND,
-        `Direct key request failed for peer ${peerId}: ${errorMsg}`,
-        { cause: error instanceof Error ? error : undefined }
-      );
     }
+
+    // Should not reach here, but just in case
+    throw new OverlayError(
+      OverlayErrorCode.KEY_NOT_FOUND,
+      `Direct key request failed for peer ${peerId} after ${maxRetries} attempts`,
+      { cause: lastError }
+    );
   }
 
   /**
