@@ -454,11 +454,7 @@ export class KeyManager {
 
         console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}..., reading response...`);
 
-        // Import utilities for proper stream handling
-        const { pipe } = await import('it-pipe');
-        const lp = await import('it-length-prefixed');
-
-        // Read the response using length-prefixed decoding with timeout
+        // Read the response directly from the yamux stream (which is async iterable)
         const chunks: Uint8Array[] = [];
         const readTimeout = 10000; // 10 second timeout for reading
         
@@ -467,23 +463,21 @@ export class KeyManager {
           setTimeout(() => reject(new Error('Read timeout waiting for key exchange response')), readTimeout);
         });
         
-        // Create the read promise
-        const readPromise = pipe(
-          stream.source,
-          lp.decode,
-          async (source: AsyncIterable<{ subarray(): Uint8Array }>) => {
-            for await (const chunk of source) {
-              // Handle both Uint8ArrayList and Uint8Array
-              if (chunk && typeof chunk.subarray === 'function') {
-                chunks.push(chunk.subarray());
-              } else if (chunk instanceof Uint8Array) {
-                chunks.push(chunk);
-              }
-              // We only expect one message, so break after receiving it
-              break;
+        // Create the read promise - iterate directly over the stream
+        const readPromise = (async () => {
+          // In libp2p 3.x with yamux, the stream itself is async iterable
+          for await (const chunk of stream) {
+            console.log(`[KeyManager] Received chunk: ${chunk.length} bytes`);
+            // Handle both Uint8ArrayList and Uint8Array
+            if (chunk && typeof chunk.subarray === 'function') {
+              chunks.push(chunk.subarray());
+            } else if (chunk instanceof Uint8Array) {
+              chunks.push(chunk);
             }
+            // We only expect one message, so break after receiving it
+            break;
           }
-        );
+        })();
         
         // Race between read and timeout
         try {
@@ -588,18 +582,13 @@ export class KeyManager {
     const libp2p = this.dht.getLibp2pNode();
     
     try {
-      // The handler receives an IncomingStreamData object with { stream, connection }
+      // In libp2p 3.x with yamux, the handler receives the stream directly (not wrapped in { stream, connection })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (incomingData: any) => {
-        const remotePeer = incomingData?.connection?.remotePeer?.toString() || 'unknown';
+      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (streamData: any) => {
+        // The streamData might be the stream directly or { stream, connection } depending on libp2p version
+        const stream = streamData.stream || streamData;
+        const remotePeer = streamData?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
-
-        // Cast stream to the correct type (same pattern as overlay.ts)
-        const stream = incomingData.stream as {
-          source: AsyncIterable<{ subarray(): Uint8Array }>;
-          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-          close: () => Promise<void>;
-        };
 
         try {
           // Create the public key record
@@ -608,8 +597,23 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // Send the serialized record directly (no length-prefix, same as overlay protocol)
-          await stream.sink([serialized]);
+          // In libp2p 3.x with yamux, use sendData with Uint8ArrayList
+          const { Uint8ArrayList } = await import('uint8arraylist');
+          const dataList = new Uint8ArrayList(serialized);
+          
+          // Get the prototype to check for yamux methods
+          const proto = Object.getPrototypeOf(stream);
+          
+          if (proto.sendData) {
+            // Yamux stream interface
+            await stream.sendData(dataList);
+            await stream.sendCloseWrite();
+          } else if (stream.sink) {
+            // Standard duplex stream interface (fallback)
+            await stream.sink([serialized]);
+          } else {
+            throw new Error('Unknown stream interface - no sendData or sink method');
+          }
           
           console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {

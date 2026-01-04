@@ -451,18 +451,20 @@ export class OverlayNetwork {
   private registerProtocolHandler(): void {
     const libp2p = this._dht.getLibp2pNode();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    libp2p.handle(OVERLAY_PROTOCOL_ID, async (data: any) => {
-      // Cast to the correct stream type with source/sink
-      const stream = data.stream as {
-        source: AsyncIterable<{ subarray(): Uint8Array }>;
-        sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-        close: () => Promise<void>;
-      };
+    libp2p.handle(OVERLAY_PROTOCOL_ID, async (streamData: any) => {
+      // In libp2p 3.x with yamux, the handler receives the stream directly (not wrapped in { stream, connection })
+      const stream = streamData.stream || streamData;
+      
       try {
-        // Read the incoming message
+        // Read the incoming message - iterate directly over the yamux stream
         const chunks: Uint8Array[] = [];
-        for await (const chunk of stream.source) {
-          chunks.push(chunk.subarray());
+        for await (const chunk of stream) {
+          // Handle both Uint8ArrayList and Uint8Array
+          if (chunk && typeof chunk.subarray === 'function') {
+            chunks.push(chunk.subarray());
+          } else if (chunk instanceof Uint8Array) {
+            chunks.push(chunk);
+          }
         }
         const messageData = this.concatenateArrays(chunks);
 
@@ -471,7 +473,19 @@ export class OverlayNetwork {
 
         // Send response if any
         if (response) {
-          await stream.sink([response]);
+          // Get the prototype to check for yamux methods
+          const proto = Object.getPrototypeOf(stream);
+          
+          if (proto.sendData) {
+            // Yamux stream interface
+            const { Uint8ArrayList } = await import('uint8arraylist');
+            const dataList = new Uint8ArrayList(response);
+            await stream.sendData(dataList);
+            await stream.sendCloseWrite();
+          } else if (stream.sink) {
+            // Standard duplex stream interface (fallback)
+            await stream.sink([response]);
+          }
         }
       } catch (error) {
         // Log error but don't crash
@@ -562,19 +576,35 @@ export class OverlayNetwork {
     const targetPeerId = peerIdFromString(peerId);
 
     const rawStream = await libp2p.dialProtocol(targetPeerId, OVERLAY_PROTOCOL_ID);
-    // Cast to the correct stream type with source/sink
-    const stream = rawStream as unknown as {
-      source: AsyncIterable<{ subarray(): Uint8Array }>;
-      sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-      close: () => Promise<void>;
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stream = rawStream as any;
+    
     try {
-      await stream.sink([data]);
+      // Get the prototype to check for yamux methods
+      const proto = Object.getPrototypeOf(stream);
+      
+      if (proto.sendData) {
+        // Yamux stream interface
+        const { Uint8ArrayList } = await import('uint8arraylist');
+        const dataList = new Uint8ArrayList(data);
+        await stream.sendData(dataList);
+        await stream.sendCloseWrite();
+      } else if (stream.sink) {
+        // Standard duplex stream interface (fallback)
+        await stream.sink([data]);
+      } else {
+        throw new Error('Unknown stream interface - no sendData or sink method');
+      }
 
-      // Read response if any
+      // Read response if any - iterate directly over the yamux stream
       const chunks: Uint8Array[] = [];
-      for await (const chunk of stream.source) {
-        chunks.push(chunk.subarray());
+      for await (const chunk of stream) {
+        // Handle both Uint8ArrayList and Uint8Array
+        if (chunk && typeof chunk.subarray === 'function') {
+          chunks.push(chunk.subarray());
+        } else if (chunk instanceof Uint8Array) {
+          chunks.push(chunk);
+        }
       }
 
       if (chunks.length > 0) {
