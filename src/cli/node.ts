@@ -279,45 +279,9 @@ async function main() {
   // Start metrics/health server EARLY so health checks pass during bootstrap
   startMetricsServer();
 
-  // Bootstrap if we have peers (with timeout)
-  if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
-    console.log(`[${NODE_ID}] Bootstrapping...`);
-    try {
-      // Add timeout to bootstrap to prevent hanging
-      const bootstrapTimeout = 30000; // 30 seconds
-      await Promise.race([
-        node.bootstrap(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Bootstrap timeout')), bootstrapTimeout)
-        )
-      ]);
-      console.log(`[${NODE_ID}] Bootstrap complete`);
-      
-      // Wait for DHT to stabilize before starting overlay
-      console.log(`[${NODE_ID}] Waiting for DHT to stabilize...`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
-      // Perform additional peer discovery
-      console.log(`[${NODE_ID}] Performing peer discovery...`);
-      await discoverPeers();
-    } catch (err) {
-      console.error(`[${NODE_ID}] Bootstrap failed:`, err);
-      // Continue anyway - the node can still function and discover peers later
-    }
-  }
-
-  // Periodic peer discovery to build routing table
-  setInterval(async () => {
-    if (node) {
-      try {
-        await discoverPeers();
-      } catch {
-        // Ignore discovery errors
-      }
-    }
-  }, 60000); // Every 60 seconds
-
-  // Initialize overlay network with shorter key publish interval for faster propagation
+  // Initialize overlay network BEFORE bootstrapping so protocol handlers are registered
+  // before connections are established. This ensures the key exchange protocol is available
+  // when peers connect.
   overlay = new OverlayNetwork(node, {
     defaultTTL: 20,
     responseTimeout: 30000,
@@ -342,6 +306,44 @@ async function main() {
       }
     }
   }
+
+  // Bootstrap if we have peers (with timeout)
+  if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
+    console.log(`[${NODE_ID}] Bootstrapping...`);
+    try {
+      // Add timeout to bootstrap to prevent hanging
+      const bootstrapTimeout = 30000; // 30 seconds
+      await Promise.race([
+        node.bootstrap(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Bootstrap timeout')), bootstrapTimeout)
+        )
+      ]);
+      console.log(`[${NODE_ID}] Bootstrap complete`);
+      
+      // Wait for DHT to stabilize
+      console.log(`[${NODE_ID}] Waiting for DHT to stabilize...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Perform additional peer discovery
+      console.log(`[${NODE_ID}] Performing peer discovery...`);
+      await discoverPeers();
+    } catch (err) {
+      console.error(`[${NODE_ID}] Bootstrap failed:`, err);
+      // Continue anyway - the node can still function and discover peers later
+    }
+  }
+
+  // Periodic peer discovery to build routing table
+  setInterval(async () => {
+    if (node) {
+      try {
+        await discoverPeers();
+      } catch {
+        // Ignore discovery errors
+      }
+    }
+  }, 60000); // Every 60 seconds
 
   // Register echo handler for overlay messages
   overlay.onMessage(async (payload, context) => {
