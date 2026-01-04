@@ -466,22 +466,21 @@ export class KeyManager {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
         // Debug: log what we actually received
-        console.log(`[KeyManager] Handler data keys (first 10): ${data ? Object.keys(data).slice(0, 10).join(', ') : 'null'}`);
+        const dataKeys = data ? Object.keys(data) : [];
+        console.log(`[KeyManager] Handler data keys (first 10): ${dataKeys.slice(0, 10).join(', ')}`);
         console.log(`[KeyManager] Handler data.stream: ${data?.stream ? 'exists' : 'undefined'}`);
         console.log(`[KeyManager] 'sink' in data: ${'sink' in (data || {})}`);
         console.log(`[KeyManager] typeof data.sink: ${typeof data?.sink}`);
         
-        // The handler receives the stream directly (not wrapped in {stream, connection})
-        // This is a YamuxStream - sink/source might be getters not enumerable properties
-        let stream: {
-          source: AsyncIterable<{ subarray(): Uint8Array }>;
-          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-          close: () => Promise<void>;
-        };
+        // Check if this is a wrapped handler data or raw stream
+        // libp2p handle() should receive { stream, connection } but sometimes receives raw stream
+        let stream: any;
+        let remotePeer = 'unknown';
         
         if (data?.stream) {
           // Standard libp2p pattern: { stream, connection }
           stream = data.stream;
+          remotePeer = data.connection?.remotePeer?.toString() || 'via-stream-prop';
           console.log(`[KeyManager] Using data.stream`);
         } else if (typeof data?.sink === 'function') {
           // Stream passed directly with sink as a function
@@ -491,12 +490,16 @@ export class KeyManager {
           // Stream passed directly - sink might be a getter
           stream = data;
           console.log(`[KeyManager] Using data directly as stream (has sink in prototype)`);
+        } else if (data && dataKeys.includes('direction')) {
+          // This looks like a raw yamux/mplex stream - try to use it directly
+          // The stream might need to be wrapped or accessed differently
+          stream = data;
+          console.log(`[KeyManager] Using data as raw muxer stream`);
         } else {
           console.error(`[KeyManager] Cannot find stream in handler data`);
           return;
         }
         
-        const remotePeer = data.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
         try {
@@ -506,16 +509,36 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
           console.log(`[KeyManager] stream.sink type: ${typeof stream.sink}`);
+          console.log(`[KeyManager] stream.push type: ${typeof stream.push}`);
+          console.log(`[KeyManager] stream.write type: ${typeof stream.write}`);
+          console.log(`[KeyManager] stream.sendData type: ${typeof stream.sendData}`);
 
-          // Send the response - use array like overlay.ts does
-          await stream.sink([serialized]);
-          console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
+          // Try different methods to send data
+          if (typeof stream.sink === 'function') {
+            // Standard duplex stream
+            await stream.sink([serialized]);
+            console.log(`[KeyManager] Public key sent via sink()`);
+          } else if (typeof stream.push === 'function') {
+            // Push-based stream
+            stream.push(serialized);
+            stream.push(null); // Signal end
+            console.log(`[KeyManager] Public key sent via push()`);
+          } else if (typeof stream.write === 'function') {
+            // Node.js style writable stream
+            stream.write(serialized);
+            stream.end();
+            console.log(`[KeyManager] Public key sent via write()`);
+          } else {
+            console.error(`[KeyManager] No known method to send data on stream`);
+          }
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
         } finally {
-          // Close the stream like overlay.ts does
-          if (stream?.close) {
+          // Close the stream
+          if (typeof stream?.close === 'function') {
             await stream.close();
+          } else if (typeof stream?.end === 'function') {
+            stream.end();
           }
         }
       });
