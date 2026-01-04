@@ -368,7 +368,6 @@ export class KeyManager {
     }
 
     // Retry logic with exponential backoff for protocol negotiation failures
-    // This handles the race condition where the target node hasn't registered the handler yet
     const maxRetries = 3;
     const baseDelay = 1000; // 1 second
     let lastError: Error | undefined;
@@ -377,36 +376,33 @@ export class KeyManager {
       try {
         console.log(`[KeyManager] Dialing protocol ${KEY_EXCHANGE_PROTOCOL_ID} to ${peerId.slice(0, 16)}... (attempt ${attempt + 1}/${maxRetries})`);
         const rawStream = await libp2p.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
-        
-        // Cast to access the source property
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const stream = rawStream as any;
 
         console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}..., reading response...`);
 
-        // Read the response using the stream's async iterator
+        // Import utilities for proper stream handling
+        const { pipe } = await import('it-pipe');
+        const lp = await import('it-length-prefixed');
+
+        // Read the response using length-prefixed decoding
+        // The server sends length-prefixed data, so we decode it
         const chunks: Uint8Array[] = [];
         
-        // The stream from dialProtocol is a duplex stream
-        // We need to iterate over the source properly
-        if (stream.source) {
-          for await (const chunk of stream.source) {
-            // Handle both BufferList and Uint8Array
-            if (chunk && typeof chunk.subarray === 'function') {
-              chunks.push(chunk.subarray());
-            } else if (chunk instanceof Uint8Array) {
-              chunks.push(chunk);
-            } else if (chunk) {
-              // Try to convert to Uint8Array
-              chunks.push(new Uint8Array(chunk));
+        await pipe(
+          stream.source,
+          lp.decode,
+          async (source: AsyncIterable<{ subarray(): Uint8Array }>) => {
+            for await (const chunk of source) {
+              // Handle both Uint8ArrayList and Uint8Array
+              if (chunk && typeof chunk.subarray === 'function') {
+                chunks.push(chunk.subarray());
+              } else if (chunk instanceof Uint8Array) {
+                chunks.push(chunk);
+              }
             }
           }
-        }
-
-        // Close the stream
-        if (stream.close) {
-          await stream.close();
-        }
+        );
 
         if (chunks.length === 0) {
           throw new Error('No response received from peer');
@@ -491,16 +487,14 @@ export class KeyManager {
     
     try {
       // The handler receives an IncomingStreamData object with { stream, connection }
-      // But in some cases (like with Yamux), the stream itself is passed directly
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (incomingData: any) => {
         const remotePeer = incomingData?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
-        // The stream might be in incomingData.stream or incomingData itself might be the stream
-        // For YamuxStream, it's passed directly
+        // The stream is in incomingData.stream (standard libp2p handler format)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let stream: any = incomingData.stream || incomingData;
+        const stream: any = incomingData.stream || incomingData;
 
         try {
           // Create the public key record
@@ -509,23 +503,19 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // For YamuxStream and other libp2p streams, we need to use pipe() or 
-          // write data using the proper stream interface
-          // The stream should have a sink that accepts an async iterable
-          
-          // Import the pipe utility for proper stream handling
+          // Import utilities for proper stream handling
           const { pipe } = await import('it-pipe');
+          const lp = await import('it-length-prefixed');
           
-          // Create an async generator that yields our data
-          async function* dataSource() {
-            yield serialized;
-          }
-          
-          // Pipe the data to the stream's sink
-          // This properly handles the stream protocol
+          // Use length-prefixed encoding to ensure the message isn't split
+          // The sink is a function that consumes an async iterable
           await pipe(
-            dataSource(),
-            stream
+            // Data source - yields our serialized record
+            [serialized],
+            // Length-prefix encode the data
+            lp.encode,
+            // Send to the stream's sink
+            stream.sink
           );
           
           console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
