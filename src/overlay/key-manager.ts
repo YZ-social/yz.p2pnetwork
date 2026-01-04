@@ -491,34 +491,16 @@ export class KeyManager {
     
     try {
       // The handler receives an IncomingStreamData object with { stream, connection }
+      // But in some cases (like with Yamux), the stream itself is passed directly
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (incomingData: any) => {
-        console.log(`[KeyManager] Handler invoked, incomingData type: ${typeof incomingData}`);
-        console.log(`[KeyManager] incomingData constructor: ${incomingData?.constructor?.name}`);
-        console.log(`[KeyManager] incomingData keys: ${incomingData ? Object.keys(incomingData).join(', ') : 'null'}`);
-        
         const remotePeer = incomingData?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
-        // The stream should be in incomingData.stream
-        // But if incomingData IS the stream (has sendFrame, etc.), use it directly
+        // The stream might be in incomingData.stream or incomingData itself might be the stream
+        // For YamuxStream, it's passed directly
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let stream: any = incomingData.stream;
-        
-        // If no .stream property, check if incomingData itself is the stream
-        if (!stream && incomingData.sendFrame) {
-          console.log(`[KeyManager] incomingData appears to be the stream itself (has sendFrame)`);
-          stream = incomingData;
-        }
-        
-        if (!stream) {
-          console.error(`[KeyManager] No stream found in incoming data`);
-          return;
-        }
-
-        console.log(`[KeyManager] Stream type: ${stream?.constructor?.name}`);
-        console.log(`[KeyManager] Stream has sink: ${typeof stream.sink}`);
-        console.log(`[KeyManager] Stream has source: ${typeof stream.source}`);
+        let stream: any = incomingData.stream || incomingData;
 
         try {
           // Create the public key record
@@ -527,44 +509,28 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // For Yamux streams, sink expects an async iterable
-          // Try different approaches based on what the stream supports
-          if (typeof stream.sink === 'function') {
-            // Standard approach - sink with async iterable
-            async function* dataGenerator() {
-              yield serialized;
-            }
-            await stream.sink(dataGenerator());
-            console.log(`[KeyManager] Public key sent via sink() to ${remotePeer.slice(0, 16)}...`);
-          } else if (typeof stream.sendData === 'function') {
-            // Alternative: use sendData if available
-            await stream.sendData(serialized);
-            console.log(`[KeyManager] Public key sent via sendData() to ${remotePeer.slice(0, 16)}...`);
-          } else if (typeof stream.write === 'function') {
-            // Alternative: use write if available
-            stream.write(serialized);
-            console.log(`[KeyManager] Public key sent via write() to ${remotePeer.slice(0, 16)}...`);
-          } else {
-            console.error(`[KeyManager] No suitable method to send data on stream`);
-            return;
+          // For YamuxStream and other libp2p streams, we need to use pipe() or 
+          // write data using the proper stream interface
+          // The stream should have a sink that accepts an async iterable
+          
+          // Import the pipe utility for proper stream handling
+          const { pipe } = await import('it-pipe');
+          
+          // Create an async generator that yields our data
+          async function* dataSource() {
+            yield serialized;
           }
+          
+          // Pipe the data to the stream's sink
+          // This properly handles the stream protocol
+          await pipe(
+            dataSource(),
+            stream
+          );
+          
+          console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
-        } finally {
-          // Close the stream
-          if (typeof stream?.close === 'function') {
-            try {
-              await stream.close();
-            } catch {
-              // Ignore close errors
-            }
-          } else if (typeof stream?.closeWrite === 'function') {
-            try {
-              await stream.closeWrite();
-            } catch {
-              // Ignore close errors
-            }
-          }
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
