@@ -256,13 +256,23 @@ export class KeyManager {
 
     // Create the DHT key
     const dhtKey = this.getDHTKey(this.peerId);
+    const keyString = new TextDecoder().decode(dhtKey);
+    console.log(`[KeyManager] Publishing public key to DHT with key: ${keyString}`);
 
     // Create the public key record
     const record = this.createPublicKeyRecord(this.peerId, this.keyPair.publicKey);
 
     // Serialize and store in DHT
     const serializedRecord = this.serializePublicKeyRecord(record);
-    await this.dht.put(dhtKey, serializedRecord);
+    console.log(`[KeyManager] Serialized public key record: ${serializedRecord.length} bytes`);
+    
+    try {
+      await this.dht.put(dhtKey, serializedRecord);
+      console.log(`[KeyManager] Successfully published public key to DHT for ${this.peerId.slice(0, 16)}...`);
+    } catch (error) {
+      // Don't throw - DHT put may fail in small networks, but direct key exchange will still work
+      console.warn(`[KeyManager] Failed to publish public key to DHT (will rely on direct key exchange):`, error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 
   /**
@@ -360,8 +370,38 @@ export class KeyManager {
     console.log(`[KeyManager] Attempting direct key request to ${peerId.slice(0, 16)}...`);
     
     // Check if we're connected to this peer
-    const connections = libp2p.getConnections(targetPeerId);
+    let connections = libp2p.getConnections(targetPeerId);
     console.log(`[KeyManager] Have ${connections.length} connections to ${peerId.slice(0, 16)}...`);
+    
+    // If not connected, try to find and connect to the peer first
+    if (connections.length === 0) {
+      console.log(`[KeyManager] Not connected to ${peerId.slice(0, 16)}..., trying to find peer...`);
+      try {
+        // Try to find the peer in the DHT
+        const dht = this.dht;
+        const peerInfo = await dht.findPeer(peerId);
+        if (peerInfo && peerInfo.multiaddrs.length > 0) {
+          console.log(`[KeyManager] Found peer ${peerId.slice(0, 16)}... with ${peerInfo.multiaddrs.length} addresses`);
+          // Try to dial the peer
+          for (const addr of peerInfo.multiaddrs) {
+            try {
+              console.log(`[KeyManager] Trying to connect to ${peerId.slice(0, 16)}... at ${addr.toString()}`);
+              await libp2p.dial(addr);
+              console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}...`);
+              break;
+            } catch (dialErr) {
+              console.log(`[KeyManager] Failed to dial ${addr.toString()}: ${dialErr instanceof Error ? dialErr.message : 'Unknown error'}`);
+            }
+          }
+        }
+      } catch (findErr) {
+        console.log(`[KeyManager] Failed to find peer ${peerId.slice(0, 16)}...: ${findErr instanceof Error ? findErr.message : 'Unknown error'}`);
+      }
+      
+      // Check connections again after trying to connect
+      connections = libp2p.getConnections(targetPeerId);
+      console.log(`[KeyManager] After connection attempt, have ${connections.length} connections to ${peerId.slice(0, 16)}...`);
+    }
     
     if (connections.length > 0) {
       console.log(`[KeyManager] Connection addresses: ${connections.map(c => c.remoteAddr.toString()).join(', ')}`);
@@ -371,6 +411,39 @@ export class KeyManager {
     const maxRetries = 3;
     const baseDelay = 1000; // 1 second
     let lastError: Error | undefined;
+
+    // If still not connected, try to dial the peer directly using just the peer ID
+    // This will use the peer store to find addresses
+    if (connections.length === 0) {
+      console.log(`[KeyManager] Still not connected, trying to dial peer directly...`);
+      try {
+        await libp2p.dial(targetPeerId);
+        connections = libp2p.getConnections(targetPeerId);
+        console.log(`[KeyManager] After direct dial, have ${connections.length} connections to ${peerId.slice(0, 16)}...`);
+      } catch (dialErr) {
+        console.log(`[KeyManager] Direct dial failed: ${dialErr instanceof Error ? dialErr.message : 'Unknown error'}`);
+      }
+    }
+
+    // Log the protocols we support
+    const registeredProtocols = libp2p.getProtocols();
+    console.log(`[KeyManager] Our registered protocols: ${registeredProtocols.join(', ')}`);
+
+    // Try to get the target peer's protocols from the peer store
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const peerStore = (libp2p as any).peerStore;
+      if (peerStore) {
+        const peerData = await peerStore.get(targetPeerId);
+        if (peerData?.protocols) {
+          console.log(`[KeyManager] Target peer ${peerId.slice(0, 16)}... protocols: ${peerData.protocols.join(', ')}`);
+          const hasKeyExchange = peerData.protocols.includes(KEY_EXCHANGE_PROTOCOL_ID);
+          console.log(`[KeyManager] Target peer has key exchange protocol: ${hasKeyExchange}`);
+        }
+      }
+    } catch (err) {
+      console.log(`[KeyManager] Could not get target peer protocols: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -385,11 +458,17 @@ export class KeyManager {
         const { pipe } = await import('it-pipe');
         const lp = await import('it-length-prefixed');
 
-        // Read the response using length-prefixed decoding
-        // The server sends length-prefixed data, so we decode it
+        // Read the response using length-prefixed decoding with timeout
         const chunks: Uint8Array[] = [];
+        const readTimeout = 10000; // 10 second timeout for reading
         
-        await pipe(
+        // Create a timeout promise
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Read timeout waiting for key exchange response')), readTimeout);
+        });
+        
+        // Create the read promise
+        const readPromise = pipe(
           stream.source,
           lp.decode,
           async (source: AsyncIterable<{ subarray(): Uint8Array }>) => {
@@ -400,9 +479,25 @@ export class KeyManager {
               } else if (chunk instanceof Uint8Array) {
                 chunks.push(chunk);
               }
+              // We only expect one message, so break after receiving it
+              break;
             }
           }
         );
+        
+        // Race between read and timeout
+        try {
+          await Promise.race([readPromise, timeoutPromise]);
+        } finally {
+          // Always try to close the stream
+          try {
+            if (typeof stream.close === 'function') {
+              await stream.close();
+            }
+          } catch {
+            // Ignore close errors
+          }
+        }
 
         if (chunks.length === 0) {
           throw new Error('No response received from peer');
@@ -435,12 +530,19 @@ export class KeyManager {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         const errorMsg = lastError.message;
-        console.error(`[KeyManager] Direct key request attempt ${attempt + 1} failed for ${peerId.slice(0, 16)}...: ${errorMsg}`);
+        const errorName = lastError.name || 'Error';
+        const errorStack = lastError.stack || '';
+        console.error(`[KeyManager] Direct key request attempt ${attempt + 1} failed for ${peerId.slice(0, 16)}...`);
+        console.error(`[KeyManager]   Error name: ${errorName}`);
+        console.error(`[KeyManager]   Error message: ${errorMsg}`);
+        console.error(`[KeyManager]   Error stack: ${errorStack.split('\n').slice(0, 3).join('\n')}`);
         
         // Check if this is a protocol negotiation error (target hasn't registered handler yet)
         const isProtocolError = errorMsg.includes('could not negotiate') || 
                                 errorMsg.includes('Protocol selection failed') ||
-                                errorMsg.includes('UnsupportedProtocolError');
+                                errorMsg.includes('UnsupportedProtocolError') ||
+                                errorMsg.includes('protocol not supported') ||
+                                errorMsg.includes('no protocol');
         
         if (isProtocolError && attempt < maxRetries - 1) {
           // Wait with exponential backoff before retrying
@@ -518,9 +620,27 @@ export class KeyManager {
             stream.sink
           );
           
+          // CRITICAL: Close the write side of the stream to signal EOF to the reader
+          // Without this, the reader will hang waiting for more data
+          if (typeof stream.closeWrite === 'function') {
+            await stream.closeWrite();
+            console.log(`[KeyManager] Closed write side of stream for ${remotePeer.slice(0, 16)}...`);
+          } else if (typeof stream.close === 'function') {
+            await stream.close();
+            console.log(`[KeyManager] Closed stream for ${remotePeer.slice(0, 16)}...`);
+          }
+          
           console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
+          // Try to close the stream on error
+          try {
+            if (typeof stream.close === 'function') {
+              await stream.close();
+            }
+          } catch {
+            // Ignore close errors
+          }
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
