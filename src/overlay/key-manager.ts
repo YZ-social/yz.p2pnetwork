@@ -490,56 +490,35 @@ export class KeyManager {
     const libp2p = this.dht.getLibp2pNode();
     
     try {
+      // The handler receives an IncomingStreamData object with { stream, connection }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-        // Debug: log what we actually received
-        console.log(`[KeyManager] Handler received data keys: ${data ? Object.keys(data).join(', ') : 'null'}`);
-        console.log(`[KeyManager] data.stream exists: ${!!data?.stream}`);
-        if (data?.stream) {
-          console.log(`[KeyManager] data.stream keys: ${Object.keys(data.stream).join(', ')}`);
-          console.log(`[KeyManager] data.stream.sink type: ${typeof data.stream.sink}`);
-          console.log(`[KeyManager] data.stream.source type: ${typeof data.stream.source}`);
-        }
+      await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (incomingData: any) => {
+        console.log(`[KeyManager] Handler invoked, incomingData type: ${typeof incomingData}`);
+        console.log(`[KeyManager] incomingData constructor: ${incomingData?.constructor?.name}`);
+        console.log(`[KeyManager] incomingData keys: ${incomingData ? Object.keys(incomingData).join(', ') : 'null'}`);
         
-        const remotePeer = data?.connection?.remotePeer?.toString() || 'unknown';
+        const remotePeer = incomingData?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
-        // Get the stream - it might be data.stream or data itself
+        // The stream should be in incomingData.stream
+        // But if incomingData IS the stream (has sendFrame, etc.), use it directly
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let stream: any;
-        if (data?.stream && typeof data.stream.sink === 'function') {
-          stream = data.stream;
-          console.log(`[KeyManager] Using data.stream (has sink function)`);
-        } else if (typeof data?.sink === 'function') {
-          stream = data;
-          console.log(`[KeyManager] Using data directly (has sink function)`);
-        } else {
-          // Try to find sink in the prototype chain
-          const streamCandidate = data?.stream || data;
-          if (streamCandidate) {
-            // Check if sink exists anywhere
-            const hasSink = 'sink' in streamCandidate;
-            const sinkType = typeof streamCandidate.sink;
-            console.log(`[KeyManager] Stream candidate 'sink' in obj: ${hasSink}, type: ${sinkType}`);
-            
-            // Try to access sink via getter
-            try {
-              const sinkValue = streamCandidate.sink;
-              console.log(`[KeyManager] Stream candidate sink value type: ${typeof sinkValue}`);
-              if (typeof sinkValue === 'function') {
-                stream = streamCandidate;
-                console.log(`[KeyManager] Using stream candidate (sink is function via getter)`);
-              }
-            } catch (e) {
-              console.log(`[KeyManager] Error accessing sink: ${e}`);
-            }
-          }
-          
-          if (!stream) {
-            console.error(`[KeyManager] Cannot find usable stream with sink function`);
-            return;
-          }
+        let stream: any = incomingData.stream;
+        
+        // If no .stream property, check if incomingData itself is the stream
+        if (!stream && incomingData.sendFrame) {
+          console.log(`[KeyManager] incomingData appears to be the stream itself (has sendFrame)`);
+          stream = incomingData;
         }
+        
+        if (!stream) {
+          console.error(`[KeyManager] No stream found in incoming data`);
+          return;
+        }
+
+        console.log(`[KeyManager] Stream type: ${stream?.constructor?.name}`);
+        console.log(`[KeyManager] Stream has sink: ${typeof stream.sink}`);
+        console.log(`[KeyManager] Stream has source: ${typeof stream.source}`);
 
         try {
           // Create the public key record
@@ -548,15 +527,43 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // Send the response using sink
-          await stream.sink([serialized]);
-          console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
+          // For Yamux streams, sink expects an async iterable
+          // Try different approaches based on what the stream supports
+          if (typeof stream.sink === 'function') {
+            // Standard approach - sink with async iterable
+            async function* dataGenerator() {
+              yield serialized;
+            }
+            await stream.sink(dataGenerator());
+            console.log(`[KeyManager] Public key sent via sink() to ${remotePeer.slice(0, 16)}...`);
+          } else if (typeof stream.sendData === 'function') {
+            // Alternative: use sendData if available
+            await stream.sendData(serialized);
+            console.log(`[KeyManager] Public key sent via sendData() to ${remotePeer.slice(0, 16)}...`);
+          } else if (typeof stream.write === 'function') {
+            // Alternative: use write if available
+            stream.write(serialized);
+            console.log(`[KeyManager] Public key sent via write() to ${remotePeer.slice(0, 16)}...`);
+          } else {
+            console.error(`[KeyManager] No suitable method to send data on stream`);
+            return;
+          }
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
         } finally {
           // Close the stream
           if (typeof stream?.close === 'function') {
-            await stream.close();
+            try {
+              await stream.close();
+            } catch {
+              // Ignore close errors
+            }
+          } else if (typeof stream?.closeWrite === 'function') {
+            try {
+              await stream.closeWrite();
+            } catch {
+              // Ignore close errors
+            }
           }
         }
       });
