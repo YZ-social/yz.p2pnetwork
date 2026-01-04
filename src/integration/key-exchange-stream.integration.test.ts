@@ -4,11 +4,10 @@
  * Tests the raw libp2p stream communication for the key exchange protocol:
  * - Protocol handler registration
  * - Stream dialing and connection
- * - Data writing and reading
- * - Length-prefixed message handling
+ * - Data writing and reading using yamux stream interface
  *
- * This test isolates the stream communication layer to debug
- * "Empty pipeline" errors in the key exchange protocol.
+ * This test isolates the stream communication layer to verify
+ * the yamux stream interface works correctly in libp2p 3.x.
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -22,15 +21,6 @@ import { KEY_EXCHANGE_PROTOCOL_ID } from '../overlay/constants.js';
  */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Stream type for libp2p streams
- */
-interface LibP2PStream {
-  source: AsyncIterable<{ subarray(): Uint8Array }>;
-  sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-  close: () => Promise<void>;
 }
 
 describe('Key Exchange Stream Protocol Integration Tests', () => {
@@ -66,6 +56,7 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
     await delay(500); // Wait for connection to establish
   }
 
+
   // ==========================================================================
   // Basic Stream Communication Tests
   // ==========================================================================
@@ -78,7 +69,9 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       // Register a simple handler
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle('/test/protocol/1.0.0', async (data: any) => {
-        console.log(`[Test] Received connection from ${data.connection.remotePeer.toString()}`);
+        const stream = data.stream || data;
+        console.log(`[Test] Received connection`);
+        await stream.close();
       });
 
       // Verify protocol is registered
@@ -95,12 +88,10 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
 
       let handlerCalled = false;
 
-      // In libp2p 3.x, the handler receives the stream directly, not { stream, connection }
+      // In libp2p 3.x with yamux, the handler receives { stream, connection }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2pB.handle('/test/dial/1.0.0', async (streamData: any) => {
         console.log(`[NodeB] Handler called!`);
-        // The streamData IS the stream in libp2p 3.x
-        // But it might also be { stream, connection } in some versions
         const stream = streamData.stream || streamData;
         handlerCalled = true;
         await stream.close();
@@ -112,9 +103,8 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       // Dial from node A to node B
       const targetPeerId = nodeB.peerId;
       
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/dial/1.0.0');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = rawStream as any;
+      const stream = await libp2pA.dialProtocol(targetPeerId, '/test/dial/1.0.0') as any;
       await stream.close();
 
       // Wait a bit for handler to be called
@@ -123,7 +113,7 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       expect(handlerCalled).toBe(true);
     }, 30000);
 
-    it('should send and receive data through a stream', async () => {
+    it('should send and receive data through a stream using yamux interface', async () => {
       const nodeA = await createNode();
       const nodeB = await createNode();
 
@@ -138,31 +128,24 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       await libp2pB.handle('/test/data/1.0.0', async (streamData: any) => {
         const stream = streamData.stream || streamData;
         console.log(`[NodeB] Handler called`);
-        
-        // Check for Symbol.asyncIterator
-        const hasAsyncIterator = typeof stream[Symbol.asyncIterator] === 'function';
-        console.log(`[NodeB] Stream has Symbol.asyncIterator: ${hasAsyncIterator}`);
 
         try {
-          if (hasAsyncIterator) {
-            // The stream itself is async iterable
-            const chunks: Uint8Array[] = [];
-            for await (const chunk of stream) {
-              console.log(`[NodeB] Received chunk: ${chunk.length} bytes`);
-              chunks.push(chunk.subarray ? chunk.subarray() : chunk);
+          // In yamux, iterate directly over the stream
+          const chunks: Uint8Array[] = [];
+          for await (const chunk of stream) {
+            const data = chunk.subarray ? chunk.subarray() : chunk;
+            console.log(`[NodeB] Received chunk: ${data.length} bytes`);
+            chunks.push(data);
+          }
+          if (chunks.length > 0) {
+            const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
+            receivedData = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+              receivedData.set(chunk, offset);
+              offset += chunk.length;
             }
-            if (chunks.length > 0) {
-              const totalLength = chunks.reduce((sum, arr) => sum + arr.length, 0);
-              receivedData = new Uint8Array(totalLength);
-              let offset = 0;
-              for (const chunk of chunks) {
-                receivedData.set(chunk, offset);
-                offset += chunk.length;
-              }
-              console.log(`[NodeB] Total received: ${receivedData.length} bytes`);
-            } else {
-              console.log(`[NodeB] No chunks received`);
-            }
+            console.log(`[NodeB] Total received: ${receivedData.length} bytes`);
           }
         } catch (error) {
           console.error('[NodeB] Error reading stream:', error);
@@ -176,51 +159,30 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       // Dial from node A to node B and send data
       const targetPeerId = nodeB.peerId;
       
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/data/1.0.0');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = rawStream as any;
+      const stream = await libp2pA.dialProtocol(targetPeerId, '/test/data/1.0.0') as any;
       
-      // Check all available methods on the stream
-      const proto = Object.getPrototypeOf(stream);
-      const protoMethods = Object.getOwnPropertyNames(proto).filter(n => typeof proto[n] === 'function');
-      console.log(`[NodeA] Stream prototype methods: ${protoMethods.join(', ')}`);
-      
-      // Check for write method on prototype
-      const hasWriteOnProto = typeof proto.write === 'function';
-      console.log(`[NodeA] Stream prototype has write: ${hasWriteOnProto}`);
-      
-      // Try to write using the correct method
-      // yamux sendData expects a Uint8ArrayList
+      // Use yamux sendData with Uint8ArrayList
       const { Uint8ArrayList } = await import('uint8arraylist');
       const dataList = new Uint8ArrayList(testData);
       
+      const proto = Object.getPrototypeOf(stream);
       if (proto.sendData) {
-        console.log(`[NodeA] Sending via sendData with Uint8ArrayList...`);
+        console.log(`[NodeA] Sending via sendData...`);
         await stream.sendData(dataList);
-      } else if (stream.push) {
-        console.log(`[NodeA] Sending via push...`);
-        stream.push(testData);
-      }
-      
-      // Close write side to signal EOF
-      if (proto.sendCloseWrite) {
-        console.log(`[NodeA] Closing write side via sendCloseWrite...`);
         await stream.sendCloseWrite();
-      } else if (stream.closeWrite) {
-        console.log(`[NodeA] Closing write side...`);
-        await stream.closeWrite();
       }
       
-      console.log(`[NodeA] Closing stream...`);
       await stream.close();
 
       // Wait for data to be received
       await delay(500);
 
-      console.log(`[NodeA] Received data: ${receivedData?.length ?? 'null'}`);
+      expect(receivedData).not.toBeNull();
+      expect(receivedData?.length).toBe(testData.length);
     }, 30000);
 
-    it('should send response back through the stream', async () => {
+    it('should send response back through the stream using yamux interface', async () => {
       const nodeA = await createNode();
       const nodeB = await createNode();
       await connectNodes(nodeA, nodeB);
@@ -230,39 +192,57 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
 
       const responseData = new TextEncoder().encode('Response from Node B!');
 
-      // Register handler on node B that sends a response
+      // Register handler on node B that sends a response using yamux interface
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2pB.handle('/test/response/1.0.0', async (data: any) => {
-        const stream = data.stream as LibP2PStream;
-        console.log(`[NodeB] Handler called from ${data.connection.remotePeer.toString()}`);
+        const stream = data.stream || data;
+        console.log(`[NodeB] Handler called`);
 
         try {
-          // Send response data
-          console.log(`[NodeB] Sending ${responseData.length} bytes response...`);
-          await stream.sink([responseData]);
+          // Send response using yamux interface
+          const { Uint8ArrayList } = await import('uint8arraylist');
+          const dataList = new Uint8ArrayList(responseData);
+          
+          const proto = Object.getPrototypeOf(stream);
+          if (proto.sendData) {
+            await stream.sendData(dataList);
+            await stream.sendCloseWrite();
+          }
           console.log(`[NodeB] Response sent`);
         } catch (error) {
           console.error('[NodeB] Error sending response:', error);
         } finally {
           await stream.close();
-          console.log(`[NodeB] Stream closed`);
         }
       });
 
       // Dial from node A to node B and read response
       const targetPeerId = nodeB.peerId;
       
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/response/1.0.0');
-      const stream = rawStream as unknown as LibP2PStream;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = await libp2pA.dialProtocol(targetPeerId, '/test/response/1.0.0') as any;
       
       console.log(`[NodeA] Connected, reading response...`);
       
-      // Read response from stream
+      // Read response by iterating directly over the yamux stream
+      // Use a timeout to avoid hanging if the stream doesn't close properly
       const chunks: Uint8Array[] = [];
-      for await (const chunk of stream.source) {
-        console.log(`[NodeA] Received chunk: ${chunk.subarray().length} bytes`);
-        chunks.push(chunk.subarray());
-      }
+      const readTimeout = 5000;
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error('Read timeout')), readTimeout);
+      });
+      
+      const readPromise = (async () => {
+        for await (const chunk of stream) {
+          const data = chunk.subarray ? chunk.subarray() : chunk;
+          console.log(`[NodeA] Received chunk: ${data.length} bytes`);
+          chunks.push(data);
+          // For this test, we expect only one message, so break after receiving
+          break;
+        }
+      })();
+      
+      await Promise.race([readPromise, timeoutPromise]);
 
       await stream.close();
 
@@ -280,12 +260,13 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
     }, 30000);
   });
 
+
   // ==========================================================================
   // Key Exchange Protocol Simulation Tests
   // ==========================================================================
 
   describe('Key Exchange Protocol Simulation', () => {
-    it('should simulate key exchange protocol with actual protocol ID', async () => {
+    it('should simulate key exchange protocol with actual protocol ID using yamux', async () => {
       const nodeA = await createNode();
       const nodeB = await createNode();
       await connectNodes(nodeA, nodeB);
@@ -332,48 +313,65 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
 
       let handlerCalled = false;
 
-      // Register key exchange handler on node B (simulating KeyManager.registerKeyExchangeHandler)
+      // Register key exchange handler on node B using yamux interface
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2pB.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-        const stream = data.stream as LibP2PStream;
-        const remotePeer = data.connection.remotePeer.toString();
+        const stream = data.stream || data;
+        const remotePeer = data?.connection?.remotePeer?.toString() || 'unknown';
         
         console.log(`[NodeB] Key exchange handler called from ${remotePeer.slice(0, 16)}...`);
         handlerCalled = true;
 
         try {
-          // Send the public key record (same pattern as KeyManager)
-          console.log(`[NodeB] Sending public key record (${record.length} bytes)...`);
-          await stream.sink([record]);
-          console.log(`[NodeB] Public key record sent`);
+          // Send the public key record using yamux interface
+          const { Uint8ArrayList } = await import('uint8arraylist');
+          const dataList = new Uint8ArrayList(record);
+          
+          const proto = Object.getPrototypeOf(stream);
+          if (proto.sendData) {
+            await stream.sendData(dataList);
+            await stream.sendCloseWrite();
+          }
+          console.log(`[NodeB] Public key record sent (${record.length} bytes)`);
         } catch (error) {
           console.error('[NodeB] Error in key exchange handler:', error);
         } finally {
           await stream.close();
-          console.log(`[NodeB] Stream closed`);
         }
       });
 
       // Verify protocol is registered
       const protocols = libp2pB.getProtocols();
-      console.log(`[NodeB] Registered protocols: ${protocols.join(', ')}`);
       expect(protocols).toContain(KEY_EXCHANGE_PROTOCOL_ID);
 
-      // Dial from node A to node B (simulating KeyManager.requestKeyDirectly)
+      // Dial from node A to node B
       const targetPeerId = nodeB.peerId;
       const peerIdStr = targetPeerId.toString();
       
       console.log(`[NodeA] Dialing ${KEY_EXCHANGE_PROTOCOL_ID} to ${peerIdStr.slice(0, 16)}...`);
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID);
-      const stream = rawStream as unknown as LibP2PStream;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = await libp2pA.dialProtocol(targetPeerId, KEY_EXCHANGE_PROTOCOL_ID) as any;
       console.log(`[NodeA] Connected, reading response...`);
 
-      // Read response (same pattern as KeyManager.requestKeyDirectly)
+      // Read response by iterating directly over the yamux stream
+      // Use timeout and break after first message (key exchange is single message)
       const chunks: Uint8Array[] = [];
-      for await (const chunk of stream.source) {
-        console.log(`[NodeA] Received chunk: ${chunk.subarray().length} bytes`);
-        chunks.push(chunk.subarray());
-      }
+      const readTimeout = 5000;
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error('Read timeout')), readTimeout);
+      });
+      
+      const readPromise = (async () => {
+        for await (const chunk of stream) {
+          const data = chunk.subarray ? chunk.subarray() : chunk;
+          console.log(`[NodeA] Received chunk: ${data.length} bytes`);
+          chunks.push(data);
+          // Key exchange sends one message, break after receiving
+          break;
+        }
+      })();
+      
+      await Promise.race([readPromise, timeoutPromise]);
 
       await stream.close();
 
@@ -396,69 +394,7 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       expect(receivedRecord).toEqual(record);
     }, 30000);
 
-    it('should work with length-prefixed encoding (it-length-prefixed)', async () => {
-      const nodeA = await createNode();
-      const nodeB = await createNode();
-      await connectNodes(nodeA, nodeB);
-
-      const libp2pA = nodeA.getLibp2pNode();
-      const libp2pB = nodeB.getLibp2pNode();
-
-      const testData = new TextEncoder().encode('Length-prefixed test data');
-
-      // Import length-prefixed utilities
-      const { pipe } = await import('it-pipe');
-      const lp = await import('it-length-prefixed');
-
-      // Register handler on node B using length-prefixed encoding
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2pB.handle('/test/lp/1.0.0', async (data: any) => {
-        const stream = data.stream as LibP2PStream;
-        console.log(`[NodeB] LP handler called`);
-
-        try {
-          // Send length-prefixed response
-          await pipe(
-            [testData],
-            lp.encode,
-            stream.sink
-          );
-          console.log(`[NodeB] LP response sent`);
-        } catch (error) {
-          console.error('[NodeB] Error in LP handler:', error);
-        } finally {
-          await stream.close();
-        }
-      });
-
-      // Dial and read with length-prefixed decoding
-      const targetPeerId = nodeB.peerId;
-      
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/lp/1.0.0');
-      const stream = rawStream as unknown as LibP2PStream;
-      console.log(`[NodeA] Connected, reading LP response...`);
-
-      // Read with length-prefixed decoding
-      const chunks: Uint8Array[] = [];
-      await pipe(
-        stream.source,
-        lp.decode,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async (source: AsyncIterable<any>) => {
-          for await (const chunk of source) {
-            console.log(`[NodeA] Received LP chunk: ${chunk.subarray().length} bytes`);
-            chunks.push(chunk.subarray());
-          }
-        }
-      );
-
-      await stream.close();
-
-      expect(chunks.length).toBeGreaterThan(0);
-      expect(chunks[0]).toEqual(testData);
-    }, 30000);
-
-    it('should handle the exact KeyManager pattern with pipe and lp.decode', async () => {
+    it('should work with raw data transfer (no length-prefix) using yamux', async () => {
       const nodeA = await createNode();
       const nodeB = await createNode();
       await connectNodes(nodeA, nodeB);
@@ -484,181 +420,22 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       offset += 8;
       crypto.getRandomValues(record.subarray(offset, offset + 32)); // signature
 
-      const { pipe } = await import('it-pipe');
-      const lp = await import('it-length-prefixed');
-
-      // Handler sends WITHOUT length-prefix (current KeyManager behavior)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2pB.handle('/test/keymanager/1.0.0', async (data: any) => {
-        const stream = data.stream as LibP2PStream;
-        console.log(`[NodeB] KeyManager-style handler called`);
-
-        try {
-          // Send WITHOUT length-prefix (current KeyManager.registerKeyExchangeHandler behavior)
-          await stream.sink([record]);
-          console.log(`[NodeB] Record sent (no LP)`);
-        } catch (error) {
-          console.error('[NodeB] Error:', error);
-        } finally {
-          await stream.close();
-        }
-      });
-
-      // Client reads WITH length-prefix decoding (current KeyManager.requestKeyDirectly behavior)
-      const targetPeerId = nodeB.peerId;
-      
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/keymanager/1.0.0');
-      const stream = rawStream as unknown as LibP2PStream;
-      console.log(`[NodeA] Connected, reading with LP decode...`);
-
-      // This is the EXACT pattern from KeyManager.requestKeyDirectly
-      const chunks: Uint8Array[] = [];
-      
-      try {
-        await pipe(
-          stream.source,
-          lp.decode,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          async (source: AsyncIterable<any>) => {
-            for await (const chunk of source) {
-              console.log(`[NodeA] Received chunk via LP decode: ${chunk.subarray().length} bytes`);
-              chunks.push(chunk.subarray());
-              break; // Only expect one message
-            }
-          }
-        );
-      } catch (error) {
-        console.error(`[NodeA] Error reading with LP decode:`, error);
-        // This is expected to fail because sender doesn't use LP encoding!
-      }
-
-      await stream.close();
-
-      // This test demonstrates the MISMATCH:
-      // - Handler sends raw data (no length-prefix)
-      // - Client tries to decode with length-prefix
-      // This will likely fail or produce incorrect results
-      console.log(`[NodeA] Chunks received: ${chunks.length}`);
-      
-      // The test passes if we get here - we're documenting the behavior
-      // In production, this mismatch causes "Empty pipeline" or incorrect data
-    }, 30000);
-
-    it('should work when BOTH sides use length-prefixed encoding', async () => {
-      const nodeA = await createNode();
-      const nodeB = await createNode();
-      await connectNodes(nodeA, nodeB);
-
-      const libp2pA = nodeA.getLibp2pNode();
-      const libp2pB = nodeB.getLibp2pNode();
-
-      // Create a mock public key record
-      const peerIdBytes = new TextEncoder().encode(nodeB.peerId.toString());
-      const recordSize = 2 + peerIdBytes.length + 32 + 1184 + 8 + 32;
-      const record = new Uint8Array(recordSize);
-      let offset = 0;
-      record[offset++] = (peerIdBytes.length >> 8) & 0xff;
-      record[offset++] = peerIdBytes.length & 0xff;
-      record.set(peerIdBytes, offset);
-      offset += peerIdBytes.length;
-      crypto.getRandomValues(record.subarray(offset, offset + 32)); // x25519
-      offset += 32;
-      crypto.getRandomValues(record.subarray(offset, offset + 1184)); // mlkem
-      offset += 1184;
-      const timestampView = new DataView(record.buffer, record.byteOffset + offset, 8);
-      timestampView.setBigUint64(0, BigInt(Date.now()), false);
-      offset += 8;
-      crypto.getRandomValues(record.subarray(offset, offset + 32)); // signature
-
-      const { pipe } = await import('it-pipe');
-      const lp = await import('it-length-prefixed');
-
-      // Handler sends WITH length-prefix
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await libp2pB.handle('/test/keymanager-fixed/1.0.0', async (data: any) => {
-        const stream = data.stream as LibP2PStream;
-        console.log(`[NodeB] Fixed KeyManager-style handler called`);
-
-        try {
-          // Send WITH length-prefix
-          await pipe(
-            [record],
-            lp.encode,
-            stream.sink
-          );
-          console.log(`[NodeB] Record sent (with LP)`);
-        } catch (error) {
-          console.error('[NodeB] Error:', error);
-        } finally {
-          await stream.close();
-        }
-      });
-
-      // Client reads WITH length-prefix decoding
-      const targetPeerId = nodeB.peerId;
-      
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/keymanager-fixed/1.0.0');
-      const stream = rawStream as unknown as LibP2PStream;
-      console.log(`[NodeA] Connected, reading with LP decode...`);
-
-      const chunks: Uint8Array[] = [];
-      
-      await pipe(
-        stream.source,
-        lp.decode,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async (source: AsyncIterable<any>) => {
-          for await (const chunk of source) {
-            console.log(`[NodeA] Received chunk via LP decode: ${chunk.subarray().length} bytes`);
-            chunks.push(chunk.subarray());
-            break; // Only expect one message
-          }
-        }
-      );
-
-      await stream.close();
-
-      expect(chunks.length).toBe(1);
-      expect(chunks[0].length).toBe(record.length);
-      expect(chunks[0]).toEqual(record);
-      console.log(`[NodeA] Successfully received ${chunks[0].length} bytes with LP encoding`);
-    }, 30000);
-
-    it('should work when NEITHER side uses length-prefixed encoding', async () => {
-      const nodeA = await createNode();
-      const nodeB = await createNode();
-      await connectNodes(nodeA, nodeB);
-
-      const libp2pA = nodeA.getLibp2pNode();
-      const libp2pB = nodeB.getLibp2pNode();
-
-      // Create a mock public key record
-      const peerIdBytes = new TextEncoder().encode(nodeB.peerId.toString());
-      const recordSize = 2 + peerIdBytes.length + 32 + 1184 + 8 + 32;
-      const record = new Uint8Array(recordSize);
-      let offset = 0;
-      record[offset++] = (peerIdBytes.length >> 8) & 0xff;
-      record[offset++] = peerIdBytes.length & 0xff;
-      record.set(peerIdBytes, offset);
-      offset += peerIdBytes.length;
-      crypto.getRandomValues(record.subarray(offset, offset + 32)); // x25519
-      offset += 32;
-      crypto.getRandomValues(record.subarray(offset, offset + 1184)); // mlkem
-      offset += 1184;
-      const timestampView = new DataView(record.buffer, record.byteOffset + offset, 8);
-      timestampView.setBigUint64(0, BigInt(Date.now()), false);
-      offset += 8;
-      crypto.getRandomValues(record.subarray(offset, offset + 32)); // signature
-
-      // Handler sends WITHOUT length-prefix
+      // Handler sends raw data using yamux interface
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2pB.handle('/test/keymanager-raw/1.0.0', async (data: any) => {
-        const stream = data.stream as LibP2PStream;
+        const stream = data.stream || data;
         console.log(`[NodeB] Raw handler called`);
 
         try {
-          // Send raw data
-          await stream.sink([record]);
+          // Send raw data using yamux interface
+          const { Uint8ArrayList } = await import('uint8arraylist');
+          const dataList = new Uint8ArrayList(record);
+          
+          const proto = Object.getPrototypeOf(stream);
+          if (proto.sendData) {
+            await stream.sendData(dataList);
+            await stream.sendCloseWrite();
+          }
           console.log(`[NodeB] Record sent (raw)`);
         } catch (error) {
           console.error('[NodeB] Error:', error);
@@ -667,19 +444,30 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
         }
       });
 
-      // Client reads WITHOUT length-prefix decoding
+      // Client reads raw data by iterating directly over the yamux stream
       const targetPeerId = nodeB.peerId;
       
-      const rawStream = await libp2pA.dialProtocol(targetPeerId, '/test/keymanager-raw/1.0.0');
-      const stream = rawStream as unknown as LibP2PStream;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = await libp2pA.dialProtocol(targetPeerId, '/test/keymanager-raw/1.0.0') as any;
       console.log(`[NodeA] Connected, reading raw...`);
 
       const chunks: Uint8Array[] = [];
+      const readTimeout = 5000;
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error('Read timeout')), readTimeout);
+      });
       
-      for await (const chunk of stream.source) {
-        console.log(`[NodeA] Received raw chunk: ${chunk.subarray().length} bytes`);
-        chunks.push(chunk.subarray());
-      }
+      const readPromise = (async () => {
+        for await (const chunk of stream) {
+          const data = chunk.subarray ? chunk.subarray() : chunk;
+          console.log(`[NodeA] Received raw chunk: ${data.length} bytes`);
+          chunks.push(data);
+          // Single message expected, break after receiving
+          break;
+        }
+      })();
+      
+      await Promise.race([readPromise, timeoutPromise]);
 
       await stream.close();
 
