@@ -594,9 +594,12 @@ export class KeyManager {
         const remotePeer = incomingData?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
-        // The stream is in incomingData.stream (standard libp2p handler format)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const stream: any = incomingData.stream || incomingData;
+        // Cast stream to the correct type (same pattern as overlay.ts)
+        const stream = incomingData.stream as {
+          source: AsyncIterable<{ subarray(): Uint8Array }>;
+          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
+          close: () => Promise<void>;
+        };
 
         try {
           // Create the public key record
@@ -605,39 +608,17 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // Import utilities for proper stream handling
-          const { pipe } = await import('it-pipe');
-          const lp = await import('it-length-prefixed');
-          
-          // Use length-prefixed encoding to ensure the message isn't split
-          // The sink is a function that consumes an async iterable
-          await pipe(
-            // Data source - yields our serialized record
-            [serialized],
-            // Length-prefix encode the data
-            lp.encode,
-            // Send to the stream's sink
-            stream.sink
-          );
-          
-          // CRITICAL: Close the write side of the stream to signal EOF to the reader
-          // Without this, the reader will hang waiting for more data
-          if (typeof stream.closeWrite === 'function') {
-            await stream.closeWrite();
-            console.log(`[KeyManager] Closed write side of stream for ${remotePeer.slice(0, 16)}...`);
-          } else if (typeof stream.close === 'function') {
-            await stream.close();
-            console.log(`[KeyManager] Closed stream for ${remotePeer.slice(0, 16)}...`);
-          }
+          // Send the serialized record directly (no length-prefix, same as overlay protocol)
+          await stream.sink([serialized]);
           
           console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
-          // Try to close the stream on error
+        } finally {
+          // Always close the stream
           try {
-            if (typeof stream.close === 'function') {
-              await stream.close();
-            }
+            await stream.close();
+            console.log(`[KeyManager] Closed stream for ${remotePeer.slice(0, 16)}...`);
           } catch {
             // Ignore close errors
           }
