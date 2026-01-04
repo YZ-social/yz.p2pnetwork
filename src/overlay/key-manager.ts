@@ -465,16 +465,54 @@ export class KeyManager {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-        // The handler receives { stream, connection } where stream is a duplex stream
-        // Use the same pattern as the overlay protocol handler
-        const stream = data.stream as {
-          source: AsyncIterable<{ subarray(): Uint8Array }>;
-          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
-          close: () => Promise<void>;
-        };
+        // Debug: log what we actually received
+        console.log(`[KeyManager] Handler received data keys: ${data ? Object.keys(data).join(', ') : 'null'}`);
+        console.log(`[KeyManager] data.stream exists: ${!!data?.stream}`);
+        if (data?.stream) {
+          console.log(`[KeyManager] data.stream keys: ${Object.keys(data.stream).join(', ')}`);
+          console.log(`[KeyManager] data.stream.sink type: ${typeof data.stream.sink}`);
+          console.log(`[KeyManager] data.stream.source type: ${typeof data.stream.source}`);
+        }
         
-        const remotePeer = data.connection?.remotePeer?.toString() || 'unknown';
+        const remotePeer = data?.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
+
+        // Get the stream - it might be data.stream or data itself
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let stream: any;
+        if (data?.stream && typeof data.stream.sink === 'function') {
+          stream = data.stream;
+          console.log(`[KeyManager] Using data.stream (has sink function)`);
+        } else if (typeof data?.sink === 'function') {
+          stream = data;
+          console.log(`[KeyManager] Using data directly (has sink function)`);
+        } else {
+          // Try to find sink in the prototype chain
+          const streamCandidate = data?.stream || data;
+          if (streamCandidate) {
+            // Check if sink exists anywhere
+            const hasSink = 'sink' in streamCandidate;
+            const sinkType = typeof streamCandidate.sink;
+            console.log(`[KeyManager] Stream candidate 'sink' in obj: ${hasSink}, type: ${sinkType}`);
+            
+            // Try to access sink via getter
+            try {
+              const sinkValue = streamCandidate.sink;
+              console.log(`[KeyManager] Stream candidate sink value type: ${typeof sinkValue}`);
+              if (typeof sinkValue === 'function') {
+                stream = streamCandidate;
+                console.log(`[KeyManager] Using stream candidate (sink is function via getter)`);
+              }
+            } catch (e) {
+              console.log(`[KeyManager] Error accessing sink: ${e}`);
+            }
+          }
+          
+          if (!stream) {
+            console.error(`[KeyManager] Cannot find usable stream with sink function`);
+            return;
+          }
+        }
 
         try {
           // Create the public key record
@@ -483,14 +521,16 @@ export class KeyManager {
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
 
-          // Send the response using sink (same pattern as overlay handler)
+          // Send the response using sink
           await stream.sink([serialized]);
           console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
         } finally {
           // Close the stream
-          await stream.close();
+          if (typeof stream?.close === 'function') {
+            await stream.close();
+          }
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
