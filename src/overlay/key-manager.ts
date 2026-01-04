@@ -465,41 +465,15 @@ export class KeyManager {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-        // Debug: log what we actually received
-        const dataKeys = data ? Object.keys(data) : [];
-        console.log(`[KeyManager] Handler data keys (first 10): ${dataKeys.slice(0, 10).join(', ')}`);
-        console.log(`[KeyManager] Handler data.stream: ${data?.stream ? 'exists' : 'undefined'}`);
-        console.log(`[KeyManager] 'sink' in data: ${'sink' in (data || {})}`);
-        console.log(`[KeyManager] typeof data.sink: ${typeof data?.sink}`);
+        // The handler receives { stream, connection } where stream is a duplex stream
+        // Use the same pattern as the overlay protocol handler
+        const stream = data.stream as {
+          source: AsyncIterable<{ subarray(): Uint8Array }>;
+          sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
+          close: () => Promise<void>;
+        };
         
-        // Check if this is a wrapped handler data or raw stream
-        // libp2p handle() should receive { stream, connection } but sometimes receives raw stream
-        let stream: any;
-        let remotePeer = 'unknown';
-        
-        if (data?.stream) {
-          // Standard libp2p pattern: { stream, connection }
-          stream = data.stream;
-          remotePeer = data.connection?.remotePeer?.toString() || 'via-stream-prop';
-          console.log(`[KeyManager] Using data.stream`);
-        } else if (typeof data?.sink === 'function') {
-          // Stream passed directly with sink as a function
-          stream = data;
-          console.log(`[KeyManager] Using data directly as stream (sink is function)`);
-        } else if (data && 'sink' in data) {
-          // Stream passed directly - sink might be a getter
-          stream = data;
-          console.log(`[KeyManager] Using data directly as stream (has sink in prototype)`);
-        } else if (data && dataKeys.includes('direction')) {
-          // This looks like a raw yamux/mplex stream - try to use it directly
-          // The stream might need to be wrapped or accessed differently
-          stream = data;
-          console.log(`[KeyManager] Using data as raw muxer stream`);
-        } else {
-          console.error(`[KeyManager] Cannot find stream in handler data`);
-          return;
-        }
-        
+        const remotePeer = data.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
         try {
@@ -508,44 +482,15 @@ export class KeyManager {
           const serialized = self.serializePublicKeyRecord(record);
           
           console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
-          console.log(`[KeyManager] stream.sink type: ${typeof stream.sink}`);
-          console.log(`[KeyManager] stream.push type: ${typeof stream.push}`);
-          console.log(`[KeyManager] stream.write type: ${typeof stream.write}`);
-          console.log(`[KeyManager] stream.sendData type: ${typeof stream.sendData}`);
 
-          // Try different methods to send data
-          if (typeof stream.sink === 'function') {
-            // Standard duplex stream
-            await stream.sink([serialized]);
-            console.log(`[KeyManager] Public key sent via sink()`);
-          } else if (typeof stream.sendData === 'function') {
-            // Yamux stream sendData method
-            const { Uint8ArrayList } = await import('uint8arraylist');
-            await stream.sendData(new Uint8ArrayList(serialized));
-            console.log(`[KeyManager] Public key sent via sendData()`);
-          } else if (typeof stream.push === 'function') {
-            // Push-based stream - need to wrap in Uint8ArrayList
-            const { Uint8ArrayList } = await import('uint8arraylist');
-            stream.push(new Uint8ArrayList(serialized));
-            stream.push(null); // Signal end
-            console.log(`[KeyManager] Public key sent via push()`);
-          } else if (typeof stream.write === 'function') {
-            // Node.js style writable stream
-            stream.write(serialized);
-            stream.end();
-            console.log(`[KeyManager] Public key sent via write()`);
-          } else {
-            console.error(`[KeyManager] No known method to send data on stream`);
-          }
+          // Send the response using sink (same pattern as overlay handler)
+          await stream.sink([serialized]);
+          console.log(`[KeyManager] Public key sent successfully to ${remotePeer.slice(0, 16)}...`);
         } catch (error) {
           console.error('[KeyManager] Error handling key exchange request:', error);
         } finally {
           // Close the stream
-          if (typeof stream?.close === 'function') {
-            await stream.close();
-          } else if (typeof stream?.end === 'function') {
-            stream.end();
-          }
+          await stream.close();
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
