@@ -465,12 +465,30 @@ export class KeyManager {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await libp2p.handle(KEY_EXCHANGE_PROTOCOL_ID, async (data: any) => {
-        // Use the exact same pattern as overlay.ts - cast data.stream directly
-        const stream = data.stream as {
+        // Debug: log what we actually received
+        console.log(`[KeyManager] Handler data keys: ${data ? Object.keys(data).join(', ') : 'null'}`);
+        console.log(`[KeyManager] Handler data.stream: ${data?.stream ? 'exists' : 'undefined'}`);
+        
+        // The handler might receive the stream directly or wrapped in an object
+        // Check both possibilities
+        let stream: {
           source: AsyncIterable<{ subarray(): Uint8Array }>;
           sink: (data: Iterable<Uint8Array> | AsyncIterable<Uint8Array>) => Promise<void>;
           close: () => Promise<void>;
         };
+        
+        if (data?.stream) {
+          // Standard libp2p pattern: { stream, connection }
+          stream = data.stream;
+          console.log(`[KeyManager] Using data.stream`);
+        } else if (data?.sink && data?.source) {
+          // Stream passed directly
+          stream = data;
+          console.log(`[KeyManager] Using data directly as stream`);
+        } else {
+          console.error(`[KeyManager] Cannot find stream in handler data`);
+          return;
+        }
         
         const remotePeer = data.connection?.remotePeer?.toString() || 'unknown';
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
@@ -489,7 +507,9 @@ export class KeyManager {
           console.error('[KeyManager] Error handling key exchange request:', error);
         } finally {
           // Close the stream like overlay.ts does
-          await stream.close();
+          if (stream?.close) {
+            await stream.close();
+          }
         }
       });
       console.log(`[KeyManager] Successfully registered key exchange handler for protocol: ${KEY_EXCHANGE_PROTOCOL_ID}`);
