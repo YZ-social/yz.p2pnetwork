@@ -179,7 +179,7 @@ describe('Key Exchange Stream Protocol Integration Tests', () => {
       await delay(500);
 
       expect(receivedData).not.toBeNull();
-      expect(receivedData?.length).toBe(testData.length);
+      expect(receivedData!.length).toBe(testData.length);
     }, 30000);
 
     it('should send response back through the stream using yamux interface', async () => {
