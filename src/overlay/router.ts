@@ -83,8 +83,18 @@ export class MessageRouter {
     const nextHops: string[] = [];
 
     try {
-      // Convert target peer ID to bytes for DHT lookup
-      const targetKey = new TextEncoder().encode(targetPeerId);
+      // Convert target peer ID string to its binary representation for DHT lookup
+      // The peer ID string (e.g., "12D3KooW...") is a base58btc-encoded multihash
+      // We need the actual bytes for correct XOR distance calculations
+      let targetKey: Uint8Array;
+      try {
+        const { peerIdFromString } = await import('@libp2p/peer-id');
+        const targetPeerIdObj = peerIdFromString(targetPeerId);
+        targetKey = targetPeerIdObj.toMultihash().bytes;
+      } catch {
+        // If peer ID parsing fails (e.g., in tests with mock IDs), fall back to string encoding
+        targetKey = new TextEncoder().encode(targetPeerId);
+      }
 
       // Get closest peers from DHT
       for await (const peer of this.dht.getClosestPeers(targetKey)) {
