@@ -450,29 +450,60 @@ export class OverlayNetwork {
    */
   private registerProtocolHandler(): void {
     const libp2p = this._dht.getLibp2pNode();
+    console.log(`[Overlay] Registering protocol handler for ${OVERLAY_PROTOCOL_ID}`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     libp2p.handle(OVERLAY_PROTOCOL_ID, async (streamData: any) => {
       // In libp2p 3.x with yamux, the handler receives the stream directly (not wrapped in { stream, connection })
       const stream = streamData.stream || streamData;
+      const remotePeer = streamData?.connection?.remotePeer?.toString() || 'unknown';
+      console.log(`[Overlay] Protocol handler called from ${remotePeer.slice(0, 16)}...`);
       
       try {
         // Read the incoming message - iterate directly over the yamux stream
+        // Use a timeout to avoid hanging if the sender doesn't close the write side
         const chunks: Uint8Array[] = [];
-        for await (const chunk of stream) {
-          // Handle both Uint8ArrayList and Uint8Array
-          if (chunk && typeof chunk.subarray === 'function') {
-            chunks.push(chunk.subarray());
-          } else if (chunk instanceof Uint8Array) {
-            chunks.push(chunk);
+        const readTimeout = 5000; // 5 second timeout
+        const timeoutPromise = new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Read timeout')), readTimeout);
+        });
+        
+        const readPromise = (async () => {
+          for await (const chunk of stream) {
+            // Handle both Uint8ArrayList and Uint8Array
+            if (chunk && typeof chunk.subarray === 'function') {
+              chunks.push(chunk.subarray());
+            } else if (chunk instanceof Uint8Array) {
+              chunks.push(chunk);
+            }
+            // Overlay messages are single messages, break after receiving
+            break;
           }
+        })();
+        
+        try {
+          await Promise.race([readPromise, timeoutPromise]);
+        } catch (err) {
+          if (chunks.length === 0) {
+            console.warn('[Overlay] Protocol handler: read timeout with no data');
+            return;
+          }
+          // If we have data, continue processing even if timeout occurred
         }
+        
+        if (chunks.length === 0) {
+          console.warn('[Overlay] Protocol handler: no data received');
+          return;
+        }
+        
         const messageData = this.concatenateArrays(chunks);
+        console.log(`[Overlay] Protocol handler received ${messageData.length} bytes from ${remotePeer.slice(0, 16)}...`);
 
         // Process the message
         const response = await this.processIncomingMessage(messageData);
 
         // Send response if any
         if (response) {
+          console.log(`[Overlay] Sending response (${response.length} bytes) to ${remotePeer.slice(0, 16)}...`);
           // Get the prototype to check for yamux methods
           const proto = Object.getPrototypeOf(stream);
           
@@ -489,7 +520,7 @@ export class OverlayNetwork {
         }
       } catch (error) {
         // Log error but don't crash
-        console.error('Error handling overlay message:', error);
+        console.error('[Overlay] Error handling overlay message:', error);
       } finally {
         await stream.close();
       }
@@ -575,9 +606,11 @@ export class OverlayNetwork {
     const { peerIdFromString } = await import('@libp2p/peer-id');
     const targetPeerId = peerIdFromString(peerId);
 
+    console.log(`[Overlay] sendToNode: dialing ${OVERLAY_PROTOCOL_ID} to ${peerId.slice(0, 16)}...`);
     const rawStream = await libp2p.dialProtocol(targetPeerId, OVERLAY_PROTOCOL_ID);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = rawStream as any;
+    console.log(`[Overlay] sendToNode: connected to ${peerId.slice(0, 16)}...`);
     
     try {
       // Get the prototype to check for yamux methods
@@ -589,27 +622,49 @@ export class OverlayNetwork {
         const dataList = new Uint8ArrayList(data);
         await stream.sendData(dataList);
         await stream.sendCloseWrite();
+        console.log(`[Overlay] sendToNode: sent ${data.length} bytes to ${peerId.slice(0, 16)}...`);
       } else if (stream.sink) {
         // Standard duplex stream interface (fallback)
         await stream.sink([data]);
+        console.log(`[Overlay] sendToNode: sent ${data.length} bytes via sink to ${peerId.slice(0, 16)}...`);
       } else {
         throw new Error('Unknown stream interface - no sendData or sink method');
       }
 
       // Read response if any - iterate directly over the yamux stream
+      // Use a timeout to avoid hanging if the receiver doesn't respond
       const chunks: Uint8Array[] = [];
-      for await (const chunk of stream) {
-        // Handle both Uint8ArrayList and Uint8Array
-        if (chunk && typeof chunk.subarray === 'function') {
-          chunks.push(chunk.subarray());
-        } else if (chunk instanceof Uint8Array) {
-          chunks.push(chunk);
+      const readTimeout = 5000; // 5 second timeout for response
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        setTimeout(() => reject(new Error('Read timeout')), readTimeout);
+      });
+      
+      const readPromise = (async () => {
+        for await (const chunk of stream) {
+          // Handle both Uint8ArrayList and Uint8Array
+          if (chunk && typeof chunk.subarray === 'function') {
+            chunks.push(chunk.subarray());
+          } else if (chunk instanceof Uint8Array) {
+            chunks.push(chunk);
+          }
+          // Overlay responses are single messages, break after receiving
+          break;
         }
+      })();
+      
+      try {
+        await Promise.race([readPromise, timeoutPromise]);
+      } catch {
+        // Timeout is okay - not all messages have responses (e.g., forwarded messages)
+        console.log(`[Overlay] sendToNode: read timeout (no response) from ${peerId.slice(0, 16)}...`);
       }
 
       if (chunks.length > 0) {
         const responseData = this.concatenateArrays(chunks);
+        console.log(`[Overlay] sendToNode: received response (${responseData.length} bytes) from ${peerId.slice(0, 16)}...`);
         await this.processIncomingMessage(responseData);
+      } else {
+        console.log(`[Overlay] sendToNode: no response from ${peerId.slice(0, 16)}...`);
       }
     } finally {
       await stream.close();
