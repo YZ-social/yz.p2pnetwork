@@ -12,7 +12,7 @@ export { ActivityMonitor } from './activity-monitor.js';
 export { RelaySelector } from './relay-selector.js';
 export { ConnectionUpgrader } from './connection-upgrader.js';
 export { BrowserStorage } from './storage.js';
-export { DEFAULT_ICE_SERVERS, createWebRTCConfig, createWebSocketConfig, createCircuitRelayConfig } from './transport-config.js';
+export { DEFAULT_ICE_SERVERS, createBrowserTransports, DEFAULT_TRANSPORT_CONFIG } from './transport-config.js';
 
 export type {
   BrowserNodeConfig,
