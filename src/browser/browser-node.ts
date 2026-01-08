@@ -20,6 +20,7 @@ import { noise } from '@chainsafe/libp2p-noise';
 import { yamux } from '@chainsafe/libp2p-yamux';
 import { kadDHT } from '@libp2p/kad-dht';
 import { identify } from '@libp2p/identify';
+import { ping } from '@libp2p/ping';
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
 import { webSockets } from '@libp2p/websockets';
 import { webRTC } from '@libp2p/webrtc';
@@ -317,6 +318,7 @@ export class BrowserNode {
         streamMuxers: [yamux()],
         services: {
           identify: identify(),
+          ping: ping(),
           dht: kadDHT({
             clientMode: false, // Full DHT participation
           }) as any,

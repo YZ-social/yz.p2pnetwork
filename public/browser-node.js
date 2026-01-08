@@ -66,7 +66,7 @@ var init_content_routing = __esm({
 });
 
 // node_modules/@libp2p/interface/dist/src/errors.js
-var AbortError, UnexpectedPeerError, InvalidCryptoExchangeError, InvalidParametersError, InvalidPublicKeyError, InvalidPrivateKeyError, ConnectionClosedError, ConnectionFailedError, MuxerClosedError, StreamResetError, StreamStateError, StreamBufferError, NotFoundError, InvalidPeerIdError, InvalidMultiaddrError, InvalidCIDError, InvalidMultihashError, UnsupportedProtocolError, InvalidMessageError, TimeoutError, NotStartedError, DialError, LimitedConnectionError, TooManyInboundProtocolStreamsError, TooManyOutboundProtocolStreamsError, UnsupportedKeyTypeError;
+var AbortError, UnexpectedPeerError, InvalidCryptoExchangeError, InvalidParametersError, InvalidPublicKeyError, InvalidPrivateKeyError, ConnectionClosedError, ConnectionFailedError, MuxerClosedError, StreamResetError, StreamStateError, StreamBufferError, NotFoundError, InvalidPeerIdError, InvalidMultiaddrError, InvalidCIDError, InvalidMultihashError, UnsupportedProtocolError, InvalidMessageError, ProtocolError, TimeoutError, NotStartedError, DialError, LimitedConnectionError, TooManyInboundProtocolStreamsError, TooManyOutboundProtocolStreamsError, UnsupportedKeyTypeError;
 var init_errors = __esm({
   "node_modules/@libp2p/interface/dist/src/errors.js"() {
     AbortError = class extends Error {
@@ -200,6 +200,13 @@ var init_errors = __esm({
       constructor(message2 = "Invalid message") {
         super(message2);
         this.name = "InvalidMessageError";
+      }
+    };
+    ProtocolError = class extends Error {
+      static name = "ProtocolError";
+      constructor(message2 = "Protocol error") {
+        super(message2);
+        this.name = "ProtocolError";
       }
     };
     TimeoutError = class extends Error {
@@ -25329,7 +25336,7 @@ var GoAwayCode;
 var HEADER_LENGTH = 12;
 
 // node_modules/@chainsafe/libp2p-yamux/dist/src/errors.js
-var ProtocolError = class extends Error {
+var ProtocolError2 = class extends Error {
   static name = "ProtocolError";
   reason;
   constructor(message2, reason) {
@@ -25341,49 +25348,49 @@ var ProtocolError = class extends Error {
 function isProtocolError(err) {
   return err?.reason !== null;
 }
-var InvalidFrameError = class extends ProtocolError {
+var InvalidFrameError = class extends ProtocolError2 {
   static name = "InvalidFrameError";
   constructor(message2 = "The frame was invalid") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "InvalidFrameError";
   }
 };
-var UnRequestedPingError = class extends ProtocolError {
+var UnRequestedPingError = class extends ProtocolError2 {
   static name = "UnRequestedPingError";
   constructor(message2 = "Un-requested ping error") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "UnRequestedPingError";
   }
 };
-var NotMatchingPingError = class extends ProtocolError {
+var NotMatchingPingError = class extends ProtocolError2 {
   static name = "NotMatchingPingError";
   constructor(message2 = "Not matching ping error") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "NotMatchingPingError";
   }
 };
-var StreamAlreadyExistsError = class extends ProtocolError {
+var StreamAlreadyExistsError = class extends ProtocolError2 {
   static name = "StreamAlreadyExistsError";
   constructor(message2 = "Stream already exists") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "StreamAlreadyExistsError";
   }
 };
-var DecodeInvalidVersionError = class extends ProtocolError {
+var DecodeInvalidVersionError = class extends ProtocolError2 {
   static name = "DecodeInvalidVersionError";
   constructor(message2 = "Decode invalid version") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "DecodeInvalidVersionError";
   }
 };
-var BothClientsError = class extends ProtocolError {
+var BothClientsError = class extends ProtocolError2 {
   static name = "BothClientsError";
   constructor(message2 = "Both clients") {
     super(message2, GoAwayCode.ProtocolError);
     this.name = "BothClientsError";
   }
 };
-var ReceiveWindowExceededError = class extends ProtocolError {
+var ReceiveWindowExceededError = class extends ProtocolError2 {
   static name = "ReceiveWindowExceededError";
   constructor(message2 = "Receive window exceeded") {
     super(message2, GoAwayCode.ProtocolError);
@@ -47286,6 +47293,143 @@ function identify(init = {}) {
   return (components) => new Identify2(components, init);
 }
 
+// node_modules/@libp2p/ping/dist/src/ping.js
+init_src2();
+init_src3();
+init_equals();
+
+// node_modules/@libp2p/ping/dist/src/constants.js
+var PING_LENGTH2 = 32;
+var PROTOCOL_VERSION2 = "1.0.0";
+var PROTOCOL_NAME2 = "ping";
+var PROTOCOL_PREFIX2 = "ipfs";
+var TIMEOUT = 1e4;
+var MAX_INBOUND_STREAMS = 2;
+var MAX_OUTBOUND_STREAMS = 1;
+
+// node_modules/@libp2p/ping/dist/src/ping.js
+var Ping = class {
+  protocol;
+  components;
+  started;
+  timeout;
+  maxInboundStreams;
+  maxOutboundStreams;
+  runOnLimitedConnection;
+  constructor(components, init = {}) {
+    this.components = components;
+    this.started = false;
+    this.protocol = `/${init.protocolPrefix ?? PROTOCOL_PREFIX2}/${PROTOCOL_NAME2}/${PROTOCOL_VERSION2}`;
+    this.timeout = init.timeout ?? TIMEOUT;
+    this.maxInboundStreams = init.maxInboundStreams ?? MAX_INBOUND_STREAMS;
+    this.maxOutboundStreams = init.maxOutboundStreams ?? MAX_OUTBOUND_STREAMS;
+    this.runOnLimitedConnection = init.runOnLimitedConnection ?? true;
+    this.handlePing = this.handlePing.bind(this);
+  }
+  [Symbol.toStringTag] = "@libp2p/ping";
+  [serviceCapabilities] = [
+    "@libp2p/ping"
+  ];
+  async start() {
+    await this.components.registrar.handle(this.protocol, this.handlePing, {
+      maxInboundStreams: this.maxInboundStreams,
+      maxOutboundStreams: this.maxOutboundStreams,
+      runOnLimitedConnection: this.runOnLimitedConnection
+    });
+    this.started = true;
+  }
+  async stop() {
+    await this.components.registrar.unhandle(this.protocol);
+    this.started = false;
+  }
+  isStarted() {
+    return this.started;
+  }
+  /**
+   * A handler to register with Libp2p to process ping messages
+   */
+  async handlePing(stream, connection) {
+    const log2 = stream.log.newScope("ping");
+    log2.trace("ping from %p", connection.remotePeer);
+    const signal = AbortSignal.timeout(this.timeout);
+    setMaxListeners(Infinity, signal);
+    signal.addEventListener("abort", () => {
+      stream.abort(new TimeoutError("Ping timed out"));
+    });
+    const start3 = Date.now();
+    for await (const buf of stream) {
+      if (stream.status !== "open") {
+        log2("stream status changed to %s", stream.status);
+        break;
+      }
+      if (!stream.send(buf)) {
+        log2("waiting for stream to drain");
+        await pEvent(stream, "drain", {
+          rejectionEvents: [
+            "close"
+          ],
+          signal
+        });
+        log2("stream drained");
+      }
+    }
+    log2("ping from %p complete in %dms", connection.remotePeer, Date.now() - start3);
+    await stream.close({
+      signal
+    });
+  }
+  /**
+   * Ping a given peer and wait for its response, getting the operation latency.
+   */
+  async ping(peer, options = {}) {
+    const data = randomBytes2(PING_LENGTH2);
+    const stream = await this.components.connectionManager.openStream(peer, this.protocol, {
+      runOnLimitedConnection: this.runOnLimitedConnection,
+      ...options
+    });
+    const log2 = stream.log.newScope("ping");
+    try {
+      const start3 = Date.now();
+      const finished = Promise.withResolvers();
+      const received = new Uint8ArrayList();
+      const onPong = (evt) => {
+        received.append(evt.data);
+        if (received.byteLength === PING_LENGTH2) {
+          stream.removeEventListener("message", onPong);
+          const rtt = Date.now() - start3;
+          Promise.all([
+            stream.closeRead(options)
+          ]).then(() => {
+            if (!equals3(data, received.subarray())) {
+              throw new ProtocolError(`Received wrong ping ack after ${rtt}ms`);
+            } else {
+              finished.resolve(rtt);
+            }
+          }).catch((err) => {
+            stream.abort(err);
+            finished.reject(err);
+          });
+        }
+      };
+      stream.addEventListener("message", onPong);
+      stream.send(data);
+      await stream.close(options);
+      return await raceSignal(finished.promise, options.signal);
+    } catch (err) {
+      log2.error("error while pinging %o - %e", peer, err);
+      stream?.abort(err);
+      throw err;
+    } finally {
+      stream?.close();
+    }
+  }
+};
+
+// node_modules/@libp2p/ping/dist/src/index.js
+function ping(init = {}) {
+  return (components) => new Ping(components, init);
+}
+
 // node_modules/@libp2p/circuit-relay-v2/node_modules/@libp2p/peer-id/dist/src/index.js
 init_keys3();
 
@@ -58284,6 +58428,40 @@ var DEFAULT_ICE_SERVERS2 = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" }
 ];
+var DEFAULT_TRANSPORT_CONFIG = {
+  enableWebSocket: true,
+  enableWebRTC: true,
+  enableCircuitRelay: true,
+  iceServers: DEFAULT_ICE_SERVERS2,
+  discoverRelays: 1
+};
+function createBrowserTransports(config = {}) {
+  const mergedConfig = {
+    ...DEFAULT_TRANSPORT_CONFIG,
+    ...config
+  };
+  const transports = [];
+  if (mergedConfig.enableWebSocket) {
+    transports.push(
+      webSockets()
+    );
+  }
+  if (mergedConfig.enableWebRTC) {
+    transports.push(
+      webRTC({
+        rtcConfiguration: {
+          iceServers: mergedConfig.iceServers
+        }
+      })
+    );
+  }
+  if (mergedConfig.enableCircuitRelay) {
+    transports.push(
+      circuitRelayTransport()
+    );
+  }
+  return transports;
+}
 
 // src/overlay/errors.ts
 var OverlayError = class _OverlayError extends Error {
@@ -62520,6 +62698,7 @@ var BrowserNode = class {
         streamMuxers: [yamux()],
         services: {
           identify: identify(),
+          ping: ping(),
           dht: kadDHT({
             clientMode: false
             // Full DHT participation
@@ -63283,9 +63462,11 @@ export {
   DEFAULT_ACTIVITY_MONITOR_CONFIG,
   DEFAULT_BROWSER_NODE_CONFIG,
   DEFAULT_ICE_SERVERS2 as DEFAULT_ICE_SERVERS,
+  DEFAULT_TRANSPORT_CONFIG,
   PeerIdManager,
   RelaySelector,
   createBrowserNodeFromConfig,
+  createBrowserTransports,
   fetchBrowserConfig
 };
 /*! Bundled license information:
