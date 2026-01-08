@@ -719,20 +719,51 @@
             }
         }
 
+        // Default fallback configuration
+        const DEFAULT_CONFIG = {
+            peerIdMode: 'persistent',
+            maxConnections: 50,
+            bootstrapPeers: [`/dns4/imeyouwe.com/tcp/443/wss`],
+            relayEnabled: true
+        };
+
         // Start the browser node
         async function startNode() {
             log('Starting full browser node...', 'info');
             startBtn.disabled = true;
 
+            let config = DEFAULT_CONFIG;
             try {
                 // Fetch configuration from server
                 log('Fetching configuration from server...', 'info');
                 const configResponse = await fetch(CONFIG_URL);
-                if (!configResponse.ok) {
-                    throw new Error(`Failed to fetch config: ${configResponse.statusText}`);
+                
+                // Check content type to detect HTML error pages
+                const contentType = configResponse.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    log(`Warning: Server returned ${contentType} instead of JSON, using default config`, 'warn');
+                    throw new Error(`Invalid content type: ${contentType}`);
                 }
-                const config = await configResponse.json();
-                log(`Config received: peerIdMode=${config.peerIdMode}, maxConnections=${config.maxConnections}`, 'success');
+                
+                if (!configResponse.ok) {
+                    throw new Error(`Failed to fetch config: ${configResponse.status} ${configResponse.statusText}`);
+                }
+                
+                const responseText = await configResponse.text();
+                try {
+                    config = JSON.parse(responseText);
+                    log(`Config received: peerIdMode=${config.peerIdMode}, maxConnections=${config.maxConnections}`, 'success');
+                } catch (parseError) {
+                    log(`Warning: Failed to parse config JSON (got: ${responseText.substring(0, 50)}...), using default`, 'warn');
+                    config = DEFAULT_CONFIG;
+                }
+            } catch (fetchError) {
+                log(`Config fetch failed: ${fetchError.message}, using default config`, 'warn');
+                config = DEFAULT_CONFIG;
+            }
+            
+            try {
+                log(`Using config: peerIdMode=${config.peerIdMode}`, 'info');
                 
                 peerIdMode.textContent = config.peerIdMode === 'persistent' ? 'Persistent' : 'Ephemeral';
 
