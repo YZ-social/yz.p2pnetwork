@@ -609,10 +609,14 @@ export class BrowserNode {
 
     for (const url of this.config.bootstrapUrls) {
       try {
+        console.log(`[BrowserNode] Attempting to connect to bootstrap: ${url}`);
         const ma = multiaddr(url);
+        console.log(`[BrowserNode] Parsed multiaddr: ${ma.toString()}`);
         await this.libp2p.dial(ma);
+        console.log(`[BrowserNode] Successfully connected to: ${url}`);
         connectedCount++;
       } catch (error) {
+        console.error(`[BrowserNode] Failed to connect to ${url}:`, error);
         errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }
