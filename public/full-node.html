@@ -752,9 +752,46 @@
                     }
                 }
 
-                // Create and start the real browser node
-                log('Creating browser node from server config...', 'info');
-                browserNode = await createBrowserNodeFromConfig(SERVER_URL);
+                // Fetch config manually first to debug any issues
+                log('Fetching configuration from server...', 'info');
+                const configUrl = `${SERVER_URL}/browser/config`;
+                log(`Config URL: ${configUrl}`, 'info');
+                
+                const configResponse = await fetch(configUrl);
+                log(`Config response status: ${configResponse.status}`, 'info');
+                
+                if (!configResponse.ok) {
+                    const errorText = await configResponse.text();
+                    log(`Config error response: ${errorText.substring(0, 100)}`, 'error');
+                    throw new Error(`Failed to fetch config: ${configResponse.status} ${configResponse.statusText}`);
+                }
+                
+                const contentType = configResponse.headers.get('content-type');
+                log(`Config content-type: ${contentType}`, 'info');
+                
+                const configText = await configResponse.text();
+                log(`Config response (first 200 chars): ${configText.substring(0, 200)}`, 'info');
+                
+                let config;
+                try {
+                    config = JSON.parse(configText);
+                } catch (parseError) {
+                    log(`JSON parse error: ${parseError.message}`, 'error');
+                    throw new Error(`Invalid JSON response from config endpoint`);
+                }
+                
+                log(`Config loaded: ${JSON.stringify(config)}`, 'success');
+
+                // Create browser node directly with the config
+                log('Creating browser node with config...', 'info');
+                browserNode = new BrowserNode({
+                    bootstrapUrls: config.bootstrapPeers,
+                    peerIdMode: config.peerIdMode,
+                    maxConnections: config.maxConnections,
+                    enableCircuitRelay: true,
+                    enableDHT: config.dhtEnabled,
+                    enableOverlay: config.overlayEnabled,
+                });
                 
                 // Register state change callback
                 browserNode.onStateChange((state) => {
