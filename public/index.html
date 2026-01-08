@@ -25,6 +25,29 @@
             background-clip: text;
         }
         .header p { color: #a0aec0; margin-top: 10px; }
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #a0aec0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .mode-btn:hover { border-color: #4facfe; color: #4facfe; }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #1a1a2e;
+            border-color: transparent;
+        }
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -165,6 +188,16 @@
         <div class="header">
             <h1>🔐 libp2p Overlay Network</h1>
             <p>Encrypted P2P messaging with hybrid post-quantum cryptography</p>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="thin-client-btn">
+                📡 Thin Client
+            </button>
+            <button class="mode-btn" id="full-node-btn" onclick="window.location.href='full-node.html'">
+                🖥️ Full Node
+            </button>
         </div>
 
         <div class="status-bar">
