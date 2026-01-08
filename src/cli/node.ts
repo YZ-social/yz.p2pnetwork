@@ -21,9 +21,70 @@ const PUBLIC_PATH = process.env.PUBLIC_PATH || `/dht/node-${NODE_INDEX}`;  // Pa
 const K_BUCKET_SIZE = parseInt(process.env.K_BUCKET_SIZE || '20', 10);
 const MAX_CONNECTIONS = parseInt(process.env.MAX_CONNECTIONS || '50', 10);
 
+// Multi-server configuration
+const SERVER_INDEX = parseInt(process.env.SERVER_INDEX || '1', 10);
+// Cross-server bootstrap URLs (comma-separated), e.g., "wss://imeyouwe.com/ws,wss://node2.imeyouwe.com/ws"
+const CROSS_SERVER_BOOTSTRAPS = process.env.CROSS_SERVER_BOOTSTRAPS || '';
+
 let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
+
+/**
+ * Parse cross-server bootstrap URLs and filter out self-server.
+ * 
+ * @param bootstrapUrls - Comma-separated list of bootstrap URLs
+ * @param selfHost - External host of this server (to filter out)
+ * @returns Array of bootstrap URLs excluding self-server
+ */
+function parseCrossServerBootstraps(bootstrapUrls: string, selfHost: string): string[] {
+  if (!bootstrapUrls) return [];
+  
+  return bootstrapUrls
+    .split(',')
+    .map(url => url.trim())
+    .filter(url => {
+      if (!url) return false;
+      try {
+        const parsed = new URL(url);
+        // Filter out self-server by comparing hostnames
+        return parsed.hostname !== selfHost;
+      } catch {
+        console.warn(`[${NODE_ID}] Invalid cross-server bootstrap URL: ${url}`);
+        return false;
+      }
+    });
+}
+
+/**
+ * Fetch peer ID from a cross-server bootstrap node via HTTPS.
+ * 
+ * @param bootstrapUrl - Full WSS URL of the bootstrap (e.g., wss://node2.imeyouwe.com/ws)
+ * @returns Peer ID string or null if not available
+ */
+async function fetchCrossServerPeerId(bootstrapUrl: string): Promise<string | null> {
+  try {
+    const url = new URL(bootstrapUrl);
+    // Convert wss:// to https:// and use /bootstrap/info endpoint
+    const infoUrl = `https://${url.hostname}/bootstrap/info`;
+    console.log(`[${NODE_ID}] Fetching cross-server peer ID from ${infoUrl}...`);
+    
+    const response = await fetch(infoUrl, { 
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    
+    if (response.ok) {
+      const info = await response.json() as { peerId?: string };
+      if (info.peerId) {
+        console.log(`[${NODE_ID}] Got cross-server peer ID: ${info.peerId.slice(0, 16)}...`);
+        return info.peerId;
+      }
+    }
+  } catch (err) {
+    console.log(`[${NODE_ID}] Failed to fetch cross-server peer ID from ${bootstrapUrl}: ${err}`);
+  }
+  return null;
+}
 
 // Helper function to discover peers through DHT lookups and connect to them
 async function discoverPeers(): Promise<void> {
@@ -203,6 +264,7 @@ async function main() {
   console.log(`[${NODE_ID}] Starting DHT node...`);
   console.log(`[${NODE_ID}] Configuration:`);
   console.log(`  - Node Index: ${NODE_INDEX}`);
+  console.log(`  - Server Index: ${SERVER_INDEX}`);
   console.log(`  - Listen Port: ${LISTEN_PORT}`);
   console.log(`  - WebSocket Port: ${WS_PORT}`);
   console.log(`  - Metrics Port: ${METRICS_PORT}`);
@@ -210,6 +272,7 @@ async function main() {
   console.log(`  - External Host: ${EXTERNAL_HOST}`);
   console.log(`  - Public Path: ${PUBLIC_PATH}`);
   console.log(`  - Bootstrap URL: ${BOOTSTRAP_URL || 'none'}`);
+  console.log(`  - Cross-Server Bootstraps: ${CROSS_SERVER_BOOTSTRAPS || 'none'}`);
 
   // Build bootstrap multiaddr if we're not the bootstrap node
   let bootstrapPeers: string[] = [];
@@ -230,6 +293,28 @@ async function main() {
       console.log(`[${NODE_ID}] Bootstrap peer: ${bootstrapPeers[0]}`);
     } else {
       console.error(`[${NODE_ID}] Could not get bootstrap peer ID`);
+    }
+  }
+
+  // Add cross-server bootstrap peers (for multi-server deployment)
+  if (CROSS_SERVER_BOOTSTRAPS) {
+    const crossServerUrls = parseCrossServerBootstraps(CROSS_SERVER_BOOTSTRAPS, EXTERNAL_HOST);
+    console.log(`[${NODE_ID}] Cross-server bootstrap URLs (excluding self): ${crossServerUrls.length}`);
+    
+    for (const bootstrapUrl of crossServerUrls) {
+      const peerId = await fetchCrossServerPeerId(bootstrapUrl);
+      if (peerId) {
+        try {
+          const url = new URL(bootstrapUrl);
+          // Construct multiaddr for external WSS connection
+          // Format: /dns4/<hostname>/tcp/443/wss/p2p/<peerId>
+          const multiaddr = `/dns4/${url.hostname}/tcp/443/wss/p2p/${peerId}`;
+          bootstrapPeers.push(multiaddr);
+          console.log(`[${NODE_ID}] Added cross-server bootstrap: ${multiaddr.slice(0, 60)}...`);
+        } catch (err) {
+          console.warn(`[${NODE_ID}] Failed to parse cross-server URL ${bootstrapUrl}: ${err}`);
+        }
+      }
     }
   }
 
@@ -400,12 +485,14 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
       res.end(JSON.stringify({
         nodeId: NODE_ID,
         nodeIndex: NODE_INDEX,
+        serverIndex: SERVER_INDEX,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
         publicEndpoint: publicEndpoint,
         routingTable: info,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,
+        crossServerBootstraps: CROSS_SERVER_BOOTSTRAPS ? CROSS_SERVER_BOOTSTRAPS.split(',').map(s => s.trim()) : [],
         overlay: {
           enabled: overlay?.isStarted || false,
           peerId: overlay?.peerId,

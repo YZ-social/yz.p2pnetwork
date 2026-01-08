@@ -106,7 +106,7 @@ This plan implements public address routing for Docker-hosted DHT nodes. Each of
       6. Enter a message and click "Send Echo"
       7. Check server logs for key lookup debugging info
 
-- [ ] 8. Checkpoint - Verify 5-node deployment
+- [x] 8. Checkpoint - Verify 5-node deployment
   - Ensure all validation steps pass
   - Ask the user if questions arise before scaling
 

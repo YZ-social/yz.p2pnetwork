@@ -22,6 +22,21 @@ const EXTERNAL_HOST = process.env.EXTERNAL_HOST || 'localhost';
 const IS_BOOTSTRAP = process.env.IS_BOOTSTRAP === 'true';
 const PUBLIC_PATH = process.env.PUBLIC_PATH || '/ws';  // Path for nginx routing (bootstrap uses /ws)
 
+// Browser node configuration
+const BROWSER_PEER_ID_MODE = (process.env.BROWSER_PEER_ID_MODE || 'persistent') as 'persistent' | 'ephemeral';
+const BROWSER_MAX_CONNECTIONS = parseInt(process.env.BROWSER_MAX_CONNECTIONS || '50', 10);
+const BROWSER_DHT_ENABLED = process.env.BROWSER_DHT_ENABLED !== 'false';
+const BROWSER_OVERLAY_ENABLED = process.env.BROWSER_OVERLAY_ENABLED !== 'false';
+
+// Relay configuration
+const RELAY_MAX_RESERVATIONS = parseInt(process.env.RELAY_MAX_RESERVATIONS || '128', 10);
+const RELAY_MAX_CIRCUITS = parseInt(process.env.RELAY_MAX_CIRCUITS || '16', 10);
+
+// Multi-server configuration
+const SERVER_INDEX = parseInt(process.env.SERVER_INDEX || '1', 10);
+// Cross-server bootstrap URLs (comma-separated), e.g., "wss://imeyouwe.com/ws,wss://node2.imeyouwe.com/ws"
+const CROSS_SERVER_BOOTSTRAPS = process.env.CROSS_SERVER_BOOTSTRAPS || '';
+
 let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
@@ -29,6 +44,71 @@ const clients = new Map<WebSocket, { id: string; connectedAt: number }>();
 
 // In-memory key-value store for browser clients
 const kvStore = new Map<string, string>();
+
+// Relay metrics tracking
+// Note: libp2p circuit-relay-v2 doesn't expose reservation counts directly,
+// so we track them via events when available, or estimate from connections
+let relayReservationsActive = 0;
+let relayCircuitsActive = 0;
+let relayReservationsRejected = 0;
+let relayBytesIn = 0;
+let relayBytesOut = 0;
+
+/**
+ * Parse cross-server bootstrap URLs and filter out self-server.
+ * 
+ * @param bootstrapUrls - Comma-separated list of bootstrap URLs
+ * @param selfHost - External host of this server (to filter out)
+ * @returns Array of bootstrap URLs excluding self-server
+ */
+function parseCrossServerBootstraps(bootstrapUrls: string, selfHost: string): string[] {
+  if (!bootstrapUrls) return [];
+  
+  return bootstrapUrls
+    .split(',')
+    .map(url => url.trim())
+    .filter(url => {
+      if (!url) return false;
+      try {
+        const parsed = new URL(url);
+        // Filter out self-server by comparing hostnames
+        return parsed.hostname !== selfHost;
+      } catch {
+        console.warn(`[${NODE_ID}] Invalid cross-server bootstrap URL: ${url}`);
+        return false;
+      }
+    });
+}
+
+/**
+ * Fetch peer ID from a cross-server bootstrap node via HTTPS.
+ * 
+ * @param bootstrapUrl - Full WSS URL of the bootstrap (e.g., wss://node2.imeyouwe.com/ws)
+ * @returns Peer ID string or null if not available
+ */
+async function fetchCrossServerPeerId(bootstrapUrl: string): Promise<string | null> {
+  try {
+    const url = new URL(bootstrapUrl);
+    // Convert wss:// to https:// and use /bootstrap/info endpoint
+    const infoUrl = `https://${url.hostname}/bootstrap/info`;
+    console.log(`[${NODE_ID}] Fetching cross-server peer ID from ${infoUrl}...`);
+    
+    const response = await fetch(infoUrl, { 
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    
+    if (response.ok) {
+      const info = await response.json() as { peerId?: string };
+      if (info.peerId) {
+        console.log(`[${NODE_ID}] Got cross-server peer ID: ${info.peerId.slice(0, 16)}...`);
+        return info.peerId;
+      }
+    }
+  } catch (err) {
+    console.log(`[${NODE_ID}] Failed to fetch cross-server peer ID from ${bootstrapUrl}: ${err}`);
+  }
+  return null;
+}
 
 async function fetchBootstrapPeerId(bootstrapHost: string): Promise<string | null> {
   const metricsUrl = `http://${bootstrapHost}:9090/info`;
@@ -57,10 +137,12 @@ async function main() {
   console.log(`[${NODE_ID}] Configuration:`);
   console.log(`  - WebSocket Port: ${WS_PORT}`);
   console.log(`  - Metrics Port: ${METRICS_PORT}`);
+  console.log(`  - Server Index: ${SERVER_INDEX}`);
   console.log(`  - Bootstrap Mode: ${IS_BOOTSTRAP}`);
   console.log(`  - External Host: ${EXTERNAL_HOST}`);
   console.log(`  - Public Path: ${PUBLIC_PATH}`);
   console.log(`  - Bootstrap URL: ${BOOTSTRAP_URL || 'none'}`);
+  console.log(`  - Cross-Server Bootstraps: ${CROSS_SERVER_BOOTSTRAPS || 'none'}`);
   
   // Build bootstrap multiaddr if we're not the bootstrap node
   let bootstrapPeers: string[] = [];
@@ -71,6 +153,29 @@ async function main() {
     
     if (peerId) {
       bootstrapPeers = [`/dns4/${bootstrapHost}/tcp/${url.port || '8080'}/ws/p2p/${peerId}`];
+    }
+  }
+
+  // Add cross-server bootstrap peers (for multi-server deployment)
+  // Bootstrap nodes connect to other servers' bootstrap nodes
+  if (IS_BOOTSTRAP && CROSS_SERVER_BOOTSTRAPS) {
+    const crossServerUrls = parseCrossServerBootstraps(CROSS_SERVER_BOOTSTRAPS, EXTERNAL_HOST);
+    console.log(`[${NODE_ID}] Cross-server bootstrap URLs (excluding self): ${crossServerUrls.length}`);
+    
+    for (const bootstrapUrl of crossServerUrls) {
+      const peerId = await fetchCrossServerPeerId(bootstrapUrl);
+      if (peerId) {
+        try {
+          const url = new URL(bootstrapUrl);
+          // Construct multiaddr for external WSS connection
+          // Format: /dns4/<hostname>/tcp/443/wss/p2p/<peerId>
+          const multiaddr = `/dns4/${url.hostname}/tcp/443/wss/p2p/${peerId}`;
+          bootstrapPeers.push(multiaddr);
+          console.log(`[${NODE_ID}] Added cross-server bootstrap: ${multiaddr.slice(0, 60)}...`);
+        } catch (err) {
+          console.warn(`[${NODE_ID}] Failed to parse cross-server URL ${bootstrapUrl}: ${err}`);
+        }
+      }
     }
   }
 
@@ -97,6 +202,11 @@ async function main() {
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
     configBuilder.withBootstrapPeers(bootstrapPeers);
   }
+  
+  // For bootstrap nodes with cross-server peers, add them as bootstrap peers
+  if (IS_BOOTSTRAP && bootstrapPeers.length > 0) {
+    configBuilder.withBootstrapPeers(bootstrapPeers);
+  }
 
   const config = configBuilder.build();
 
@@ -105,11 +215,11 @@ async function main() {
   await node.start();
   console.log(`[${NODE_ID}] DHT Node started: ${node.peerId.toString()}`);
 
-  // Bootstrap if needed
-  if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
+  // Bootstrap if needed (either non-bootstrap node or bootstrap with cross-server peers)
+  if (bootstrapPeers.length > 0) {
     try {
       await node.bootstrap();
-      console.log(`[${NODE_ID}] Bootstrap complete`);
+      console.log(`[${NODE_ID}] Bootstrap complete (${bootstrapPeers.length} peers)`);
     } catch (err) {
       console.error(`[${NODE_ID}] Bootstrap failed:`, err);
     }
@@ -454,6 +564,31 @@ kv_entries_total{node="${NODE_ID}"} ${kvStore.size}
 # HELP overlay_enabled Overlay network enabled
 # TYPE overlay_enabled gauge
 overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
+
+# HELP relay_reservations_active Current active relay reservations
+# TYPE relay_reservations_active gauge
+relay_reservations_active{node="${NODE_ID}"} ${relayReservationsActive}
+
+# HELP relay_reservations_max Maximum relay reservations
+# TYPE relay_reservations_max gauge
+relay_reservations_max{node="${NODE_ID}"} ${RELAY_MAX_RESERVATIONS}
+
+# HELP relay_circuits_active Current active relay circuits
+# TYPE relay_circuits_active gauge
+relay_circuits_active{node="${NODE_ID}"} ${relayCircuitsActive}
+
+# HELP relay_circuits_max Maximum relay circuits per peer
+# TYPE relay_circuits_max gauge
+relay_circuits_max{node="${NODE_ID}"} ${RELAY_MAX_CIRCUITS}
+
+# HELP relay_reservations_rejected_total Total rejected reservations
+# TYPE relay_reservations_rejected_total counter
+relay_reservations_rejected_total{node="${NODE_ID}"} ${relayReservationsRejected}
+
+# HELP relay_bytes_total Total bytes relayed
+# TYPE relay_bytes_total counter
+relay_bytes_total{node="${NODE_ID}",direction="in"} ${relayBytesIn}
+relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
 `);
     } else if (req.url === '/info') {
       const info = node?.getRoutingTableInfo();
@@ -465,6 +600,7 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
+        serverIndex: SERVER_INDEX,
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
         publicEndpoint: publicEndpoint,
@@ -474,10 +610,71 @@ overlay_enabled{node="${NODE_ID}"} ${overlay?.isStarted ? 1 : 0}
         kvEntries: kvStore.size,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,
+        crossServerBootstraps: CROSS_SERVER_BOOTSTRAPS ? CROSS_SERVER_BOOTSTRAPS.split(',').map(s => s.trim()) : [],
         overlay: {
           enabled: overlay?.isStarted || false,
           peerId: overlay?.peerId,
         }
+      }, null, 2));
+    } else if (req.url === '/browser/config') {
+      // Browser node configuration endpoint
+      // Returns configuration for browser-native libp2p nodes
+      const bootstrapPeers: string[] = [];
+      const relayNodes: string[] = [];
+      
+      // Build bootstrap peer multiaddrs from this node
+      if (node?.peerId) {
+        const peerId = node.peerId.toString();
+        // Add WebSocket multiaddr for browser connections
+        if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
+          bootstrapPeers.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/p2p/${peerId}`);
+        }
+        // Also add as relay node if circuit relay is enabled
+        if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
+          relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/p2p/${peerId}`);
+        }
+      }
+      
+      // Add cross-server bootstrap peers
+      if (CROSS_SERVER_BOOTSTRAPS) {
+        const crossServerUrls = parseCrossServerBootstraps(CROSS_SERVER_BOOTSTRAPS, EXTERNAL_HOST);
+        // Note: We can't include peer IDs here without fetching them
+        // Browser nodes will need to discover peer IDs via the /bootstrap/info endpoint
+        for (const url of crossServerUrls) {
+          try {
+            const parsed = new URL(url);
+            // Add as potential relay nodes (browser will need to resolve peer IDs)
+            relayNodes.push(`/dns4/${parsed.hostname}/tcp/443/wss`);
+          } catch {
+            // Skip invalid URLs
+          }
+        }
+      }
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        peerIdMode: BROWSER_PEER_ID_MODE,
+        bootstrapPeers,
+        relayNodes,
+        maxConnections: BROWSER_MAX_CONNECTIONS,
+        dhtEnabled: BROWSER_DHT_ENABLED,
+        overlayEnabled: BROWSER_OVERLAY_ENABLED,
+      }, null, 2));
+    } else if (req.url === '/relay/status') {
+      // Relay status endpoint for browser nodes to check relay capacity
+      // Returns current relay utilization metrics
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        activeReservations: relayReservationsActive,
+        maxReservations: RELAY_MAX_RESERVATIONS,
+        activeCircuits: relayCircuitsActive,
+        maxCircuits: RELAY_MAX_CIRCUITS,
+        utilization: relayReservationsActive / RELAY_MAX_RESERVATIONS,
+        bytesRelayed: {
+          in: relayBytesIn,
+          out: relayBytesOut,
+        },
+        rejectedReservations: relayReservationsRejected,
       }, null, 2));
     } else if (req.url === '/debug/dht') {
       // Debug endpoint to inspect DHT internal structure

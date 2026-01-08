@@ -6,28 +6,28 @@ This plan implements a multi-server DHT infrastructure across 4 Oracle Cloud Fre
 
 ## Tasks
 
-- [ ] 1. Update code for multi-server support
-  - [ ] 1.1 Add server configuration module
+- [x] 1. Update code for multi-server support
+  - [x] 1.1 Add server configuration module
     - Create src/config/server-config.ts with ServerConfig and NodeConfig interfaces
     - Implement calculateGlobalIndex(serverIndex, localIndex) function
     - Implement getPublicPath(globalIndex) function
     - Implement getAnnounceAddress(host, globalIndex) function
     - _Requirements: 6.1, 6.2, 6.3_
-  - [ ] 1.2 Write property test for global index calculation
+  - [x] 1.2 Write property test for global index calculation
     - **Property 1: Global Index Uniqueness**
     - Test that for all valid (serverIndex, localIndex) pairs, global indices are unique
     - Test formula: (serverIndex - 1) * 15 + localIndex produces correct range
     - **Validates: Requirements 6.1, 6.2, 6.3**
-  - [ ] 1.3 Update src/cli/node.ts for cross-server bootstrap
+  - [x] 1.3 Update src/cli/node.ts for cross-server bootstrap
     - Add CROSS_SERVER_BOOTSTRAPS environment variable parsing
     - Filter out self-server from bootstrap list
     - Update bootstrap connection logic to try all servers
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
-  - [ ] 1.4 Update src/cli/ws-bridge.ts for cross-server bootstrap
+  - [x] 1.4 Update src/cli/ws-bridge.ts for cross-server bootstrap
     - Add CROSS_SERVER_BOOTSTRAPS environment variable parsing
     - Configure bootstrap node to connect to other servers' bootstraps
     - _Requirements: 5.1, 5.2_
-  - [ ] 1.5 Write property test for bootstrap configuration
+  - [x] 1.5 Write property test for bootstrap configuration
     - **Property 2: Cross-Server Connectivity**
     - Test that bootstrap list includes addresses from all 4 servers
     - Test that self-server is correctly filtered out

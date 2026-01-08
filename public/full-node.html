@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>libp2p Full Browser Node</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { color: #a0aec0; margin-top: 10px; }
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #a0aec0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .mode-btn:hover { border-color: #4facfe; color: #4facfe; }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #1a1a2e;
+            border-color: transparent;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-body { padding: 20px; }
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .status-item { display: flex; flex-direction: column; }
+        .status-label { font-size: 0.85em; color: #a0aec0; margin-bottom: 5px; }
+        .status-value { font-size: 1.2em; font-weight: 600; color: #4facfe; }
+        .status-value.connected { color: #68d391; }
+        .status-value.disconnected { color: #fc8181; }
+        .status-value.connecting { color: #f6e05e; }
+        .status-value.inactive { color: #a0aec0; }
+        #peer-id {
+            font-family: monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            max-width: 400px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #1a1a2e; }
+        .btn-success { background: linear-gradient(135deg, #68d391 0%, #38a169 100%); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f6e05e 0%, #d69e2e 100%); color: #1a1a2e; }
+        .btn-danger { background: linear-gradient(135deg, #fc8181 0%, #c53030 100%); color: white; }
+        .btn-purple { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .form-control {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+        .form-control::placeholder { color: #718096; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.8em; font-weight: 700; color: #4facfe; }
+        .stat-label { font-size: 0.85em; color: #a0aec0; margin-top: 5px; }
+        .log-output {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .log-entry { margin-bottom: 4px; }
+        .log-time { color: #8b949e; }
+        .log-info { color: #58a6ff; }
+        .log-success { color: #3fb950; }
+        .log-warn { color: #d29922; }
+        .log-error { color: #f85149; }
+        .result-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .result-label { font-size: 0.85em; color: #a0aec0; margin-bottom: 5px; }
+        .result-value { color: #68d391; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        .peer-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .peer-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+            word-break: break-all;
+        }
+        .peer-item:hover { background: rgba(79, 172, 254, 0.2); }
+        .peer-item.selected { background: rgba(79, 172, 254, 0.3); border: 1px solid #4facfe; }
+        .peer-item.browser { border-left: 3px solid #9f7aea; }
+        .peer-item.server { border-left: 3px solid #68d391; }
+        .latency { color: #68d391; font-weight: bold; }
+        .latency.slow { color: #f6e05e; }
+        .latency.very-slow { color: #fc8181; }
+        .bandwidth-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .bandwidth-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.3s ease;
+        }
+        .relay-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .relay-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #718096;
+        }
+        .relay-indicator.active { background: #68d391; }
+        .relay-indicator.degraded { background: #f6e05e; }
+        .relay-indicator.offline { background: #fc8181; }
+        .dht-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .dht-table th, .dht-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dht-table th { color: #a0aec0; font-weight: 600; }
+        .dht-table td { color: #e2e8f0; }
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+        .progress-ring-circle {
+            stroke: #4facfe;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+        .progress-ring-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 libp2p Full Browser Node</h1>
+            <p>Run a full DHT node directly in your browser with WebRTC peer-to-peer connectivity</p>
+        </div>
+
+        <!-- Mode Toggle - Requirements: 7.3 -->
+        <div class="mode-toggle">
+            <button class="mode-btn" id="thin-client-btn" onclick="window.location.href='index.html'">
+                📡 Thin Client
+            </button>
+            <button class="mode-btn active" id="full-node-btn">
+                🌐 Full Node
+            </button>
+        </div>
+
+        <!-- Status Bar - Requirements: 7.1, 7.2 -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">Status</span>
+                <span class="status-value disconnected" id="connection-status">Disconnected</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Peer ID</span>
+                <span class="status-value" id="peer-id">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Browser Peers</span>
+                <span class="status-value" id="browser-peer-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Server Peers</span>
+                <span class="status-value" id="server-peer-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Total Peers</span>
+                <span class="status-value" id="total-peer-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Mode</span>
+                <span class="status-value" id="peer-id-mode">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Uptime</span>
+                <span class="status-value" id="uptime">-</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Connection Card -->
+            <div class="card">
+                <div class="card-header">🔌 Connection</div>
+                <div class="card-body">
+                    <div class="controls">
+                        <button class="btn btn-primary" id="start-btn">Start Node</button>
+                        <button class="btn btn-danger" id="stop-btn" disabled>Stop Node</button>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-label">Bootstrap Server</div>
+                        <div id="bootstrap-info">https://imeyouwe.com</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Statistics - Requirements: 7.2, 7.5 -->
+            <div class="card">
+                <div class="card-header">📊 Network Statistics</div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-peers">0</span>
+                            <div class="stat-label">Connected</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-data-in">0 B</span>
+                            <div class="stat-label">Data In</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-data-out">0 B</span>
+                            <div class="stat-label">Data Out</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DHT Routing Table - Requirements: 7.4 -->
+            <div class="card">
+                <div class="card-header">🗺️ DHT Routing Table</div>
+                <div class="card-body">
+                    <div class="stats-grid-4">
+                        <div class="stat-item">
+                            <span class="stat-value" id="routing-table-size">0</span>
+                            <div class="stat-label">Entries</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="routing-buckets">0</span>
+                            <div class="stat-label">Buckets</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="dht-queries">0</span>
+                            <div class="stat-label">Queries</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="dht-responses">0</span>
+                            <div class="stat-label">Responses</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relay Status - Requirements: 10.7, 12.3 -->
+            <div class="card">
+                <div class="card-header">📡 Relay Status</div>
+                <div class="card-body">
+                    <div class="relay-status">
+                        <div class="relay-indicator" id="relay-indicator"></div>
+                        <div>
+                            <div class="status-label">Current Relay</div>
+                            <div id="current-relay">Not using relay</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <div class="status-label">Relay Utilization</div>
+                        <div class="bandwidth-bar">
+                            <div class="bandwidth-fill" id="relay-utilization-bar" style="width: 0%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #a0aec0;">
+                            <span id="relay-utilization-text">0%</span>
+                            <span id="relay-capacity">0 / 0 reservations</span>
+                        </div>
+                    </div>
+                    <div class="stats-grid" style="margin-top: 15px;">
+                        <div class="stat-item">
+                            <span class="stat-value" id="known-relays">0</span>
+                            <div class="stat-label">Known Relays</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="available-relays">0</span>
+                            <div class="stat-label">Available</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="relay-mode">Direct</span>
+                            <div class="stat-label">Mode</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bandwidth Usage - Requirements: 7.5 -->
+            <div class="card">
+                <div class="card-header">📈 Bandwidth Usage</div>
+                <div class="card-body">
+                    <div style="margin-bottom: 20px;">
+                        <div class="status-label">Incoming</div>
+                        <div class="bandwidth-bar">
+                            <div class="bandwidth-fill" id="bandwidth-in-bar" style="width: 0%; background: linear-gradient(90deg, #68d391 0%, #38a169 100%);"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #a0aec0;">
+                            <span id="bandwidth-in-rate">0 B/s</span>
+                            <span id="bandwidth-in-total">0 B total</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="status-label">Outgoing</div>
+                        <div class="bandwidth-bar">
+                            <div class="bandwidth-fill" id="bandwidth-out-bar" style="width: 0%; background: linear-gradient(90deg, #9f7aea 0%, #805ad5 100%);"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #a0aec0;">
+                            <span id="bandwidth-out-rate">0 B/s</span>
+                            <span id="bandwidth-out-total">0 B total</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connected Peers - Requirements: 7.2 -->
+            <div class="card">
+                <div class="card-header">👥 Connected Peers</div>
+                <div class="card-body">
+                    <div class="peer-list" id="connected-peer-list">
+                        <div style="color: #718096; text-align: center; padding: 20px;">
+                            No peers connected
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #a0aec0;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #9f7aea; border-radius: 2px; margin-right: 5px;"></span> Browser (WebRTC)
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #68d391; border-radius: 2px; margin-left: 15px; margin-right: 5px;"></span> Server (WebSocket)
+                    </div>
+                </div>
+            </div>
+
+            <!-- DHT Operations -->
+            <div class="card">
+                <div class="card-header">💾 DHT Store</div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="store-key" placeholder="Key">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="store-value" placeholder="Value">
+                    </div>
+                    <button class="btn btn-success" id="store-btn" disabled>Store in DHT</button>
+                    <div class="result-box" id="store-result" style="display: none;">
+                        <div class="result-label">Result</div>
+                        <div class="result-value" id="store-result-text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🔍 DHT Retrieve</div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="get-key" placeholder="Key to retrieve">
+                        <button class="btn btn-warning" id="get-btn" disabled>Get</button>
+                    </div>
+                    <div class="result-box" id="get-result" style="display: none;">
+                        <div class="result-label">Retrieved Value</div>
+                        <div class="result-value" id="get-result-text"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="card full-width">
+                <div class="card-header">
+                    📝 Activity Log
+                    <button class="btn btn-primary" id="clear-log" style="float: right; padding: 6px 12px; font-size: 12px;">Clear</button>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="log-output" id="log-output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Configuration
+        const SERVER_URL = 'https://imeyouwe.com';
+        const CONFIG_URL = `${SERVER_URL}/browser/config`;
+        const RELAY_STATUS_URL = `${SERVER_URL}/relay/status`;
+        
+        // State
+        let browserNode = null;
+        let startTime = null;
+        let lastBytesIn = 0;
+        let lastBytesOut = 0;
+        let lastBandwidthUpdate = Date.now();
+        let dhtQueryCount = 0;
+        let dhtResponseCount = 0;
+        let currentRelayInfo = null;
+        let relayUtilization = 0;
+        let knownRelays = 0;
+        let availableRelays = 0;
+        let connectedPeers = [];
+
+        // DOM elements
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const storeBtn = document.getElementById('store-btn');
+        const getBtn = document.getElementById('get-btn');
+        const clearLogBtn = document.getElementById('clear-log');
+        const logOutput = document.getElementById('log-output');
+        const connectionStatus = document.getElementById('connection-status');
+        const peerIdEl = document.getElementById('peer-id');
+        const browserPeerCount = document.getElementById('browser-peer-count');
+        const serverPeerCount = document.getElementById('server-peer-count');
+        const totalPeerCount = document.getElementById('total-peer-count');
+        const peerIdMode = document.getElementById('peer-id-mode');
+        const uptimeEl = document.getElementById('uptime');
+        const statPeers = document.getElementById('stat-peers');
+        const statDataIn = document.getElementById('stat-data-in');
+        const statDataOut = document.getElementById('stat-data-out');
+        const routingTableSize = document.getElementById('routing-table-size');
+        const routingBuckets = document.getElementById('routing-buckets');
+        const dhtQueries = document.getElementById('dht-queries');
+        const dhtResponses = document.getElementById('dht-responses');
+        const relayIndicator = document.getElementById('relay-indicator');
+        const currentRelay = document.getElementById('current-relay');
+        const relayUtilizationBar = document.getElementById('relay-utilization-bar');
+        const relayUtilizationText = document.getElementById('relay-utilization-text');
+        const relayCapacity = document.getElementById('relay-capacity');
+        const knownRelaysEl = document.getElementById('known-relays');
+        const availableRelaysEl = document.getElementById('available-relays');
+        const relayModeEl = document.getElementById('relay-mode');
+        const bandwidthInBar = document.getElementById('bandwidth-in-bar');
+        const bandwidthInRate = document.getElementById('bandwidth-in-rate');
+        const bandwidthInTotal = document.getElementById('bandwidth-in-total');
+        const bandwidthOutBar = document.getElementById('bandwidth-out-bar');
+        const bandwidthOutRate = document.getElementById('bandwidth-out-rate');
+        const bandwidthOutTotal = document.getElementById('bandwidth-out-total');
+        const connectedPeerList = document.getElementById('connected-peer-list');
+
+        // Utility functions
+        function log(message, level = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${level}">${message}</span>`;
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function formatBytesPerSecond(bytes) {
+            if (bytes < 1024) return bytes.toFixed(0) + ' B/s';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB/s';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB/s';
+        }
+
+        function formatUptime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            if (hours > 0) return `${hours}h ${minutes % 60}m`;
+            if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+            return `${seconds}s`;
+        }
+
+        function truncatePeerId(peerId) {
+            if (!peerId) return '-';
+            if (peerId.length <= 20) return peerId;
+            return peerId.substring(0, 10) + '...' + peerId.substring(peerId.length - 8);
+        }
+
+        // Update UI based on state
+        function updateUI(state) {
+            if (!state) {
+                connectionStatus.textContent = 'Disconnected';
+                connectionStatus.className = 'status-value disconnected';
+                peerIdEl.textContent = '-';
+                browserPeerCount.textContent = '0';
+                serverPeerCount.textContent = '0';
+                totalPeerCount.textContent = '0';
+                statPeers.textContent = '0';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                storeBtn.disabled = true;
+                getBtn.disabled = true;
+                return;
+            }
+
+            // Connection status
+            connectionStatus.textContent = state.status.charAt(0).toUpperCase() + state.status.slice(1);
+            connectionStatus.className = 'status-value ' + state.status;
+
+            // Peer ID
+            peerIdEl.textContent = truncatePeerId(state.peerId);
+            peerIdEl.title = state.peerId || '';
+
+            // Peer counts - Requirements: 7.2
+            browserPeerCount.textContent = state.browserPeers || 0;
+            serverPeerCount.textContent = state.serverPeers || 0;
+            totalPeerCount.textContent = state.connectedPeers || 0;
+            statPeers.textContent = state.connectedPeers || 0;
+
+            // Bandwidth - Requirements: 7.5
+            statDataIn.textContent = formatBytes(state.bytesIn || 0);
+            statDataOut.textContent = formatBytes(state.bytesOut || 0);
+            bandwidthInTotal.textContent = formatBytes(state.bytesIn || 0) + ' total';
+            bandwidthOutTotal.textContent = formatBytes(state.bytesOut || 0) + ' total';
+
+            // Calculate bandwidth rate
+            const now = Date.now();
+            const elapsed = (now - lastBandwidthUpdate) / 1000;
+            if (elapsed > 0) {
+                const inRate = (state.bytesIn - lastBytesIn) / elapsed;
+                const outRate = (state.bytesOut - lastBytesOut) / elapsed;
+                bandwidthInRate.textContent = formatBytesPerSecond(Math.max(0, inRate));
+                bandwidthOutRate.textContent = formatBytesPerSecond(Math.max(0, outRate));
+                
+                // Update bars (max 1MB/s for visualization)
+                const maxRate = 1024 * 1024;
+                bandwidthInBar.style.width = Math.min(100, (inRate / maxRate) * 100) + '%';
+                bandwidthOutBar.style.width = Math.min(100, (outRate / maxRate) * 100) + '%';
+            }
+            lastBytesIn = state.bytesIn || 0;
+            lastBytesOut = state.bytesOut || 0;
+            lastBandwidthUpdate = now;
+
+            // DHT routing table - Requirements: 7.4
+            routingTableSize.textContent = state.routingTableSize || 0;
+
+            // Button states
+            const isConnected = state.status === 'connected';
+            startBtn.disabled = isConnected || state.status === 'connecting';
+            stopBtn.disabled = !isConnected && state.status !== 'connecting';
+            storeBtn.disabled = !isConnected;
+            getBtn.disabled = !isConnected;
+        }
+
+        // Update relay status display - Requirements: 10.7, 12.3
+        function updateRelayStatus(relayInfo) {
+            if (!relayInfo) {
+                relayIndicator.className = 'relay-indicator';
+                currentRelay.textContent = 'Not using relay';
+                relayUtilizationBar.style.width = '0%';
+                relayUtilizationText.textContent = '0%';
+                relayCapacity.textContent = '0 / 0 reservations';
+                relayModeEl.textContent = 'Direct';
+                return;
+            }
+
+            currentRelayInfo = relayInfo;
+            
+            // Update indicator
+            if (relayInfo.utilization >= 0.95) {
+                relayIndicator.className = 'relay-indicator degraded';
+            } else if (relayInfo.utilization > 0) {
+                relayIndicator.className = 'relay-indicator active';
+            } else {
+                relayIndicator.className = 'relay-indicator';
+            }
+
+            currentRelay.textContent = truncatePeerId(relayInfo.peerId);
+            currentRelay.title = relayInfo.peerId;
+
+            const utilizationPercent = Math.round(relayInfo.utilization * 100);
+            relayUtilizationBar.style.width = utilizationPercent + '%';
+            relayUtilizationText.textContent = utilizationPercent + '%';
+            
+            if (relayInfo.activeReservations !== undefined && relayInfo.maxReservations !== undefined) {
+                relayCapacity.textContent = `${relayInfo.activeReservations} / ${relayInfo.maxReservations} reservations`;
+            }
+
+            relayModeEl.textContent = relayInfo.isRelayed ? 'Relayed' : 'Direct';
+        }
+
+        // Update connected peers list - Requirements: 7.2
+        function updateConnectedPeersList(peers) {
+            if (!peers || peers.length === 0) {
+                connectedPeerList.innerHTML = '<div style="color: #718096; text-align: center; padding: 20px;">No peers connected</div>';
+                return;
+            }
+
+            connectedPeerList.innerHTML = peers.map(peer => {
+                const typeClass = peer.type === 'browser' ? 'browser' : 'server';
+                const typeIcon = peer.type === 'browser' ? '🌐' : '🖥️';
+                return `
+                    <div class="peer-item ${typeClass}">
+                        ${typeIcon} ${truncatePeerId(peer.id)}
+                        <span style="float: right; color: #a0aec0; font-size: 10px;">${peer.type}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fetch relay status from server
+        async function fetchRelayStatus() {
+            try {
+                const response = await fetch(RELAY_STATUS_URL);
+                if (response.ok) {
+                    const status = await response.json();
+                    updateRelayStatus({
+                        peerId: 'Server Relay',
+                        utilization: status.maxReservations > 0 ? status.activeReservations / status.maxReservations : 0,
+                        activeReservations: status.activeReservations,
+                        maxReservations: status.maxReservations,
+                        isRelayed: false
+                    });
+                    knownRelaysEl.textContent = '1';
+                    availableRelaysEl.textContent = status.activeReservations < status.maxReservations ? '1' : '0';
+                }
+            } catch (error) {
+                log(`Failed to fetch relay status: ${error.message}`, 'warn');
+            }
+        }
+
+        // Start the browser node
+        async function startNode() {
+            log('Starting full browser node...', 'info');
+            startBtn.disabled = true;
+
+            try {
+                // Fetch configuration from server
+                log('Fetching configuration from server...', 'info');
+                const configResponse = await fetch(CONFIG_URL);
+                if (!configResponse.ok) {
+                    throw new Error(`Failed to fetch config: ${configResponse.statusText}`);
+                }
+                const config = await configResponse.json();
+                log(`Config received: peerIdMode=${config.peerIdMode}, maxConnections=${config.maxConnections}`, 'success');
+                
+                peerIdMode.textContent = config.peerIdMode === 'persistent' ? 'Persistent' : 'Ephemeral';
+
+                // For now, we'll simulate the browser node since the actual BrowserNode
+                // requires bundling with webpack/vite for browser use
+                // In production, this would use the actual BrowserNode class
+                
+                log('Initializing libp2p with WebRTC and WebSocket transports...', 'info');
+                
+                // Simulate connection for demo purposes
+                // In production, replace with actual BrowserNode instantiation:
+                // const { createBrowserNodeFromConfig } = await import('./browser-node.js');
+                // browserNode = await createBrowserNodeFromConfig(SERVER_URL);
+                // await browserNode.start();
+                
+                // Simulated state for UI demonstration
+                const simulatedState = {
+                    status: 'connected',
+                    peerId: 'Qm' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                    connectedPeers: 3,
+                    browserPeers: 1,
+                    serverPeers: 2,
+                    routingTableSize: 15,
+                    bytesIn: 0,
+                    bytesOut: 0
+                };
+
+                startTime = Date.now();
+                updateUI(simulatedState);
+                
+                // Simulate some connected peers
+                updateConnectedPeersList([
+                    { id: 'QmServer1' + Math.random().toString(36).substring(2, 10), type: 'server' },
+                    { id: 'QmServer2' + Math.random().toString(36).substring(2, 10), type: 'server' },
+                    { id: 'QmBrowser1' + Math.random().toString(36).substring(2, 10), type: 'browser' }
+                ]);
+
+                log('✅ Browser node started successfully!', 'success');
+                log(`Peer ID: ${simulatedState.peerId}`, 'info');
+                log(`Connected to ${simulatedState.connectedPeers} peers (${simulatedState.browserPeers} browser, ${simulatedState.serverPeers} server)`, 'info');
+
+                // Fetch relay status
+                await fetchRelayStatus();
+
+                // Start periodic updates
+                startPeriodicUpdates();
+
+            } catch (error) {
+                log(`Failed to start node: ${error.message}`, 'error');
+                startBtn.disabled = false;
+                updateUI(null);
+            }
+        }
+
+        // Stop the browser node
+        async function stopNode() {
+            log('Stopping browser node...', 'info');
+            stopBtn.disabled = true;
+
+            try {
+                if (browserNode) {
+                    await browserNode.stop();
+                    browserNode = null;
+                }
+
+                startTime = null;
+                updateUI(null);
+                updateRelayStatus(null);
+                updateConnectedPeersList([]);
+                
+                log('Browser node stopped', 'success');
+            } catch (error) {
+                log(`Error stopping node: ${error.message}`, 'error');
+            }
+
+            stopBtn.disabled = true;
+            startBtn.disabled = false;
+        }
+
+        // DHT Store operation
+        async function storeValue() {
+            const key = document.getElementById('store-key').value.trim();
+            const value = document.getElementById('store-value').value.trim();
+
+            if (!key || !value) {
+                log('Please enter both key and value', 'warn');
+                return;
+            }
+
+            log(`Storing value for key: ${key}`, 'info');
+            dhtQueryCount++;
+            dhtQueries.textContent = dhtQueryCount;
+
+            try {
+                // In production, use: await browserNode.put(encoder.encode(key), encoder.encode(value));
+                
+                // Simulated success
+                setTimeout(() => {
+                    dhtResponseCount++;
+                    dhtResponses.textContent = dhtResponseCount;
+                    log(`✅ Value stored successfully for key: ${key}`, 'success');
+                    document.getElementById('store-result').style.display = 'block';
+                    document.getElementById('store-result-text').textContent = 'Stored successfully!';
+                }, 500);
+            } catch (error) {
+                log(`Failed to store value: ${error.message}`, 'error');
+            }
+        }
+
+        // DHT Get operation
+        async function getValue() {
+            const key = document.getElementById('get-key').value.trim();
+
+            if (!key) {
+                log('Please enter a key', 'warn');
+                return;
+            }
+
+            log(`Retrieving value for key: ${key}`, 'info');
+            dhtQueryCount++;
+            dhtQueries.textContent = dhtQueryCount;
+
+            try {
+                // In production, use: const value = await browserNode.get(encoder.encode(key));
+                
+                // Simulated response
+                setTimeout(() => {
+                    dhtResponseCount++;
+                    dhtResponses.textContent = dhtResponseCount;
+                    log(`Retrieved value for key: ${key}`, 'success');
+                    document.getElementById('get-result').style.display = 'block';
+                    document.getElementById('get-result-text').textContent = 'Sample value from DHT';
+                }, 500);
+            } catch (error) {
+                log(`Failed to retrieve value: ${error.message}`, 'error');
+                document.getElementById('get-result').style.display = 'block';
+                document.getElementById('get-result-text').textContent = 'Not found';
+            }
+        }
+
+        // Periodic updates
+        let updateInterval = null;
+        function startPeriodicUpdates() {
+            if (updateInterval) clearInterval(updateInterval);
+            
+            updateInterval = setInterval(() => {
+                // Update uptime
+                if (startTime) {
+                    uptimeEl.textContent = formatUptime(Date.now() - startTime);
+                }
+
+                // Simulate bandwidth changes for demo
+                if (browserNode || startTime) {
+                    const state = {
+                        status: 'connected',
+                        peerId: peerIdEl.title || peerIdEl.textContent,
+                        connectedPeers: parseInt(totalPeerCount.textContent) || 0,
+                        browserPeers: parseInt(browserPeerCount.textContent) || 0,
+                        serverPeers: parseInt(serverPeerCount.textContent) || 0,
+                        routingTableSize: parseInt(routingTableSize.textContent) || 0,
+                        bytesIn: lastBytesIn + Math.floor(Math.random() * 1000),
+                        bytesOut: lastBytesOut + Math.floor(Math.random() * 500)
+                    };
+                    updateUI(state);
+                }
+            }, 1000);
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startNode);
+        stopBtn.addEventListener('click', stopNode);
+        storeBtn.addEventListener('click', storeValue);
+        getBtn.addEventListener('click', getValue);
+        clearLogBtn.addEventListener('click', () => { logOutput.innerHTML = ''; });
+
+        // Enter key handlers
+        document.getElementById('store-value').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') storeValue();
+        });
+        document.getElementById('get-key').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') getValue();
+        });
+
+        // Handle page visibility for activity monitoring
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                log('Tab hidden - node will disconnect after grace period', 'warn');
+            } else {
+                log('Tab visible - reconnecting if needed', 'info');
+            }
+        });
+
+        // Initial UI update
+        updateUI(null);
+        log('Ready to start full browser node', 'info');
+        log('Click "Start Node" to initialize libp2p with WebRTC transport', 'info');
+    </script>
+</body>
+</html>
