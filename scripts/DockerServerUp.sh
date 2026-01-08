@@ -34,8 +34,19 @@ git pull
 echo "      Done."
 echo ""
 
-# Step 2: Generate nginx config for DHT nodes
-echo "[2/6] Generating nginx config for $DHT_NODES nodes..."
+# Step 2: Install npm dependencies and build browser bundle
+echo "[2/7] Installing npm dependencies..."
+npm ci
+echo "      Done."
+echo ""
+
+echo "[3/7] Building browser bundle..."
+npm run build:browser
+echo "      Done."
+echo ""
+
+# Step 3: Generate nginx config for DHT nodes
+echo "[4/7] Generating nginx config for $DHT_NODES nodes..."
 if [ -f "scripts/generate-nginx-config.sh" ]; then
     chmod +x scripts/generate-nginx-config.sh
     ./scripts/generate-nginx-config.sh $DHT_NODES
@@ -45,22 +56,22 @@ else
 fi
 echo ""
 
-# Step 3: Build Docker images
-echo "[3/6] Building Docker images..."
+# Step 4: Build Docker images
+echo "[5/7] Building Docker images..."
 docker compose build
 echo "      Done."
 echo ""
 
-# Step 4: Stop any existing containers
-echo "[4/6] Stopping existing containers..."
+# Step 5: Stop any existing containers
+echo "[6/7] Stopping existing containers..."
 docker compose down --remove-orphans 2>/dev/null || true
 # Remove old DHT node containers
 docker rm -f $(docker ps -aq --filter 'name=libp2p-dht-dht-node-') 2>/dev/null || true
 echo "      Done."
 echo ""
 
-# Step 5: Start bootstrap node and webserver
-echo "[5/6] Starting bootstrap node and webserver..."
+# Step 6: Start bootstrap node and webserver
+echo "[7/7] Starting bootstrap node and webserver..."
 docker compose up -d bootstrap webserver
 echo "      Waiting for bootstrap node to be healthy..."
 

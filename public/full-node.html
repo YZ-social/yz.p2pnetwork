@@ -719,91 +719,60 @@
             }
         }
 
-        // Default fallback configuration
-        const DEFAULT_CONFIG = {
-            peerIdMode: 'persistent',
-            maxConnections: 50,
-            bootstrapPeers: [`/dns4/imeyouwe.com/tcp/443/wss`],
-            relayEnabled: true
-        };
+        // Import the real BrowserNode from the bundled module
+        let BrowserNode, createBrowserNodeFromConfig;
+        
+        // Load the browser node module
+        async function loadBrowserModule() {
+            try {
+                const module = await import('./browser-node.js');
+                BrowserNode = module.BrowserNode;
+                createBrowserNodeFromConfig = module.createBrowserNodeFromConfig;
+                log('Browser node module loaded successfully', 'success');
+                return true;
+            } catch (error) {
+                log(`Failed to load browser node module: ${error.message}`, 'error');
+                console.error('Module load error:', error);
+                return false;
+            }
+        }
 
         // Start the browser node
         async function startNode() {
             log('Starting full browser node...', 'info');
             startBtn.disabled = true;
 
-            let config = DEFAULT_CONFIG;
             try {
-                // Fetch configuration from server
-                log('Fetching configuration from server...', 'info');
-                const configResponse = await fetch(CONFIG_URL);
-                
-                // Check content type to detect HTML error pages
-                const contentType = configResponse.headers.get('content-type') || '';
-                if (!contentType.includes('application/json')) {
-                    log(`Warning: Server returned ${contentType} instead of JSON, using default config`, 'warn');
-                    throw new Error(`Invalid content type: ${contentType}`);
+                // Load the browser module if not already loaded
+                if (!BrowserNode) {
+                    log('Loading browser node module...', 'info');
+                    const loaded = await loadBrowserModule();
+                    if (!loaded) {
+                        throw new Error('Failed to load browser node module');
+                    }
                 }
-                
-                if (!configResponse.ok) {
-                    throw new Error(`Failed to fetch config: ${configResponse.status} ${configResponse.statusText}`);
-                }
-                
-                const responseText = await configResponse.text();
-                try {
-                    config = JSON.parse(responseText);
-                    log(`Config received: peerIdMode=${config.peerIdMode}, maxConnections=${config.maxConnections}`, 'success');
-                } catch (parseError) {
-                    log(`Warning: Failed to parse config JSON (got: ${responseText.substring(0, 50)}...), using default`, 'warn');
-                    config = DEFAULT_CONFIG;
-                }
-            } catch (fetchError) {
-                log(`Config fetch failed: ${fetchError.message}, using default config`, 'warn');
-                config = DEFAULT_CONFIG;
-            }
-            
-            try {
-                log(`Using config: peerIdMode=${config.peerIdMode}`, 'info');
-                
-                peerIdMode.textContent = config.peerIdMode === 'persistent' ? 'Persistent' : 'Ephemeral';
 
-                // For now, we'll simulate the browser node since the actual BrowserNode
-                // requires bundling with webpack/vite for browser use
-                // In production, this would use the actual BrowserNode class
+                // Create and start the real browser node
+                log('Creating browser node from server config...', 'info');
+                browserNode = await createBrowserNodeFromConfig(SERVER_URL);
                 
-                log('Initializing libp2p with WebRTC and WebSocket transports...', 'info');
-                
-                // Simulate connection for demo purposes
-                // In production, replace with actual BrowserNode instantiation:
-                // const { createBrowserNodeFromConfig } = await import('./browser-node.js');
-                // browserNode = await createBrowserNodeFromConfig(SERVER_URL);
-                // await browserNode.start();
-                
-                // Simulated state for UI demonstration
-                const simulatedState = {
-                    status: 'connected',
-                    peerId: 'Qm' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                    connectedPeers: 3,
-                    browserPeers: 1,
-                    serverPeers: 2,
-                    routingTableSize: 15,
-                    bytesIn: 0,
-                    bytesOut: 0
-                };
+                // Register state change callback
+                browserNode.onStateChange((state) => {
+                    updateUI(state);
+                    updatePeersList();
+                });
 
+                log('Starting libp2p with WebRTC and WebSocket transports...', 'info');
+                await browserNode.start();
+                
                 startTime = Date.now();
-                updateUI(simulatedState);
                 
-                // Simulate some connected peers
-                updateConnectedPeersList([
-                    { id: 'QmServer1' + Math.random().toString(36).substring(2, 10), type: 'server' },
-                    { id: 'QmServer2' + Math.random().toString(36).substring(2, 10), type: 'server' },
-                    { id: 'QmBrowser1' + Math.random().toString(36).substring(2, 10), type: 'browser' }
-                ]);
-
+                const state = browserNode.getState();
                 log('✅ Browser node started successfully!', 'success');
-                log(`Peer ID: ${simulatedState.peerId}`, 'info');
-                log(`Connected to ${simulatedState.connectedPeers} peers (${simulatedState.browserPeers} browser, ${simulatedState.serverPeers} server)`, 'info');
+                log(`Peer ID: ${state.peerId}`, 'info');
+                log(`Status: ${state.status}`, 'info');
+                
+                peerIdMode.textContent = 'Persistent';
 
                 // Fetch relay status
                 await fetchRelayStatus();
@@ -813,8 +782,35 @@
 
             } catch (error) {
                 log(`Failed to start node: ${error.message}`, 'error');
+                console.error('Start error:', error);
                 startBtn.disabled = false;
                 updateUI(null);
+            }
+        }
+
+        // Update peers list from actual connections
+        function updatePeersList() {
+            if (!browserNode) return;
+            
+            try {
+                const libp2p = browserNode.getLibp2pNode();
+                const connections = libp2p.getConnections();
+                
+                const peers = connections.map(conn => {
+                    const remoteAddr = conn.remoteAddr.toString();
+                    const isWebRTC = remoteAddr.includes('/webrtc/');
+                    const isRelay = remoteAddr.includes('/p2p-circuit/');
+                    
+                    return {
+                        id: conn.remotePeer.toString(),
+                        type: isWebRTC ? 'browser' : (isRelay ? 'relay' : 'server'),
+                        address: remoteAddr
+                    };
+                });
+                
+                updateConnectedPeersList(peers);
+            } catch (error) {
+                // Node might not be fully started yet
             }
         }
 
@@ -858,18 +854,22 @@
             dhtQueries.textContent = dhtQueryCount;
 
             try {
-                // In production, use: await browserNode.put(encoder.encode(key), encoder.encode(value));
+                if (!browserNode) {
+                    throw new Error('Browser node not started');
+                }
                 
-                // Simulated success
-                setTimeout(() => {
-                    dhtResponseCount++;
-                    dhtResponses.textContent = dhtResponseCount;
-                    log(`✅ Value stored successfully for key: ${key}`, 'success');
-                    document.getElementById('store-result').style.display = 'block';
-                    document.getElementById('store-result-text').textContent = 'Stored successfully!';
-                }, 500);
+                const encoder = new TextEncoder();
+                await browserNode.put(encoder.encode(key), encoder.encode(value));
+                
+                dhtResponseCount++;
+                dhtResponses.textContent = dhtResponseCount;
+                log(`✅ Value stored successfully for key: ${key}`, 'success');
+                document.getElementById('store-result').style.display = 'block';
+                document.getElementById('store-result-text').textContent = 'Stored successfully!';
             } catch (error) {
                 log(`Failed to store value: ${error.message}`, 'error');
+                document.getElementById('store-result').style.display = 'block';
+                document.getElementById('store-result-text').textContent = `Error: ${error.message}`;
             }
         }
 
@@ -887,16 +887,20 @@
             dhtQueries.textContent = dhtQueryCount;
 
             try {
-                // In production, use: const value = await browserNode.get(encoder.encode(key));
+                if (!browserNode) {
+                    throw new Error('Browser node not started');
+                }
                 
-                // Simulated response
-                setTimeout(() => {
-                    dhtResponseCount++;
-                    dhtResponses.textContent = dhtResponseCount;
-                    log(`Retrieved value for key: ${key}`, 'success');
-                    document.getElementById('get-result').style.display = 'block';
-                    document.getElementById('get-result-text').textContent = 'Sample value from DHT';
-                }, 500);
+                const encoder = new TextEncoder();
+                const decoder = new TextDecoder();
+                const valueBytes = await browserNode.get(encoder.encode(key));
+                const value = decoder.decode(valueBytes);
+                
+                dhtResponseCount++;
+                dhtResponses.textContent = dhtResponseCount;
+                log(`✅ Retrieved value for key: ${key}`, 'success');
+                document.getElementById('get-result').style.display = 'block';
+                document.getElementById('get-result-text').textContent = value;
             } catch (error) {
                 log(`Failed to retrieve value: ${error.message}`, 'error');
                 document.getElementById('get-result').style.display = 'block';
@@ -915,19 +919,11 @@
                     uptimeEl.textContent = formatUptime(Date.now() - startTime);
                 }
 
-                // Simulate bandwidth changes for demo
-                if (browserNode || startTime) {
-                    const state = {
-                        status: 'connected',
-                        peerId: peerIdEl.title || peerIdEl.textContent,
-                        connectedPeers: parseInt(totalPeerCount.textContent) || 0,
-                        browserPeers: parseInt(browserPeerCount.textContent) || 0,
-                        serverPeers: parseInt(serverPeerCount.textContent) || 0,
-                        routingTableSize: parseInt(routingTableSize.textContent) || 0,
-                        bytesIn: lastBytesIn + Math.floor(Math.random() * 1000),
-                        bytesOut: lastBytesOut + Math.floor(Math.random() * 500)
-                    };
+                // Update state from real browser node
+                if (browserNode) {
+                    const state = browserNode.getState();
                     updateUI(state);
+                    updatePeersList();
                 }
             }, 1000);
         }
