@@ -626,12 +626,14 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
       if (node?.peerId) {
         const peerId = node.peerId.toString();
         // Add WebSocket multiaddr for browser connections
+        // Use http-path to specify the /ws path that nginx routes to the WebSocket server
+        // The path is URL-encoded: /ws becomes %2Fws
         if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-          bootstrapPeers.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/p2p/${peerId}`);
+          bootstrapPeers.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/%2Fws/p2p/${peerId}`);
         }
         // Also add as relay node if circuit relay is enabled
         if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-          relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/p2p/${peerId}`);
+          relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/%2Fws/p2p/${peerId}`);
         }
       }
       
