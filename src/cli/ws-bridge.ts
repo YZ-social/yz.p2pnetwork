@@ -625,15 +625,16 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
       // Build bootstrap peer multiaddrs from this node
       if (node?.peerId) {
         const peerId = node.peerId.toString();
-        // Add WebSocket multiaddr for browser connections
-        // Use http-path to specify the /ws path that nginx routes to the WebSocket server
+        // Add WebSocket multiaddr for browser libp2p connections
+        // Use http-path to specify the /libp2p path that nginx routes to libp2p WebSocket port (4002)
         // Note: http-path value should NOT include leading slash (it's added automatically)
+        // The /ws path is for thin client JSON API, /libp2p is for native libp2p protocol
         if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-          bootstrapPeers.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/ws/p2p/${peerId}`);
+          bootstrapPeers.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/libp2p/p2p/${peerId}`);
         }
         // Also add as relay node if circuit relay is enabled
         if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
-          relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/ws/p2p/${peerId}`);
+          relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/libp2p/p2p/${peerId}`);
         }
       }
       
