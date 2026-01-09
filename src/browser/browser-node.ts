@@ -22,7 +22,6 @@ import { kadDHT } from '@libp2p/kad-dht';
 import { identify } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
-import { webSockets } from '@libp2p/websockets';
 import { webRTC } from '@libp2p/webrtc';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
 import type { PeerId, Connection } from '@libp2p/interface';
@@ -41,6 +40,7 @@ import { RelaySelector } from './relay-selector.js';
 import { ConnectionUpgrader, type ConnectionUpgraderConfig } from './connection-upgrader.js';
 import { DEFAULT_ICE_SERVERS } from './transport-config.js';
 import { OverlayNetwork, type MessageHandler as OverlayMessageHandler, type MessageContext as OverlayMessageContext } from '../overlay/index.js';
+import { webSocketsWithHttpPath } from './websocket-transport.js';
 
 /**
  * State change callback type
@@ -306,7 +306,8 @@ export class BrowserNode {
       this.libp2p = await createLibp2p({
         privateKey,
         transports: [
-          webSockets() as any,
+          // Use custom WebSocket transport that supports http-path for nginx routing
+          webSocketsWithHttpPath() as any,
           webRTC({
             rtcConfiguration: {
               iceServers: DEFAULT_ICE_SERVERS,

@@ -13,6 +13,7 @@ export { RelaySelector } from './relay-selector.js';
 export { ConnectionUpgrader } from './connection-upgrader.js';
 export { BrowserStorage } from './storage.js';
 export { DEFAULT_ICE_SERVERS, createBrowserTransports, DEFAULT_TRANSPORT_CONFIG } from './transport-config.js';
+export { webSocketsWithHttpPath } from './websocket-transport.js';
 
 export type {
   BrowserNodeConfig,

@@ -51548,365 +51548,6 @@ function circuitRelayTransport(init = {}) {
   };
 }
 
-// node_modules/@libp2p/websockets/dist/src/index.js
-init_src2();
-
-// node_modules/@multiformats/multiaddr-to-uri/dist/src/index.js
-var ASSUME_HTTP_CODES = [
-  CODE_TCP,
-  CODE_DNS,
-  CODE_DNSADDR,
-  CODE_DNS4,
-  CODE_DNS6
-];
-function extractSNI(ma) {
-  return extractTuple("sni", ma)?.value;
-}
-function extractPort(ma) {
-  const port = extractTuple("tcp", ma)?.value;
-  if (port == null) {
-    return "";
-  }
-  return `:${port}`;
-}
-function extractTuple(name3, ma) {
-  return ma.find((component) => component.name === name3);
-}
-function hasTLS(ma) {
-  return ma.some(({ code: code6 }) => code6 === CODE_TLS);
-}
-function interpretNext(head, rest) {
-  const interpreter = interpreters[head.name];
-  if (interpreter == null) {
-    throw new Error(`Can't interpret protocol ${head.name}`);
-  }
-  const restVal = interpreter(head, rest);
-  if (head.code === CODE_IP6) {
-    return `[${restVal}]`;
-  }
-  return restVal;
-}
-var interpreters = {
-  ip4: (head, rest) => head.value,
-  ip6: (head, rest) => {
-    if (rest.length === 0) {
-      return head.value;
-    }
-    return `[${head.value}]`;
-  },
-  tcp: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return `tcp://${interpretNext(tail, rest)}:${head.value}`;
-  },
-  udp: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return `udp://${interpretNext(tail, rest)}:${head.value}`;
-  },
-  dnsaddr: (head, rest) => head.value,
-  dns4: (head, rest) => head.value,
-  dns6: (head, rest) => head.value,
-  dns: (head, rest) => head.value,
-  ipfs: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return `${interpretNext(tail, rest)}`;
-  },
-  p2p: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return `${interpretNext(tail, rest)}`;
-  },
-  http: (head, rest) => {
-    const maHasTLS = hasTLS(rest);
-    const sni = extractSNI(rest);
-    const port = extractPort(rest);
-    if (maHasTLS && sni != null) {
-      return `https://${sni}${port}`;
-    }
-    const protocol = maHasTLS ? "https://" : "http://";
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    let baseVal = interpretNext(tail, rest);
-    baseVal = baseVal?.replace("tcp://", "");
-    return `${protocol}${baseVal}`;
-  },
-  "http-path": (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    const baseVal = interpretNext(tail, rest);
-    const decodedValue = decodeURIComponent(head.value ?? "");
-    return `${baseVal}${decodedValue}`;
-  },
-  tls: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return interpretNext(tail, rest);
-  },
-  sni: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    return interpretNext(tail, rest);
-  },
-  https: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    let baseVal = interpretNext(tail, rest);
-    baseVal = baseVal?.replace("tcp://", "");
-    return `https://${baseVal}`;
-  },
-  ws: (head, rest) => {
-    const maHasTLS = hasTLS(rest);
-    const sni = extractSNI(rest);
-    const port = extractPort(rest);
-    if (maHasTLS && sni != null) {
-      return `wss://${sni}${port}`;
-    }
-    const protocol = maHasTLS ? "wss://" : "ws://";
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    let baseVal = interpretNext(tail, rest);
-    baseVal = baseVal?.replace("tcp://", "");
-    return `${protocol}${baseVal}`;
-  },
-  wss: (head, rest) => {
-    const tail = rest.pop();
-    if (tail == null) {
-      throw new Error("Unexpected end of multiaddr");
-    }
-    let baseVal = interpretNext(tail, rest);
-    baseVal = baseVal?.replace("tcp://", "");
-    return `wss://${baseVal}`;
-  }
-};
-function multiaddrToUri(input, opts2) {
-  const ma = multiaddr(input);
-  const components = ma.getComponents();
-  const head = components.pop();
-  if (head == null) {
-    throw new Error("Unexpected end of multiaddr");
-  }
-  const interpreter = interpreters[head.name];
-  if (interpreter == null) {
-    throw new Error(`No interpreter found for ${head.name}`);
-  }
-  let uri = interpreter(head, components) ?? "";
-  if (opts2?.assumeHttp !== false && ASSUME_HTTP_CODES.includes(head.code)) {
-    uri = uri.replace(/^.*:\/\//, "");
-    if (head.value === "443") {
-      uri = `https://${uri}`;
-    } else {
-      uri = `http://${uri}`;
-    }
-  }
-  if (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("ws://") || uri.startsWith("wss://")) {
-    uri = new URL(uri).toString();
-    if (uri.endsWith("/")) {
-      uri = uri.substring(0, uri.length - 1);
-    }
-  }
-  return uri;
-}
-
-// node_modules/@libp2p/websockets/dist/src/listener.browser.js
-function createListener2() {
-  throw new Error("WebSocket Servers can not be created in the browser!");
-}
-
-// node_modules/@libp2p/websockets/dist/src/websocket-to-conn.js
-init_src3();
-init_from_string();
-var DEFAULT_MAX_BUFFERED_AMOUNT = 1024 * 1024 * 4;
-var DEFAULT_BUFFERED_AMOUNT_POLL_INTERVAL = 10;
-var WebSocketMultiaddrConnection = class extends AbstractMultiaddrConnection {
-  websocket;
-  maxBufferedAmount;
-  checkBufferedAmountTask;
-  constructor(init) {
-    super(init);
-    this.websocket = init.websocket;
-    this.maxBufferedAmount = init.maxBufferedAmount ?? DEFAULT_MAX_BUFFERED_AMOUNT;
-    this.checkBufferedAmountTask = repeatingTask(this.checkBufferedAmount.bind(this), init.bufferedAmountPollInterval ?? DEFAULT_BUFFERED_AMOUNT_POLL_INTERVAL);
-    this.websocket.addEventListener("close", (evt) => {
-      this.log('closed - code %d, reason "%s", wasClean %s', evt.code, evt.reason, evt.wasClean);
-      this.checkBufferedAmountTask.stop();
-      if (!evt.wasClean) {
-        this.onRemoteReset();
-        return;
-      }
-      this.onTransportClosed();
-    }, { once: true });
-    this.websocket.addEventListener("message", (evt) => {
-      try {
-        let buf;
-        if (typeof evt.data === "string") {
-          buf = fromString2(evt.data);
-        } else if (evt.data instanceof ArrayBuffer) {
-          buf = new Uint8Array(evt.data, 0, evt.data.byteLength);
-        } else {
-          this.abort(new Error("Incorrect binary type"));
-          return;
-        }
-        this.onData(buf);
-      } catch (err) {
-        this.log.error("error receiving data - %e", err);
-      }
-    });
-  }
-  sendData(data) {
-    for (const buf of data) {
-      this.websocket.send(buf);
-    }
-    const canSendMore = this.websocket.bufferedAmount < this.maxBufferedAmount;
-    if (!canSendMore) {
-      this.checkBufferedAmountTask.start();
-    }
-    return {
-      sentBytes: data.byteLength,
-      canSendMore
-    };
-  }
-  sendReset() {
-    this.websocket.close(1006);
-  }
-  async sendClose(options) {
-    this.websocket.close();
-    options?.signal?.throwIfAborted();
-  }
-  sendPause() {
-  }
-  sendResume() {
-  }
-  checkBufferedAmount() {
-    this.log("buffered amount now %d", this.websocket.bufferedAmount);
-    if (this.websocket.bufferedAmount === 0) {
-      this.checkBufferedAmountTask.stop();
-      this.safeDispatchEvent("drain");
-    }
-  }
-};
-function webSocketToMaConn(init) {
-  return new WebSocketMultiaddrConnection(init);
-}
-
-// node_modules/@libp2p/websockets/dist/src/index.js
-var WebSockets3 = class {
-  log;
-  init;
-  logger;
-  metrics;
-  components;
-  constructor(components, init = {}) {
-    this.log = components.logger.forComponent("libp2p:websockets");
-    this.logger = components.logger;
-    this.components = components;
-    this.init = init;
-    if (components.metrics != null) {
-      this.metrics = {
-        dialerEvents: components.metrics.registerCounterGroup("libp2p_websockets_dialer_events_total", {
-          label: "event",
-          help: "Total count of WebSockets dialer events by type"
-        })
-      };
-    }
-  }
-  [transportSymbol] = true;
-  [Symbol.toStringTag] = "@libp2p/websockets";
-  [serviceCapabilities] = [
-    "@libp2p/transport"
-  ];
-  async dial(ma, options) {
-    this.log("dialing %s", ma);
-    options = options ?? {};
-    const maConn = webSocketToMaConn({
-      websocket: await this._connect(ma, options),
-      remoteAddr: ma,
-      metrics: this.metrics?.dialerEvents,
-      direction: "outbound",
-      log: this.components.logger.forComponent("libp2p:websockets:connection"),
-      maxBufferedAmount: this.init.maxBufferedAmount,
-      bufferedAmountPollInterval: this.init.bufferedAmountPollInterval
-    });
-    this.log("new outbound connection %s", maConn.remoteAddr);
-    const conn = await options.upgrader.upgradeOutbound(maConn, options);
-    this.log("outbound connection %s upgraded", maConn.remoteAddr);
-    return conn;
-  }
-  async _connect(ma, options) {
-    options?.signal?.throwIfAborted();
-    const uri = multiaddrToUri(ma);
-    this.log("create websocket connection to %s", uri);
-    const websocket = new WebSocket(uri);
-    websocket.binaryType = "arraybuffer";
-    try {
-      options.onProgress?.(new CustomProgressEvent("websockets:open-connection"));
-      await pEvent(websocket, "open", options);
-    } catch (err) {
-      if (options.signal?.aborted) {
-        this.metrics?.dialerEvents.increment({ abort: true });
-        throw new ConnectionFailedError(`Could not connect to ${uri}`);
-      } else {
-        this.metrics?.dialerEvents.increment({ error: true });
-      }
-      try {
-        websocket.close();
-      } catch {
-      }
-      throw err;
-    }
-    this.log("connected %s", ma);
-    this.metrics?.dialerEvents.increment({ connect: true });
-    return websocket;
-  }
-  /**
-   * Creates a WebSockets listener. The provided `handler` function will be called
-   * anytime a new incoming Connection has been successfully upgraded via
-   * `upgrader.upgradeInbound`
-   */
-  createListener(options) {
-    return createListener2({
-      logger: this.logger,
-      events: this.components.events,
-      metrics: this.components.metrics
-    }, {
-      ...this.init,
-      ...options
-    });
-  }
-  listenFilter(multiaddrs) {
-    return multiaddrs.filter((ma) => WebSockets.exactMatch(ma) || WebSocketsSecure.exactMatch(ma));
-  }
-  dialFilter(multiaddrs) {
-    return this.listenFilter(multiaddrs);
-  }
-};
-function webSockets(init = {}) {
-  return (components) => {
-    return new WebSockets3(components, init);
-  };
-}
-
 // node_modules/@libp2p/webrtc/node_modules/@libp2p/interface/dist/src/peer-id.js
 var peerIdSymbol3 = /* @__PURE__ */ Symbol.for("@libp2p/peer-id");
 
@@ -53277,7 +52918,7 @@ var QUIC3 = fmt3(_QUIC3);
 var QUIC_V13 = fmt3(_QUIC_V13);
 var _WEB3 = or4(_IP_OR_DOMAIN3, _TCP3, _UDP3, _QUIC3, _QUIC_V13);
 var _WebSockets3 = or4(and3(_WEB3, code5(CODE_WS3), optional3(value3(CODE_P2P3))));
-var WebSockets4 = fmt3(_WebSockets3);
+var WebSockets3 = fmt3(_WebSockets3);
 var _WebSocketsSecure3 = or4(and3(_WEB3, code5(CODE_WSS3), optional3(value3(CODE_P2P3))), and3(_WEB3, code5(CODE_TLS3), optional3(value3(CODE_SNI3)), code5(CODE_WS3), optional3(value3(CODE_P2P3))));
 var WebSocketsSecure3 = fmt3(_WebSocketsSecure3);
 var _WebRTCDirect3 = and3(_UDP3, code5(CODE_WEBRTC_DIRECT3), optional3(value3(CODE_CERTHASH3)), optional3(value3(CODE_CERTHASH3)), optional3(value3(CODE_P2P3)));
@@ -58423,6 +58064,365 @@ var ConnectionUpgrader = class {
   }
 };
 
+// node_modules/@libp2p/websockets/dist/src/index.js
+init_src2();
+
+// node_modules/@multiformats/multiaddr-to-uri/dist/src/index.js
+var ASSUME_HTTP_CODES = [
+  CODE_TCP,
+  CODE_DNS,
+  CODE_DNSADDR,
+  CODE_DNS4,
+  CODE_DNS6
+];
+function extractSNI(ma) {
+  return extractTuple("sni", ma)?.value;
+}
+function extractPort(ma) {
+  const port = extractTuple("tcp", ma)?.value;
+  if (port == null) {
+    return "";
+  }
+  return `:${port}`;
+}
+function extractTuple(name3, ma) {
+  return ma.find((component) => component.name === name3);
+}
+function hasTLS(ma) {
+  return ma.some(({ code: code6 }) => code6 === CODE_TLS);
+}
+function interpretNext(head, rest) {
+  const interpreter = interpreters[head.name];
+  if (interpreter == null) {
+    throw new Error(`Can't interpret protocol ${head.name}`);
+  }
+  const restVal = interpreter(head, rest);
+  if (head.code === CODE_IP6) {
+    return `[${restVal}]`;
+  }
+  return restVal;
+}
+var interpreters = {
+  ip4: (head, rest) => head.value,
+  ip6: (head, rest) => {
+    if (rest.length === 0) {
+      return head.value;
+    }
+    return `[${head.value}]`;
+  },
+  tcp: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return `tcp://${interpretNext(tail, rest)}:${head.value}`;
+  },
+  udp: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return `udp://${interpretNext(tail, rest)}:${head.value}`;
+  },
+  dnsaddr: (head, rest) => head.value,
+  dns4: (head, rest) => head.value,
+  dns6: (head, rest) => head.value,
+  dns: (head, rest) => head.value,
+  ipfs: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return `${interpretNext(tail, rest)}`;
+  },
+  p2p: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return `${interpretNext(tail, rest)}`;
+  },
+  http: (head, rest) => {
+    const maHasTLS = hasTLS(rest);
+    const sni = extractSNI(rest);
+    const port = extractPort(rest);
+    if (maHasTLS && sni != null) {
+      return `https://${sni}${port}`;
+    }
+    const protocol = maHasTLS ? "https://" : "http://";
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    let baseVal = interpretNext(tail, rest);
+    baseVal = baseVal?.replace("tcp://", "");
+    return `${protocol}${baseVal}`;
+  },
+  "http-path": (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    const baseVal = interpretNext(tail, rest);
+    const decodedValue = decodeURIComponent(head.value ?? "");
+    return `${baseVal}${decodedValue}`;
+  },
+  tls: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return interpretNext(tail, rest);
+  },
+  sni: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    return interpretNext(tail, rest);
+  },
+  https: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    let baseVal = interpretNext(tail, rest);
+    baseVal = baseVal?.replace("tcp://", "");
+    return `https://${baseVal}`;
+  },
+  ws: (head, rest) => {
+    const maHasTLS = hasTLS(rest);
+    const sni = extractSNI(rest);
+    const port = extractPort(rest);
+    if (maHasTLS && sni != null) {
+      return `wss://${sni}${port}`;
+    }
+    const protocol = maHasTLS ? "wss://" : "ws://";
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    let baseVal = interpretNext(tail, rest);
+    baseVal = baseVal?.replace("tcp://", "");
+    return `${protocol}${baseVal}`;
+  },
+  wss: (head, rest) => {
+    const tail = rest.pop();
+    if (tail == null) {
+      throw new Error("Unexpected end of multiaddr");
+    }
+    let baseVal = interpretNext(tail, rest);
+    baseVal = baseVal?.replace("tcp://", "");
+    return `wss://${baseVal}`;
+  }
+};
+function multiaddrToUri(input, opts2) {
+  const ma = multiaddr(input);
+  const components = ma.getComponents();
+  const head = components.pop();
+  if (head == null) {
+    throw new Error("Unexpected end of multiaddr");
+  }
+  const interpreter = interpreters[head.name];
+  if (interpreter == null) {
+    throw new Error(`No interpreter found for ${head.name}`);
+  }
+  let uri = interpreter(head, components) ?? "";
+  if (opts2?.assumeHttp !== false && ASSUME_HTTP_CODES.includes(head.code)) {
+    uri = uri.replace(/^.*:\/\//, "");
+    if (head.value === "443") {
+      uri = `https://${uri}`;
+    } else {
+      uri = `http://${uri}`;
+    }
+  }
+  if (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("ws://") || uri.startsWith("wss://")) {
+    uri = new URL(uri).toString();
+    if (uri.endsWith("/")) {
+      uri = uri.substring(0, uri.length - 1);
+    }
+  }
+  return uri;
+}
+
+// node_modules/@libp2p/websockets/dist/src/listener.browser.js
+function createListener2() {
+  throw new Error("WebSocket Servers can not be created in the browser!");
+}
+
+// node_modules/@libp2p/websockets/dist/src/websocket-to-conn.js
+init_src3();
+init_from_string();
+var DEFAULT_MAX_BUFFERED_AMOUNT = 1024 * 1024 * 4;
+var DEFAULT_BUFFERED_AMOUNT_POLL_INTERVAL = 10;
+var WebSocketMultiaddrConnection = class extends AbstractMultiaddrConnection {
+  websocket;
+  maxBufferedAmount;
+  checkBufferedAmountTask;
+  constructor(init) {
+    super(init);
+    this.websocket = init.websocket;
+    this.maxBufferedAmount = init.maxBufferedAmount ?? DEFAULT_MAX_BUFFERED_AMOUNT;
+    this.checkBufferedAmountTask = repeatingTask(this.checkBufferedAmount.bind(this), init.bufferedAmountPollInterval ?? DEFAULT_BUFFERED_AMOUNT_POLL_INTERVAL);
+    this.websocket.addEventListener("close", (evt) => {
+      this.log('closed - code %d, reason "%s", wasClean %s', evt.code, evt.reason, evt.wasClean);
+      this.checkBufferedAmountTask.stop();
+      if (!evt.wasClean) {
+        this.onRemoteReset();
+        return;
+      }
+      this.onTransportClosed();
+    }, { once: true });
+    this.websocket.addEventListener("message", (evt) => {
+      try {
+        let buf;
+        if (typeof evt.data === "string") {
+          buf = fromString2(evt.data);
+        } else if (evt.data instanceof ArrayBuffer) {
+          buf = new Uint8Array(evt.data, 0, evt.data.byteLength);
+        } else {
+          this.abort(new Error("Incorrect binary type"));
+          return;
+        }
+        this.onData(buf);
+      } catch (err) {
+        this.log.error("error receiving data - %e", err);
+      }
+    });
+  }
+  sendData(data) {
+    for (const buf of data) {
+      this.websocket.send(buf);
+    }
+    const canSendMore = this.websocket.bufferedAmount < this.maxBufferedAmount;
+    if (!canSendMore) {
+      this.checkBufferedAmountTask.start();
+    }
+    return {
+      sentBytes: data.byteLength,
+      canSendMore
+    };
+  }
+  sendReset() {
+    this.websocket.close(1006);
+  }
+  async sendClose(options) {
+    this.websocket.close();
+    options?.signal?.throwIfAborted();
+  }
+  sendPause() {
+  }
+  sendResume() {
+  }
+  checkBufferedAmount() {
+    this.log("buffered amount now %d", this.websocket.bufferedAmount);
+    if (this.websocket.bufferedAmount === 0) {
+      this.checkBufferedAmountTask.stop();
+      this.safeDispatchEvent("drain");
+    }
+  }
+};
+function webSocketToMaConn(init) {
+  return new WebSocketMultiaddrConnection(init);
+}
+
+// node_modules/@libp2p/websockets/dist/src/index.js
+var WebSockets4 = class {
+  log;
+  init;
+  logger;
+  metrics;
+  components;
+  constructor(components, init = {}) {
+    this.log = components.logger.forComponent("libp2p:websockets");
+    this.logger = components.logger;
+    this.components = components;
+    this.init = init;
+    if (components.metrics != null) {
+      this.metrics = {
+        dialerEvents: components.metrics.registerCounterGroup("libp2p_websockets_dialer_events_total", {
+          label: "event",
+          help: "Total count of WebSockets dialer events by type"
+        })
+      };
+    }
+  }
+  [transportSymbol] = true;
+  [Symbol.toStringTag] = "@libp2p/websockets";
+  [serviceCapabilities] = [
+    "@libp2p/transport"
+  ];
+  async dial(ma, options) {
+    this.log("dialing %s", ma);
+    options = options ?? {};
+    const maConn = webSocketToMaConn({
+      websocket: await this._connect(ma, options),
+      remoteAddr: ma,
+      metrics: this.metrics?.dialerEvents,
+      direction: "outbound",
+      log: this.components.logger.forComponent("libp2p:websockets:connection"),
+      maxBufferedAmount: this.init.maxBufferedAmount,
+      bufferedAmountPollInterval: this.init.bufferedAmountPollInterval
+    });
+    this.log("new outbound connection %s", maConn.remoteAddr);
+    const conn = await options.upgrader.upgradeOutbound(maConn, options);
+    this.log("outbound connection %s upgraded", maConn.remoteAddr);
+    return conn;
+  }
+  async _connect(ma, options) {
+    options?.signal?.throwIfAborted();
+    const uri = multiaddrToUri(ma);
+    this.log("create websocket connection to %s", uri);
+    const websocket = new WebSocket(uri);
+    websocket.binaryType = "arraybuffer";
+    try {
+      options.onProgress?.(new CustomProgressEvent("websockets:open-connection"));
+      await pEvent(websocket, "open", options);
+    } catch (err) {
+      if (options.signal?.aborted) {
+        this.metrics?.dialerEvents.increment({ abort: true });
+        throw new ConnectionFailedError(`Could not connect to ${uri}`);
+      } else {
+        this.metrics?.dialerEvents.increment({ error: true });
+      }
+      try {
+        websocket.close();
+      } catch {
+      }
+      throw err;
+    }
+    this.log("connected %s", ma);
+    this.metrics?.dialerEvents.increment({ connect: true });
+    return websocket;
+  }
+  /**
+   * Creates a WebSockets listener. The provided `handler` function will be called
+   * anytime a new incoming Connection has been successfully upgraded via
+   * `upgrader.upgradeInbound`
+   */
+  createListener(options) {
+    return createListener2({
+      logger: this.logger,
+      events: this.components.events,
+      metrics: this.components.metrics
+    }, {
+      ...this.init,
+      ...options
+    });
+  }
+  listenFilter(multiaddrs) {
+    return multiaddrs.filter((ma) => WebSockets.exactMatch(ma) || WebSocketsSecure.exactMatch(ma));
+  }
+  dialFilter(multiaddrs) {
+    return this.listenFilter(multiaddrs);
+  }
+};
+function webSockets(init = {}) {
+  return (components) => {
+    return new WebSockets4(components, init);
+  };
+}
+
 // src/browser/transport-config.ts
 var DEFAULT_ICE_SERVERS2 = [
   { urls: "stun:stun.l.google.com:19302" },
@@ -62502,6 +62502,30 @@ var OverlayNetwork = class {
   }
 };
 
+// src/browser/websocket-transport.ts
+function isWebSocketMultiaddr(ma) {
+  const str = ma.toString();
+  return str.includes("/ws/") || str.includes("/wss/") || str.endsWith("/ws") || str.endsWith("/wss");
+}
+function webSocketsWithHttpPath() {
+  const baseTransport = webSockets();
+  return (components) => {
+    const transport = baseTransport(components);
+    const originalDialFilter = transport.dialFilter?.bind(transport);
+    transport.dialFilter = (multiaddrs) => {
+      const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
+      const additionalMatches = multiaddrs.filter((ma) => {
+        if (standardMatches.some((m2) => m2.toString() === ma.toString())) {
+          return false;
+        }
+        return isWebSocketMultiaddr(ma);
+      });
+      return [...standardMatches, ...additionalMatches];
+    };
+    return transport;
+  };
+}
+
 // src/browser/browser-node.ts
 var BrowserDHTAdapter = class {
   libp2p;
@@ -62686,7 +62710,8 @@ var BrowserNode = class {
       this.libp2p = await createLibp2p({
         privateKey,
         transports: [
-          webSockets(),
+          // Use custom WebSocket transport that supports http-path for nginx routing
+          webSocketsWithHttpPath(),
           webRTC({
             rtcConfiguration: {
               iceServers: DEFAULT_ICE_SERVERS2
@@ -63471,7 +63496,8 @@ export {
   RelaySelector,
   createBrowserNodeFromConfig,
   createBrowserTransports,
-  fetchBrowserConfig
+  fetchBrowserConfig,
+  webSocketsWithHttpPath
 };
 /*! Bundled license information:
 
