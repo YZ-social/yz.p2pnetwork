@@ -727,63 +727,80 @@ export class BrowserNode {
    * Discover peers by performing DHT lookups
    * 
    * This populates the routing table by doing a self-lookup and random lookups.
+   * Only dials peers we're not already connected to, and respects connection limits.
    */
   private async discoverPeers(): Promise<void> {
     if (!this.libp2p) return;
 
+    // Don't discover if we're at or near connection limit
+    const currentConnections = this.libp2p.getConnections().length;
+    if (currentConnections >= this.config.maxConnections * 0.9) {
+      console.log(`[BrowserNode] Skipping peer discovery - at connection limit (${currentConnections}/${this.config.maxConnections})`);
+      return;
+    }
+
     const dht = this.getDHTService();
     const myPeerId = this.libp2p.peerId;
     
-    console.log('[BrowserNode] Starting peer discovery...');
-    console.log(`[BrowserNode] Current connections: ${this.libp2p.getConnections().length}`);
+    // Get set of already connected peer IDs to avoid redundant dials
+    const connectedPeerIds = new Set<string>();
+    for (const conn of this.libp2p.getConnections()) {
+      connectedPeerIds.add(conn.remotePeer.toString());
+    }
+    
+    console.log(`[BrowserNode] Starting peer discovery... (${connectedPeerIds.size} peers already connected)`);
     
     try {
       // Perform self-lookup to find peers close to us
       const selfKey = myPeerId.toMultihash().bytes;
       let discoveredCount = 0;
-      let eventCount = 0;
+      let newConnectionCount = 0;
       
       for await (const event of dht.getClosestPeers(selfKey)) {
-        eventCount++;
-        console.log(`[BrowserNode] Discovery event ${eventCount}: ${event.name}`);
-        
         if (event.name === 'PEER_RESPONSE') {
-          console.log(`[BrowserNode] PEER_RESPONSE from ${event.from?.toString().slice(0, 16)}..., ${event.closer?.length || 0} closer peers`);
           for (const peer of event.closer) {
             const peerId = peer.id.toString();
-            if (peerId !== myPeerId.toString()) {
-              discoveredCount++;
-              // Filter to dialable addresses and try to connect
-              const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
-              const dialableAddrs = filterDialableAddresses(addrs);
-              
-              console.log(`[BrowserNode] Discovered peer ${peerId.slice(0, 16)}... with ${addrs.length} addrs, ${dialableAddrs.length} dialable`);
-              if (addrs.length > 0) {
-                console.log(`[BrowserNode]   All addrs: ${addrs.join(', ')}`);
-              }
-              if (dialableAddrs.length > 0) {
-                console.log(`[BrowserNode]   Dialable: ${dialableAddrs.join(', ')}`);
-              }
-              
-              if (dialableAddrs.length > 0) {
-                // Try to connect to this peer
-                for (const addr of dialableAddrs) {
-                  try {
-                    await this.libp2p.dial(multiaddr(addr));
-                    console.log(`[BrowserNode] ✅ Connected to discovered peer: ${peerId.slice(0, 16)}...`);
-                    break;
-                  } catch (dialError) {
-                    console.log(`[BrowserNode] ❌ Failed to dial ${addr}: ${dialError}`);
-                  }
-                }
+            
+            // Skip ourselves
+            if (peerId === myPeerId.toString()) continue;
+            
+            // Skip peers we're already connected to
+            if (connectedPeerIds.has(peerId)) {
+              continue;
+            }
+            
+            // Check connection limit before each dial attempt
+            if (this.libp2p.getConnections().length >= this.config.maxConnections) {
+              console.log(`[BrowserNode] Reached connection limit, stopping discovery`);
+              break;
+            }
+            
+            discoveredCount++;
+            
+            // Filter to dialable addresses and try to connect
+            const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+            const dialableAddrs = filterDialableAddresses(addrs);
+            
+            if (dialableAddrs.length > 0) {
+              // Try to connect to this peer (try only first dialable address to save resources)
+              const addr = dialableAddrs[0];
+              try {
+                await this.libp2p.dial(multiaddr(addr));
+                console.log(`[BrowserNode] ✅ Connected to discovered peer: ${peerId.slice(0, 16)}...`);
+                connectedPeerIds.add(peerId); // Track so we don't try again
+                newConnectionCount++;
+              } catch (dialError) {
+                // Don't log every failure - too noisy
+                // Just track that we tried this peer
+                connectedPeerIds.add(peerId);
               }
             }
           }
         }
       }
       
-      console.log(`[BrowserNode] Peer discovery complete: ${eventCount} events, ${discoveredCount} peers discovered`);
-      console.log(`[BrowserNode] Final connections: ${this.libp2p.getConnections().length}`);
+      console.log(`[BrowserNode] Peer discovery complete: discovered ${discoveredCount} new peers, connected to ${newConnectionCount}`);
+      console.log(`[BrowserNode] Total connections: ${this.libp2p.getConnections().length}`);
     } catch (error) {
       console.log(`[BrowserNode] Peer discovery error: ${error}`);
     }
