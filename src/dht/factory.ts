@@ -16,9 +16,61 @@ import { circuitRelayTransport, circuitRelayServer } from '@libp2p/circuit-relay
 import { identify } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
 import { bootstrap } from '@libp2p/bootstrap';
+import type { Transport } from '@libp2p/interface';
+import type { Multiaddr } from '@multiformats/multiaddr';
 
 import { type DHTNodeConfig, DEFAULT_CONFIG, validateConfig } from './config.js';
 import { DHTError, DHTErrorCode } from './errors.js';
+import { isInternalAddress } from '../config/address-utils.js';
+
+/**
+ * Check if a multiaddr contains WebSocket protocols
+ * 
+ * This is a more permissive check than the standard multiaddr-matcher
+ * that allows http-path and other extensions needed for nginx routing.
+ */
+function isWebSocketMultiaddr(ma: Multiaddr): boolean {
+  const str = ma.toString();
+  return str.includes('/ws/') || str.includes('/wss/') || 
+         str.endsWith('/ws') || str.endsWith('/wss');
+}
+
+/**
+ * Create a WebSocket transport with permissive filtering for http-path
+ * 
+ * The standard @libp2p/websockets transport filters out multiaddrs with
+ * http-path because the multiaddr-matcher doesn't recognize it. This custom
+ * transport uses a more permissive filter that accepts any multiaddr containing
+ * /ws or /wss protocols.
+ */
+function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
+  const baseTransport = webSockets();
+  
+  return (components) => {
+    const transport = baseTransport(components) as Transport;
+    
+    // Override the dialFilter to accept http-path multiaddrs
+    const originalDialFilter = transport.dialFilter?.bind(transport);
+    transport.dialFilter = (multiaddrs: Multiaddr[]): Multiaddr[] => {
+      // First try the original filter
+      const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
+      
+      // Then add any WebSocket multiaddrs that weren't matched (e.g., with http-path)
+      const additionalMatches = multiaddrs.filter(ma => {
+        // Skip if already matched by standard filter
+        if (standardMatches.some(m => m.toString() === ma.toString())) {
+          return false;
+        }
+        // Check if it's a WebSocket multiaddr
+        return isWebSocketMultiaddr(ma);
+      });
+      
+      return [...standardMatches, ...additionalMatches];
+    };
+    
+    return transport;
+  };
+}
 
 /**
  * Creates a libp2p node configured with Kademlia DHT support.
@@ -62,10 +114,11 @@ export async function createLibp2pNode(config: DHTNodeConfig): Promise<Libp2p> {
  */
 function buildLibp2pOptions(config: DHTNodeConfig) {
   // Build transports array
+  // Use custom WebSocket transport that supports http-path for nginx routing
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transports: any[] = [
     tcp(),
-    webSockets(),
+    webSocketsWithHttpPath(),
   ];
 
   // Add WebRTC transport if enabled
@@ -96,11 +149,29 @@ function buildLibp2pOptions(config: DHTNodeConfig) {
       // Refresh routing table more frequently
       querySelfInterval: 30000, // 30 seconds
       initialQuerySelfInterval: 5000, // 5 seconds after start
-      // CRITICAL: Allow private addresses in the routing table
-      // By default, kad-dht filters out private addresses (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-      // This breaks peer discovery in Docker networks and private LANs
-      // We use a pass-through mapper that keeps all addresses
-      peerInfoMapper: (peerInfo) => peerInfo,
+      // CRITICAL: Filter out internal addresses from peer info
+      // The peer store may contain internal Docker addresses from connections,
+      // but we only want to advertise public addresses that browsers can dial.
+      // This mapper filters addresses to only include public ones.
+      peerInfoMapper: (peerInfo) => {
+        if (!peerInfo || !peerInfo.multiaddrs) {
+          return peerInfo;
+        }
+        // Filter out internal addresses (Docker IPs, localhost, private ranges)
+        const publicAddrs = peerInfo.multiaddrs.filter((ma: { toString: () => string }) => {
+          const addrStr = ma.toString();
+          return !isInternalAddress(addrStr);
+        });
+        // If we have public addresses, use only those
+        // If no public addresses, keep original (better than nothing for internal network)
+        if (publicAddrs.length > 0) {
+          return {
+            ...peerInfo,
+            multiaddrs: publicAddrs,
+          };
+        }
+        return peerInfo;
+      },
     }),
   };
 
