@@ -680,8 +680,12 @@
                 log('✅ Browser node started successfully!', 'success');
                 log(`Peer ID: ${state.peerId}`, 'info');
                 
+                // Check actual overlay availability (not just config)
+                overlayEnabled = browserNode.isOverlayAvailable();
                 if (overlayEnabled) {
                     log('🔐 Overlay network with E2E encryption is available', 'success');
+                } else if (config.overlayEnabled) {
+                    log('⚠️ Overlay was enabled in config but failed to initialize. Check console for errors.', 'warn');
                 }
 
                 // Start periodic updates
@@ -936,6 +940,8 @@
                 // Update state from real browser node
                 if (browserNode) {
                     const state = browserNode.getState();
+                    // Check overlay availability dynamically
+                    overlayEnabled = browserNode.isOverlayAvailable();
                     updateUI(state);
                     updatePeersList();
                 }

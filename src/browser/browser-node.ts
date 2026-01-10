@@ -632,7 +632,10 @@ export class BrowserNode {
     this.ensureStarted();
     
     if (!this.overlayNetwork) {
-      throw new Error('Overlay network is not enabled. Set enableOverlay: true in config.');
+      const reason = this.config.enableOverlay 
+        ? 'Overlay network failed to initialize. Check console for errors.'
+        : 'Overlay network is not enabled. Set enableOverlay: true in config.';
+      throw new Error(reason);
     }
     
     return this.overlayNetwork.sendMessage(targetPeerId, payload);
@@ -1058,26 +1061,40 @@ export class BrowserNode {
       throw new Error('libp2p must be started before initializing overlay');
     }
 
-    // Create DHT adapter for the overlay network
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.dhtAdapter = new BrowserDHTAdapter(this.libp2p as any);
+    console.log('[BrowserNode] Initializing overlay network...');
 
-    // Create overlay network with the DHT adapter
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.overlayNetwork = new OverlayNetwork(this.dhtAdapter as any);
+    try {
+      // Create DHT adapter for the overlay network
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.dhtAdapter = new BrowserDHTAdapter(this.libp2p as any);
+      console.log('[BrowserNode] Created DHT adapter for overlay');
 
-    // Start the overlay network (this publishes public key to DHT)
-    await this.overlayNetwork.start();
+      // Create overlay network with the DHT adapter
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.overlayNetwork = new OverlayNetwork(this.dhtAdapter as any);
+      console.log('[BrowserNode] Created overlay network instance');
 
-    // Register message handler if one was set before start
-    if (this.messageHandler) {
-      const handler = this.messageHandler;
-      this.overlayNetwork.onMessage((payload: Uint8Array, context: OverlayMessageContext) => {
-        return handler(payload, {
-          originPeerId: context.originPeerId,
-          messageId: context.messageId,
+      // Start the overlay network (this publishes public key to DHT)
+      await this.overlayNetwork.start();
+      console.log('[BrowserNode] Overlay network started successfully');
+
+      // Register message handler if one was set before start
+      if (this.messageHandler) {
+        const handler = this.messageHandler;
+        this.overlayNetwork.onMessage((payload: Uint8Array, context: OverlayMessageContext) => {
+          return handler(payload, {
+            originPeerId: context.originPeerId,
+            messageId: context.messageId,
+          });
         });
-      });
+        console.log('[BrowserNode] Registered message handler with overlay');
+      }
+    } catch (error) {
+      console.error('[BrowserNode] Failed to initialize overlay network:', error);
+      // Don't throw - allow the node to continue without overlay
+      // The overlay can be retried later or user can be notified
+      this.overlayNetwork = null;
+      this.dhtAdapter = null;
     }
   }
 
@@ -1088,6 +1105,15 @@ export class BrowserNode {
    */
   getOverlayNetwork(): OverlayNetwork | null {
     return this.overlayNetwork;
+  }
+
+  /**
+   * Check if overlay network is available and started
+   * 
+   * @returns true if overlay is enabled and successfully initialized
+   */
+  isOverlayAvailable(): boolean {
+    return this.overlayNetwork !== null && this.overlayNetwork.isStarted;
   }
 
   /**
