@@ -522,7 +522,18 @@ export class BrowserNode {
     this.ensureStarted();
     
     const dht = this.getDHTService();
-    await dht.put(key, value);
+    
+    console.log('[BrowserNode] DHT PUT starting...');
+    console.log(`[BrowserNode] Connected peers: ${this.libp2p?.getConnections().length}`);
+    
+    // Log all events during PUT for debugging
+    let putEventCount = 0;
+    for await (const event of dht.put(key, value)) {
+      putEventCount++;
+      console.log(`[BrowserNode] PUT event ${putEventCount}: ${event.name}`, event);
+    }
+    
+    console.log(`[BrowserNode] DHT PUT complete, ${putEventCount} events`);
     
     this.bytesOut += key.length + value.length;
     this.updateState({ bytesOut: this.bytesOut });
@@ -541,14 +552,24 @@ export class BrowserNode {
     
     const dht = this.getDHTService();
     
+    console.log('[BrowserNode] DHT GET starting...');
+    console.log(`[BrowserNode] Connected peers: ${this.libp2p?.getConnections().length}`);
+    
+    // Log all events during GET for debugging
+    let getEventCount = 0;
     for await (const event of dht.get(key)) {
+      getEventCount++;
+      console.log(`[BrowserNode] GET event ${getEventCount}: ${event.name}`, event);
+      
       if (event.name === 'VALUE') {
+        console.log(`[BrowserNode] DHT GET found value after ${getEventCount} events`);
         this.bytesIn += event.value.length;
         this.updateState({ bytesIn: this.bytesIn });
         return event.value;
       }
     }
     
+    console.log(`[BrowserNode] DHT GET complete, ${getEventCount} events, no VALUE found`);
     throw new Error('Key not found in DHT');
   }
 
@@ -714,14 +735,20 @@ export class BrowserNode {
     const myPeerId = this.libp2p.peerId;
     
     console.log('[BrowserNode] Starting peer discovery...');
+    console.log(`[BrowserNode] Current connections: ${this.libp2p.getConnections().length}`);
     
     try {
       // Perform self-lookup to find peers close to us
       const selfKey = myPeerId.toMultihash().bytes;
       let discoveredCount = 0;
+      let eventCount = 0;
       
       for await (const event of dht.getClosestPeers(selfKey)) {
+        eventCount++;
+        console.log(`[BrowserNode] Discovery event ${eventCount}: ${event.name}`);
+        
         if (event.name === 'PEER_RESPONSE') {
+          console.log(`[BrowserNode] PEER_RESPONSE from ${event.from?.toString().slice(0, 16)}..., ${event.closer?.length || 0} closer peers`);
           for (const peer of event.closer) {
             const peerId = peer.id.toString();
             if (peerId !== myPeerId.toString()) {
@@ -730,15 +757,23 @@ export class BrowserNode {
               const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
               const dialableAddrs = filterDialableAddresses(addrs);
               
+              console.log(`[BrowserNode] Discovered peer ${peerId.slice(0, 16)}... with ${addrs.length} addrs, ${dialableAddrs.length} dialable`);
+              if (addrs.length > 0) {
+                console.log(`[BrowserNode]   All addrs: ${addrs.join(', ')}`);
+              }
+              if (dialableAddrs.length > 0) {
+                console.log(`[BrowserNode]   Dialable: ${dialableAddrs.join(', ')}`);
+              }
+              
               if (dialableAddrs.length > 0) {
                 // Try to connect to this peer
                 for (const addr of dialableAddrs) {
                   try {
                     await this.libp2p.dial(multiaddr(addr));
-                    console.log(`[BrowserNode] Connected to discovered peer: ${peerId.slice(0, 16)}...`);
+                    console.log(`[BrowserNode] ✅ Connected to discovered peer: ${peerId.slice(0, 16)}...`);
                     break;
-                  } catch {
-                    // Try next address
+                  } catch (dialError) {
+                    console.log(`[BrowserNode] ❌ Failed to dial ${addr}: ${dialError}`);
                   }
                 }
               }
@@ -747,7 +782,8 @@ export class BrowserNode {
         }
       }
       
-      console.log(`[BrowserNode] Peer discovery complete, found ${discoveredCount} peers`);
+      console.log(`[BrowserNode] Peer discovery complete: ${eventCount} events, ${discoveredCount} peers discovered`);
+      console.log(`[BrowserNode] Final connections: ${this.libp2p.getConnections().length}`);
     } catch (error) {
       console.log(`[BrowserNode] Peer discovery error: ${error}`);
     }
