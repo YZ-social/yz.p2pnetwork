@@ -62527,6 +62527,30 @@ function webSocketsWithHttpPath() {
 }
 
 // src/browser/browser-node.ts
+function canDialAddress(addr) {
+  const privatePatterns = [
+    /\/ip4\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/192\.168\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/127\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+    /\/dns4\/localhost\//,
+    /\/dns\/localhost\//,
+    /\/dns4\/libp2p-bootstrap\//,
+    /\/dns4\/dht-node-\d+\//
+  ];
+  for (const pattern of privatePatterns) {
+    if (pattern.test(addr)) {
+      return false;
+    }
+  }
+  const hasWss = addr.includes("/wss/") || addr.endsWith("/wss");
+  const hasWebRTC = addr.includes("/webrtc/") || addr.includes("/webrtc-direct/");
+  const hasCircuitRelay = addr.includes("/p2p-circuit/") || addr.includes("/p2p-circuit");
+  return hasWss || hasWebRTC || hasCircuitRelay;
+}
+function filterDialableAddresses(addrs) {
+  return addrs.filter(canDialAddress);
+}
 var BrowserDHTAdapter = class {
   libp2p;
   _peerId;
@@ -62646,6 +62670,7 @@ var BrowserNode = class {
   stateCallbacks = [];
   messageHandler = null;
   connectionPruneTimer = null;
+  peerDiscoveryTimer = null;
   bytesIn = 0;
   bytesOut = 0;
   /**
@@ -62740,12 +62765,14 @@ var BrowserNode = class {
         peerId: peerId.toString()
       });
       await this.bootstrap();
+      await this.discoverPeers();
       if (this.config.enableOverlay) {
         await this.initializeOverlay();
       }
       this.setupActivityMonitoring();
       this.startConnectionPruning();
       this.initializeConnectionUpgrader();
+      this.startPeriodicPeerDiscovery();
     } catch (error) {
       this.updateState({ status: "disconnected" });
       throw error;
@@ -62765,6 +62792,10 @@ var BrowserNode = class {
     if (this.connectionPruneTimer) {
       clearInterval(this.connectionPruneTimer);
       this.connectionPruneTimer = null;
+    }
+    if (this.peerDiscoveryTimer) {
+      clearInterval(this.peerDiscoveryTimer);
+      this.peerDiscoveryTimer = null;
     }
     this.connectionUpgrader.stop();
     this.connectionUpgrader.clear();
@@ -62848,8 +62879,10 @@ var BrowserNode = class {
   /**
    * Get the closest peers to a key
    * 
+   * Filters returned addresses to only include those dialable by browsers.
+   * 
    * @param key - The key to find closest peers for
-   * @yields PeerInfo for each peer found
+   * @yields PeerInfo for each peer found (with filtered addresses)
    */
   async *getClosestPeers(key) {
     this.ensureStarted();
@@ -62861,9 +62894,11 @@ var BrowserNode = class {
           const peerId = peer.id.toString();
           if (!seen.has(peerId)) {
             seen.add(peerId);
+            const allAddrs = peer.multiaddrs.map((ma) => ma.toString());
+            const dialableAddrs = filterDialableAddresses(allAddrs);
             yield {
               id: peerId,
-              multiaddrs: peer.multiaddrs.map((ma) => ma.toString())
+              multiaddrs: dialableAddrs
             };
           }
         }
@@ -62872,9 +62907,11 @@ var BrowserNode = class {
         const peerId = event.peer.id.toString();
         if (!seen.has(peerId)) {
           seen.add(peerId);
+          const allAddrs = event.peer.multiaddrs.map((ma) => ma.toString());
+          const dialableAddrs = filterDialableAddresses(allAddrs);
           yield {
             id: peerId,
-            multiaddrs: event.peer.multiaddrs.map((ma) => ma.toString())
+            multiaddrs: dialableAddrs
           };
         }
       }
@@ -62968,6 +63005,56 @@ var BrowserNode = class {
     if (connectedCount === 0 && this.config.bootstrapUrls.length > 0) {
       throw new Error(`Failed to connect to any bootstrap peers. Attempted ${this.config.bootstrapUrls.length} peer(s).`);
     }
+  }
+  /**
+   * Discover peers by performing DHT lookups
+   * 
+   * This populates the routing table by doing a self-lookup and random lookups.
+   */
+  async discoverPeers() {
+    if (!this.libp2p) return;
+    const dht = this.getDHTService();
+    const myPeerId = this.libp2p.peerId;
+    console.log("[BrowserNode] Starting peer discovery...");
+    try {
+      const selfKey = myPeerId.toMultihash().bytes;
+      let discoveredCount = 0;
+      for await (const event of dht.getClosestPeers(selfKey)) {
+        if (event.name === "PEER_RESPONSE") {
+          for (const peer of event.closer) {
+            const peerId = peer.id.toString();
+            if (peerId !== myPeerId.toString()) {
+              discoveredCount++;
+              const addrs = peer.multiaddrs.map((ma) => ma.toString());
+              const dialableAddrs = filterDialableAddresses(addrs);
+              if (dialableAddrs.length > 0) {
+                for (const addr of dialableAddrs) {
+                  try {
+                    await this.libp2p.dial(multiaddr(addr));
+                    console.log(`[BrowserNode] Connected to discovered peer: ${peerId.slice(0, 16)}...`);
+                    break;
+                  } catch {
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      console.log(`[BrowserNode] Peer discovery complete, found ${discoveredCount} peers`);
+    } catch (error) {
+      console.log(`[BrowserNode] Peer discovery error: ${error}`);
+    }
+  }
+  /**
+   * Start periodic peer discovery
+   */
+  startPeriodicPeerDiscovery() {
+    this.peerDiscoveryTimer = setInterval(async () => {
+      if (this.libp2p && this.state.status === "connected") {
+        await this.discoverPeers();
+      }
+    }, 6e4);
   }
   /**
    * Set up libp2p event listeners
@@ -63494,9 +63581,11 @@ export {
   DEFAULT_TRANSPORT_CONFIG,
   PeerIdManager,
   RelaySelector,
+  canDialAddress,
   createBrowserNodeFromConfig,
   createBrowserTransports,
   fetchBrowserConfig,
+  filterDialableAddresses,
   webSocketsWithHttpPath
 };
 /*! Bundled license information:

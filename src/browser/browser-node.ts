@@ -277,6 +277,7 @@ export class BrowserNode {
   private messageHandler: MessageHandler | null = null;
   
   private connectionPruneTimer: ReturnType<typeof setInterval> | null = null;
+  private peerDiscoveryTimer: ReturnType<typeof setInterval> | null = null;
   private bytesIn = 0;
   private bytesOut = 0;
 
@@ -398,6 +399,9 @@ export class BrowserNode {
       // Bootstrap to server nodes
       await this.bootstrap();
 
+      // Perform initial peer discovery to populate routing table
+      await this.discoverPeers();
+
       // Initialize overlay network if enabled
       // Requirements: 5.1, 5.2
       if (this.config.enableOverlay) {
@@ -413,6 +417,9 @@ export class BrowserNode {
       // Initialize and start connection upgrader
       // Requirements: 3.4, 10.6
       this.initializeConnectionUpgrader();
+
+      // Start periodic peer discovery
+      this.startPeriodicPeerDiscovery();
 
     } catch (error) {
       this.updateState({ status: 'disconnected' });
@@ -436,6 +443,12 @@ export class BrowserNode {
     if (this.connectionPruneTimer) {
       clearInterval(this.connectionPruneTimer);
       this.connectionPruneTimer = null;
+    }
+
+    // Stop peer discovery
+    if (this.peerDiscoveryTimer) {
+      clearInterval(this.peerDiscoveryTimer);
+      this.peerDiscoveryTimer = null;
     }
 
     // Stop connection upgrader
@@ -687,6 +700,69 @@ export class BrowserNode {
     if (connectedCount === 0 && this.config.bootstrapUrls.length > 0) {
       throw new Error(`Failed to connect to any bootstrap peers. Attempted ${this.config.bootstrapUrls.length} peer(s).`);
     }
+  }
+
+  /**
+   * Discover peers by performing DHT lookups
+   * 
+   * This populates the routing table by doing a self-lookup and random lookups.
+   */
+  private async discoverPeers(): Promise<void> {
+    if (!this.libp2p) return;
+
+    const dht = this.getDHTService();
+    const myPeerId = this.libp2p.peerId;
+    
+    console.log('[BrowserNode] Starting peer discovery...');
+    
+    try {
+      // Perform self-lookup to find peers close to us
+      const selfKey = myPeerId.toMultihash().bytes;
+      let discoveredCount = 0;
+      
+      for await (const event of dht.getClosestPeers(selfKey)) {
+        if (event.name === 'PEER_RESPONSE') {
+          for (const peer of event.closer) {
+            const peerId = peer.id.toString();
+            if (peerId !== myPeerId.toString()) {
+              discoveredCount++;
+              // Filter to dialable addresses and try to connect
+              const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+              const dialableAddrs = filterDialableAddresses(addrs);
+              
+              if (dialableAddrs.length > 0) {
+                // Try to connect to this peer
+                for (const addr of dialableAddrs) {
+                  try {
+                    await this.libp2p.dial(multiaddr(addr));
+                    console.log(`[BrowserNode] Connected to discovered peer: ${peerId.slice(0, 16)}...`);
+                    break;
+                  } catch {
+                    // Try next address
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      console.log(`[BrowserNode] Peer discovery complete, found ${discoveredCount} peers`);
+    } catch (error) {
+      console.log(`[BrowserNode] Peer discovery error: ${error}`);
+    }
+  }
+
+  /**
+   * Start periodic peer discovery
+   */
+  private startPeriodicPeerDiscovery(): void {
+    // Run peer discovery every 60 seconds
+    this.peerDiscoveryTimer = setInterval(async () => {
+      if (this.libp2p && this.state.status === 'connected') {
+        await this.discoverPeers();
+      }
+    }, 60000);
   }
 
   /**
