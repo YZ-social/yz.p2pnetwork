@@ -6,7 +6,7 @@ This implementation fixes the peer discovery issue by ensuring all server-side n
 
 ## Tasks
 
-- [-] 1. Create address utility functions
+- [x] 1. Create address utility functions ✓
   - [x] 1.1 Create `src/config/address-utils.ts` with address generation and validation functions ✓
     - Implement `buildAnnounceAddress(host: string, path: string): string`
     - Implement `validateNodeAddresses(config: NodeAddressConfig): AddressValidationResult`
@@ -22,9 +22,7 @@ This implementation fixes the peer discovery issue by ensuring all server-side n
     - **Property 5: DHT Node Index to Path Mapping**
     - **Validates: Requirements 1.2, 1.3, 1.4, 1.5, 1b.5, 3.1, 3.2, 3.4, 4.3, 5.3, 6.2, 6.4**
 
-- [x] 1. Create address utility functions ✓
-
-- [-] 2. Update DHT node configuration (node.ts)
+- [x] 2. Update DHT node configuration (node.ts) ✓
   - [x] 2.1 Modify node.ts to use `withAnnounceAddresses()` at configuration time ✓
     - Import address utilities
     - Build announce address before creating DHTConfigBuilder
@@ -36,9 +34,7 @@ This implementation fixes the peer discovery issue by ensuring all server-side n
     - Log warning if advertising internal addresses
     - _Requirements: 6.3_
 
-- [x] 2. Update DHT node configuration (node.ts) ✓
-
-- [-] 3. Update bootstrap node configuration (ws-bridge.ts)
+- [x] 3. Update bootstrap node configuration (ws-bridge.ts) ✓
   - [x] 3.1 Modify ws-bridge.ts to use `withAnnounceAddresses()` at configuration time ✓
     - Build announce address as `/dns4/{EXTERNAL_HOST}/tcp/443/wss/http-path/libp2p`
     - Configure before node creation
@@ -47,8 +43,6 @@ This implementation fixes the peer discovery issue by ensuring all server-side n
   - [x] 3.2 Update /browser/config endpoint to return correct bootstrap addresses ✓
     - Ensure bootstrap peer addresses use public format
     - _Requirements: 2.2_
-
-- [x] 3. Update bootstrap node configuration (ws-bridge.ts) ✓
 
 - [x] 4. Checkpoint - Verify server nodes advertise public addresses ✓
   - All property tests pass (32 tests)
@@ -92,6 +86,15 @@ This implementation fixes the peer discovery issue by ensuring all server-side n
     - Connect browser node
     - Verify browser discovers and connects to multiple peers
     - _Requirements: 4.2, 4.4_
+
+- [x] 9. Update DHT factory to use custom WebSocket transport ✓
+  - [x] 9.1 Add webSocketsWithHttpPath() to src/dht/factory.ts ✓
+    - Create custom WebSocket transport that accepts http-path multiaddrs
+    - Override dialFilter to include addresses with http-path component
+    - Replace standard webSockets() with webSocketsWithHttpPath()
+    - _Requirements: 3.3, 4.2_
+    
+  - **Root Cause Fixed**: Server nodes were using standard webSockets() transport which doesn't recognize http-path multiaddr component, causing NoValidAddressesError when trying to dial peers via public addresses
 
 ## Notes
 

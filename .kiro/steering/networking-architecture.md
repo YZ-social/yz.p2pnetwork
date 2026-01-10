@@ -40,6 +40,30 @@ When implementing or modifying DHT node code:
 2. **Do NOT use `addObservedAddr()`** - it doesn't properly propagate to DHT responses
 3. **Announce addresses should NOT include `/p2p/{peerId}`** - libp2p appends it automatically
 4. **Internal Docker connections are only for initial bootstrap** - after that, use public addresses
+5. **Use custom WebSocket transport** - The standard `@libp2p/websockets` transport doesn't recognize `http-path`. Both server nodes (`src/dht/factory.ts`) and browser nodes (`src/browser/websocket-transport.ts`) must use `webSocketsWithHttpPath()` which accepts multiaddrs with the `http-path` component.
+
+### Custom WebSocket Transport
+
+The `http-path` multiaddr component is not recognized by the standard libp2p WebSocket transport. Without a custom transport, nodes get `NoValidAddressesError` when trying to dial peers via public addresses.
+
+```typescript
+// In src/dht/factory.ts - Server nodes
+function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
+  const baseTransport = webSockets();
+  return (components) => {
+    const transport = baseTransport(components);
+    // Override dialFilter to accept http-path multiaddrs
+    transport.dialFilter = (multiaddrs) => {
+      // Accept any multiaddr containing /ws/ or /wss/
+      return multiaddrs.filter(ma => {
+        const str = ma.toString();
+        return str.includes('/ws/') || str.includes('/wss/');
+      });
+    };
+    return transport;
+  };
+}
+```
 
 ### nginx Routing
 

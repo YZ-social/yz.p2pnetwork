@@ -64,6 +64,18 @@ The fix ensures all nodes (bootstrap, DHT nodes) properly advertise their public
 2. THE DHTNode SHALL use the format `/dns4/{EXTERNAL_HOST}/tcp/443/wss/http-path/dht%2Fnode-{NODE_INDEX}` for its announce address
 3. WHEN responding to DHT peer queries, THE DHTNode SHALL return only public addresses for known peers
 4. THE DHTNode SHALL filter out any internal addresses before sharing peer information
+5. THE DHTNode SHALL use a WebSocket transport that recognizes the http-path multiaddr component
+
+### Requirement 3b: WebSocket Transport http-path Support
+
+**User Story:** As a server node, I want to be able to dial other nodes using their public addresses with http-path, so that the DHT routing table can be properly populated.
+
+#### Acceptance Criteria
+
+1. WHEN a server node attempts to dial a peer address containing http-path, THE ServerNode SHALL recognize it as a valid WebSocket address
+2. THE ServerNode SHALL NOT reject addresses with http-path as invalid
+3. WHEN the DHT routing table pings peers, THE DHTNode SHALL successfully dial peers via their public http-path addresses
+4. IF the standard WebSocket transport rejects an address with http-path, THE DHTNode SHALL use a custom transport that accepts it
 
 ### Requirement 4: Peer Discovery Returns Connectable Addresses
 

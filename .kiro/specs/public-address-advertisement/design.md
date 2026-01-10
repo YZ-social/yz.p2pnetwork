@@ -121,6 +121,58 @@ The spec fixes how `node.ts` and `ws-bridge.ts` **use** the environment variable
 
 ## Components
 
+### 0. Custom WebSocket Transport with http-path Support (factory.ts)
+
+**Critical Discovery**: The standard `@libp2p/websockets` transport does not recognize the `http-path` multiaddr component. When server nodes try to dial peers using public addresses like `/dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1`, the transport rejects them as invalid, causing `NoValidAddressesError`.
+
+**Solution**: Both server nodes (via `factory.ts`) and browser nodes (via `websocket-transport.ts`) must use a custom WebSocket transport that accepts multiaddrs with `http-path`:
+
+```typescript
+// In src/dht/factory.ts
+function isWebSocketMultiaddr(ma: Multiaddr): boolean {
+  const str = ma.toString();
+  return str.includes('/ws/') || str.includes('/wss/') || 
+         str.endsWith('/ws') || str.endsWith('/wss');
+}
+
+function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
+  const baseTransport = webSockets();
+  
+  return (components) => {
+    const transport = baseTransport(components) as Transport;
+    
+    // Override dialFilter to accept http-path multiaddrs
+    const originalDialFilter = transport.dialFilter?.bind(transport);
+    transport.dialFilter = (multiaddrs: Multiaddr[]): Multiaddr[] => {
+      const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
+      
+      // Add WebSocket multiaddrs that weren't matched (e.g., with http-path)
+      const additionalMatches = multiaddrs.filter(ma => {
+        if (standardMatches.some(m => m.toString() === ma.toString())) {
+          return false;
+        }
+        return isWebSocketMultiaddr(ma);
+      });
+      
+      return [...standardMatches, ...additionalMatches];
+    };
+    
+    return transport;
+  };
+}
+
+// Use in buildLibp2pOptions:
+const transports: any[] = [
+  tcp(),
+  webSocketsWithHttpPath(),  // NOT webSockets()
+];
+```
+
+Without this fix, server nodes cannot dial each other via public addresses, resulting in:
+- `NoValidAddressesError: The dial request has no valid addresses`
+- DHT routing table stays empty or has only 1 peer
+- DHT store/retrieve operations fail
+
 ### 1. Server Node Configuration (node.ts)
 
 The key change is configuring announce addresses at node creation time, not after start.
