@@ -6,6 +6,8 @@ dist
 
 # Generated files
 nginx/dht-nodes.conf
+public/browser-node.js
+public/browser-node.js.map
 
 # Test output
 test-results/
