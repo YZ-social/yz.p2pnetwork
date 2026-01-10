@@ -6,6 +6,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { multiaddr } from '@multiformats/multiaddr';
 import { DHTNode, DHTConfigBuilder } from '../index.js';
 import { OverlayNetwork } from '../overlay/index.js';
+import { buildAnnounceAddress, validateNodeAddresses, NodeAddressConfig } from '../config/address-utils.js';
 
 // Configuration from environment
 const NODE_ID = process.env.NODE_ID || 'node-0';
@@ -29,6 +30,7 @@ const CROSS_SERVER_BOOTSTRAPS = process.env.CROSS_SERVER_BOOTSTRAPS || '';
 let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
+let announceAddresses: string[] = [];
 
 /**
  * Parse cross-server bootstrap URLs and filter out self-server.
@@ -329,20 +331,36 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
-  // Set announce addresses with ONLY the public WSS address
-  // This ensures all nodes advertise their public address for external connectivity
-  //
-  // We use port-based routing: each node gets a unique port (4001 + NODE_INDEX)
-  // This avoids the complexity of path-based multiaddr which libp2p doesn't support natively.
-  // nginx will route based on port, or we expose ports directly.
-  //
-  // For path-based routing through nginx, we need to NOT set announce addresses
-  // and let peers discover this node through DHT queries. The internal Docker
-  // addresses will be filtered out by libp2p's address filtering.
-  //
-  // For now, we'll use the internal listen address and rely on DHT discovery.
-  // External clients will connect via the bootstrap node which has a public address.
-  console.log(`[${NODE_ID}] Public path: ${PUBLIC_PATH} (path-based routing via nginx)`);
+  // Set announce addresses to the public WSS address via nginx
+  // All nodes MUST advertise their public address so other nodes can connect
+  // nginx routes /dht/node-N to the correct container's WebSocket port
+  // Use http-path to specify the path component for nginx routing
+  // CRITICAL: Must use withAnnounceAddresses() at config time, NOT addObservedAddr() after start
+  if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
+    // Extract path without leading slash for http-path component
+    const pathComponent = PUBLIC_PATH.startsWith('/') ? PUBLIC_PATH.slice(1) : PUBLIC_PATH;
+    const announceAddr = buildAnnounceAddress(EXTERNAL_HOST, pathComponent);
+    announceAddresses = [announceAddr];
+    configBuilder.withAnnounceAddresses(announceAddresses);
+    console.log(`[${NODE_ID}] Configured announce address: ${announceAddr}`);
+    
+    // Validate address configuration
+    const addressConfig: NodeAddressConfig = {
+      listenAddresses: [`/ip4/0.0.0.0/tcp/${LISTEN_PORT}`, `/ip4/0.0.0.0/tcp/${WS_PORT}/ws`],
+      announceAddresses,
+      externalHost: EXTERNAL_HOST,
+      publicPath: PUBLIC_PATH,
+    };
+    const validation = validateNodeAddresses(addressConfig);
+    if (!validation.isValid) {
+      console.warn(`[${NODE_ID}] Address validation warnings:`);
+      for (const warning of validation.warnings) {
+        console.warn(`  - ${warning}`);
+      }
+    }
+  } else {
+    console.warn(`[${NODE_ID}] No public announce address configured (EXTERNAL_HOST=${EXTERNAL_HOST})`);
+  }
 
   // Add bootstrap peers if not bootstrap node
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
@@ -481,6 +499,16 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
       const info = node?.getRoutingTableInfo();
       // Note: We show the public endpoint URL, not a multiaddr (since libp2p doesn't support path-based multiaddrs)
       const publicEndpoint = `wss://${EXTERNAL_HOST}${PUBLIC_PATH}`;
+      
+      // Validate current address configuration
+      const addressConfig: NodeAddressConfig = {
+        listenAddresses: [`/ip4/0.0.0.0/tcp/${LISTEN_PORT}`, `/ip4/0.0.0.0/tcp/${WS_PORT}/ws`],
+        announceAddresses,
+        externalHost: EXTERNAL_HOST,
+        publicPath: PUBLIC_PATH,
+      };
+      const addressValidation = validateNodeAddresses(addressConfig);
+      
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
@@ -489,6 +517,14 @@ dht_uptime_seconds{node="${NODE_ID}"} ${(Date.now() - startTime) / 1000}
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
         publicEndpoint: publicEndpoint,
+        announceAddresses: announceAddresses,
+        isAdvertisingPublicAddress: addressValidation.hasPublicAddress,
+        addressValidation: {
+          isValid: addressValidation.isValid,
+          hasPublicAddress: addressValidation.hasPublicAddress,
+          hasInternalAddress: addressValidation.hasInternalAddress,
+          warnings: addressValidation.warnings,
+        },
         routingTable: info,
         uptime: Date.now() - startTime,
         isBootstrap: IS_BOOTSTRAP,

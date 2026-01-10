@@ -4,7 +4,7 @@
  * Exports all browser-specific functionality for bundling
  */
 
-export { BrowserNode, createBrowserNodeFromConfig, fetchBrowserConfig, BrowserDHTAdapter } from './browser-node.js';
+export { BrowserNode, createBrowserNodeFromConfig, fetchBrowserConfig, BrowserDHTAdapter, canDialAddress, filterDialableAddresses } from './browser-node.js';
 export type { StateChangeCallback, MessageHandler, MessageContext, PeerInfo } from './browser-node.js';
 
 export { PeerIdManager } from './peer-id-manager.js';

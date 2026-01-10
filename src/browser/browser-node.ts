@@ -43,6 +43,60 @@ import { OverlayNetwork, type MessageHandler as OverlayMessageHandler, type Mess
 import { webSocketsWithHttpPath } from './websocket-transport.js';
 
 /**
+ * Check if a browser can dial the given multiaddr.
+ * 
+ * Browsers can only dial:
+ * - WSS addresses (WebSocket Secure)
+ * - WebRTC addresses
+ * - Circuit relay addresses
+ * 
+ * And cannot dial:
+ * - Private IP ranges (172.x.x.x, 10.x.x.x, 192.168.x.x)
+ * - Localhost addresses
+ * - Docker internal DNS names
+ * - Plain TCP addresses
+ * 
+ * @param addr - Multiaddr string to check
+ * @returns true if a browser can dial this address
+ */
+export function canDialAddress(addr: string): boolean {
+  // Check for private/internal addresses
+  const privatePatterns = [
+    /\/ip4\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/192\.168\.\d{1,3}\.\d{1,3}/,
+    /\/ip4\/127\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+    /\/dns4\/localhost\//,
+    /\/dns\/localhost\//,
+    /\/dns4\/libp2p-bootstrap\//,
+    /\/dns4\/dht-node-\d+\//,
+  ];
+  
+  for (const pattern of privatePatterns) {
+    if (pattern.test(addr)) {
+      return false;
+    }
+  }
+  
+  // Check for dialable transports
+  const hasWss = addr.includes('/wss/') || addr.endsWith('/wss');
+  const hasWebRTC = addr.includes('/webrtc/') || addr.includes('/webrtc-direct/');
+  const hasCircuitRelay = addr.includes('/p2p-circuit/') || addr.includes('/p2p-circuit');
+  
+  return hasWss || hasWebRTC || hasCircuitRelay;
+}
+
+/**
+ * Filter a list of multiaddrs to only those dialable by browsers.
+ * 
+ * @param addrs - Array of multiaddr strings
+ * @returns Array of dialable addresses
+ */
+export function filterDialableAddresses(addrs: string[]): string[] {
+  return addrs.filter(canDialAddress);
+}
+
+/**
  * State change callback type
  */
 export type StateChangeCallback = (state: BrowserNodeState) => void;
@@ -488,8 +542,10 @@ export class BrowserNode {
   /**
    * Get the closest peers to a key
    * 
+   * Filters returned addresses to only include those dialable by browsers.
+   * 
    * @param key - The key to find closest peers for
-   * @yields PeerInfo for each peer found
+   * @yields PeerInfo for each peer found (with filtered addresses)
    */
   async *getClosestPeers(key: Uint8Array): AsyncIterable<PeerInfo> {
     this.ensureStarted();
@@ -503,9 +559,12 @@ export class BrowserNode {
           const peerId = peer.id.toString();
           if (!seen.has(peerId)) {
             seen.add(peerId);
+            // Filter addresses to only those dialable by browsers
+            const allAddrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+            const dialableAddrs = filterDialableAddresses(allAddrs);
             yield {
               id: peerId,
-              multiaddrs: peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()),
+              multiaddrs: dialableAddrs,
             };
           }
         }
@@ -514,9 +573,12 @@ export class BrowserNode {
         const peerId = event.peer.id.toString();
         if (!seen.has(peerId)) {
           seen.add(peerId);
+          // Filter addresses to only those dialable by browsers
+          const allAddrs = event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+          const dialableAddrs = filterDialableAddresses(allAddrs);
           yield {
             id: peerId,
-            multiaddrs: event.peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString()),
+            multiaddrs: dialableAddrs,
           };
         }
       }

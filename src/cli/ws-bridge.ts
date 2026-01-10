@@ -13,6 +13,7 @@ import { createServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { DHTNode, DHTConfigBuilder } from '../index.js';
 import { OverlayNetwork } from '../overlay/index.js';
+import { buildAnnounceAddress, validateNodeAddresses, NodeAddressConfig } from '../config/address-utils.js';
 
 const NODE_ID = process.env.NODE_ID || 'bridge';
 const WS_PORT = parseInt(process.env.WS_PORT || '8080', 10);
@@ -40,6 +41,7 @@ const CROSS_SERVER_BOOTSTRAPS = process.env.CROSS_SERVER_BOOTSTRAPS || '';
 let node: DHTNode | null = null;
 let overlay: OverlayNetwork | null = null;
 let startTime = Date.now();
+let announceAddresses: string[] = [];
 const clients = new Map<WebSocket, { id: string; connectedAt: number }>();
 
 // In-memory key-value store for browser clients
@@ -190,13 +192,33 @@ async function main() {
     .withRefreshInterval(30000)
     .withCircuitRelay(true); // Enable circuit relay for NAT traversal
 
-  // NOTE: We do NOT set announce addresses because libp2p multiaddr doesn't support
-  // path-based routing (e.g., /dht/node-1). The nodes will use their internal Docker
-  // addresses for DHT communication. External clients connect via nginx which routes
-  // based on the URL path to the correct container.
-  //
-  // For the bootstrap node, external clients connect via wss://imeyouwe.com/ws
-  // which nginx routes to this container's WebSocket port.
+  // Set announce addresses to the public WSS address via nginx
+  // Bootstrap node uses /libp2p path for native libp2p protocol connections
+  // CRITICAL: Must use withAnnounceAddresses() at config time, NOT addObservedAddr() after start
+  if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
+    // Bootstrap node uses 'libp2p' path for native libp2p connections
+    const announceAddr = buildAnnounceAddress(EXTERNAL_HOST, 'libp2p');
+    announceAddresses = [announceAddr];
+    configBuilder.withAnnounceAddresses(announceAddresses);
+    console.log(`[${NODE_ID}] Configured announce address: ${announceAddr}`);
+    
+    // Validate address configuration
+    const addressConfig: NodeAddressConfig = {
+      listenAddresses: ['/ip4/0.0.0.0/tcp/4001', '/ip4/0.0.0.0/tcp/4002/ws'],
+      announceAddresses,
+      externalHost: EXTERNAL_HOST,
+      publicPath: '/libp2p',
+    };
+    const validation = validateNodeAddresses(addressConfig);
+    if (!validation.isValid) {
+      console.warn(`[${NODE_ID}] Address validation warnings:`);
+      for (const warning of validation.warnings) {
+        console.warn(`  - ${warning}`);
+      }
+    }
+  } else {
+    console.warn(`[${NODE_ID}] No public announce address configured (EXTERNAL_HOST=${EXTERNAL_HOST})`);
+  }
   console.log(`[${NODE_ID}] Public endpoint: wss://${EXTERNAL_HOST}${PUBLIC_PATH}`);
 
   if (!IS_BOOTSTRAP && bootstrapPeers.length > 0) {
@@ -597,6 +619,16 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
       const publicEndpoint = (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') 
         ? `wss://${EXTERNAL_HOST}${PUBLIC_PATH}` 
         : null;
+      
+      // Validate current address configuration
+      const addressConfig: NodeAddressConfig = {
+        listenAddresses: ['/ip4/0.0.0.0/tcp/4001', '/ip4/0.0.0.0/tcp/4002/ws'],
+        announceAddresses,
+        externalHost: EXTERNAL_HOST,
+        publicPath: '/libp2p',
+      };
+      const addressValidation = validateNodeAddresses(addressConfig);
+      
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         nodeId: NODE_ID,
@@ -604,6 +636,14 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
         peerId: node?.peerId.toString(),
         multiaddrs: node?.multiaddrs.map(a => a.toString()),
         publicEndpoint: publicEndpoint,
+        announceAddresses: announceAddresses,
+        isAdvertisingPublicAddress: addressValidation.hasPublicAddress,
+        addressValidation: {
+          isValid: addressValidation.isValid,
+          hasPublicAddress: addressValidation.hasPublicAddress,
+          hasInternalAddress: addressValidation.hasInternalAddress,
+          warnings: addressValidation.warnings,
+        },
         routingTable: info,
         connections: connectionInfo,
         browserClients: clients.size,
@@ -621,6 +661,7 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
       // Returns configuration for browser-native libp2p nodes
       const bootstrapPeers: string[] = [];
       const relayNodes: string[] = [];
+      const dhtNodes: string[] = [];
       
       // Build bootstrap peer multiaddrs from this node
       if (node?.peerId) {
@@ -635,6 +676,24 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
         // Also add as relay node if circuit relay is enabled
         if (EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
           relayNodes.push(`/dns4/${EXTERNAL_HOST}/tcp/443/wss/http-path/libp2p/p2p/${peerId}`);
+        }
+      }
+      
+      // Add connected DHT nodes with their public nginx paths
+      // Browser nodes can connect to these via /dht/node-N paths
+      if (node && EXTERNAL_HOST && EXTERNAL_HOST !== 'localhost') {
+        const routingInfo = node.getRoutingTableInfo();
+        // Get peer IDs from routing table and map to their node index
+        // DHT nodes are named dht-node-1, dht-node-2, etc. and have paths /dht/node-1, /dht/node-2
+        // We need to discover which peer ID maps to which node index
+        // For now, include all connected peers - browser will try to connect via DHT discovery
+        const connectionInfo = node.getConnectionInfo();
+        for (let i = 0; i < Math.min(connectionInfo.connectedPeers.length, 5); i++) {
+          const peerId = connectionInfo.connectedPeers[i];
+          // Add as additional bootstrap peer via the /libp2p path
+          // Note: We can't use /dht/node-N paths because we don't know which peer ID maps to which node
+          // Instead, browser will discover these peers through DHT and connect via circuit relay
+          dhtNodes.push(peerId);
         }
       }
       
@@ -659,6 +718,7 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
         peerIdMode: BROWSER_PEER_ID_MODE,
         bootstrapPeers,
         relayNodes,
+        dhtNodes,  // Peer IDs of DHT nodes for discovery
         maxConnections: BROWSER_MAX_CONNECTIONS,
         dhtEnabled: BROWSER_DHT_ENABLED,
         overlayEnabled: BROWSER_OVERLAY_ENABLED,
