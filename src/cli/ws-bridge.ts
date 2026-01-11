@@ -886,6 +886,45 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
       } catch (err) {
         res.end(JSON.stringify({ error: String(err) }));
       }
+    } else if (req.url === '/debug/protocols') {
+      // Debug endpoint to list protocols this node supports
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      try {
+        const libp2pNode = node?.getLibp2pNode();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const registrar = (libp2pNode as any)?.registrar;
+        const protocols: string[] = [];
+        
+        // Get registered protocols from the registrar
+        if (registrar?.getProtocols) {
+          const protoList = registrar.getProtocols();
+          protocols.push(...protoList);
+        }
+        
+        // Check for circuit relay service
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const services = (libp2pNode as any)?.services;
+        const hasCircuitRelay = !!services?.circuitRelay;
+        
+        // Check if HOP protocol is registered
+        const hasHopProtocol = protocols.some(p => p.includes('/hop'));
+        const hasStopProtocol = protocols.some(p => p.includes('/stop'));
+        
+        res.end(JSON.stringify({
+          nodeId: NODE_ID,
+          peerId: node?.peerId.toString(),
+          protocols,
+          protocolCount: protocols.length,
+          circuitRelay: {
+            serviceExists: hasCircuitRelay,
+            hopProtocolRegistered: hasHopProtocol,
+            stopProtocolRegistered: hasStopProtocol,
+          },
+          services: Object.keys(services || {}),
+        }, null, 2));
+      } catch (err) {
+        res.end(JSON.stringify({ error: String(err) }));
+      }
     } else {
       res.writeHead(404);
       res.end('Not found');
