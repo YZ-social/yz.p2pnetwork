@@ -24,7 +24,9 @@ const IS_BOOTSTRAP = process.env.IS_BOOTSTRAP === 'true';
 const PUBLIC_PATH = process.env.PUBLIC_PATH || '/ws';  // Path for nginx routing (bootstrap uses /ws)
 
 // Browser node configuration
-const BROWSER_PEER_ID_MODE = (process.env.BROWSER_PEER_ID_MODE || 'persistent') as 'persistent' | 'ephemeral';
+// Default to 'ephemeral' so each browser tab gets a unique peer ID (better for testing)
+// Set BROWSER_PEER_ID_MODE=persistent to share peer ID across tabs via localStorage
+const BROWSER_PEER_ID_MODE = (process.env.BROWSER_PEER_ID_MODE || 'ephemeral') as 'persistent' | 'ephemeral';
 const BROWSER_MAX_CONNECTIONS = parseInt(process.env.BROWSER_MAX_CONNECTIONS || '50', 10);
 const BROWSER_DHT_ENABLED = process.env.BROWSER_DHT_ENABLED !== 'false';
 const BROWSER_OVERLAY_ENABLED = process.env.BROWSER_OVERLAY_ENABLED !== 'false';
