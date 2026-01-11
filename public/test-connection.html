@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Connection Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="log"></div>
+    <script type="module">
+        const log = (msg) => {
+            console.log(msg);
+            document.getElementById('log').innerHTML += msg + '<br>';
+        };
+
+        // Test 1: Direct WebSocket to /libp2p
+        log('Test 1: Direct WebSocket connection to wss://imeyouwe.com/libp2p');
+        const ws = new WebSocket('wss://imeyouwe.com/libp2p');
+        ws.onopen = () => log('✅ WebSocket connected!');
+        ws.onerror = (e) => log('❌ WebSocket error: ' + e);
+        ws.onclose = (e) => log('WebSocket closed: code=' + e.code + ', reason=' + e.reason);
+
+        // Test 2: Load browser-node and try to connect
+        setTimeout(async () => {
+            log('');
+            log('Test 2: Loading browser-node module...');
+            try {
+                const module = await import('./browser-node.js?v=' + Date.now());
+                log('✅ Module loaded');
+                
+                const { BrowserNode } = module;
+                log('Creating BrowserNode...');
+                
+                const node = new BrowserNode({
+                    bootstrapUrls: ['/dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWMpuzo5LiHbtmoFBZfRJjNKWiDUouAj2ZeqJ1E1Zjp2t2'],
+                    peerIdMode: 'ephemeral',
+                    maxConnections: 10,
+                    enableCircuitRelay: true,
+                    enableDHT: true,
+                    enableOverlay: false,
+                });
+                
+                log('Starting node...');
+                await node.start();
+                log('✅ Node started! Peer ID: ' + node.getPeerId());
+                
+                const state = node.getState();
+                log('State: ' + JSON.stringify(state));
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+                console.error('Full error:', error);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
