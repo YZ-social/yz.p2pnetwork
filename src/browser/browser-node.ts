@@ -739,21 +739,30 @@ export class BrowserNode {
     // The relay reservation is asynchronous - we need to wait for addresses to appear
     if (this.libp2p && connectedCount > 0) {
       console.log('[BrowserNode] Waiting for relay reservation...');
+      console.log('[BrowserNode] Connected to relay, waiting for identify exchange...');
       
       // Wait for addresses with timeout
-      const maxWaitTime = 10000; // 10 seconds max
+      const maxWaitTime = 15000; // 15 seconds max (increased for identify + reservation)
       const checkInterval = 500; // Check every 500ms
       const startTime = Date.now();
       
       let hasRelayAddr = false;
       let hasWebRTCAddr = false;
+      let lastAddrCount = 0;
       
       while (Date.now() - startTime < maxWaitTime) {
         const myAddrs = this.libp2p.getMultiaddrs();
         hasRelayAddr = myAddrs.some(a => a.toString().includes('/p2p-circuit'));
         hasWebRTCAddr = myAddrs.some(a => a.toString().includes('/webrtc'));
         
+        // Log when address count changes
+        if (myAddrs.length !== lastAddrCount) {
+          console.log(`[BrowserNode] Address count changed: ${lastAddrCount} -> ${myAddrs.length}`);
+          lastAddrCount = myAddrs.length;
+        }
+        
         if (hasRelayAddr || hasWebRTCAddr) {
+          console.log(`[BrowserNode] Got relay/WebRTC addresses after ${Date.now() - startTime}ms`);
           break;
         }
         
@@ -914,6 +923,19 @@ export class BrowserNode {
         if (addrStr.includes('/p2p-circuit') || addrStr.includes('/webrtc')) {
           console.log(`[BrowserNode]   New address: ${addrStr}`);
         }
+      }
+    });
+
+    // Track peer identification - needed for relay discovery
+    this.libp2p.addEventListener('peer:identify', (event) => {
+      const peerId = event.detail.peerId.toString();
+      const protocols = event.detail.protocols || [];
+      console.log(`[BrowserNode] 🔍 Identified peer ${peerId.slice(0, 16)}... with ${protocols.length} protocols`);
+      
+      // Check if this peer supports circuit relay
+      const supportsRelay = protocols.some(p => p.includes('circuit') || p.includes('relay'));
+      if (supportsRelay) {
+        console.log(`[BrowserNode] ✅ Peer ${peerId.slice(0, 16)}... supports circuit relay!`);
       }
     });
   }
