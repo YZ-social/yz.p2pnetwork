@@ -80,6 +80,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/dht-nodes.conf:/etc/nginx/dht-nodes.conf:ro
+      - ./nginx/nginx-main.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./public:/usr/share/nginx/html:ro
     networks:
@@ -87,6 +88,11 @@ services:
     depends_on:
       - bootstrap
     restart: unless-stopped
+    # Increase file descriptor limits for WebSocket connections
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost/health"]
       interval: 30s
