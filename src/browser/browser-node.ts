@@ -731,8 +731,6 @@ export class BrowserNode {
         console.log(`[BrowserNode] Attempting to connect to bootstrap: ${url}`);
         const ma = multiaddr(url);
         console.log(`[BrowserNode] Parsed multiaddr: ${ma.toString()}`);
-        console.log(`[BrowserNode] Multiaddr protocols:`, ma.protoNames());
-        console.log(`[BrowserNode] Multiaddr tuples:`, ma.tuples().map(t => `${t[0]}=${t[1]}`));
         
         // Log available transports
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
