@@ -70,6 +70,13 @@ docker rm -f $(docker ps -aq --filter 'name=libp2p-dht-dht-node-') 2>/dev/null |
 echo "      Done."
 echo ""
 
+# Step 5b: Prune unused containers and images to free memory
+echo "[6b/7] Pruning unused Docker resources..."
+docker container prune -f 2>/dev/null || true
+docker image prune -f 2>/dev/null || true
+echo "      Done."
+echo ""
+
 # Step 6: Start bootstrap node and webserver
 echo "[7/7] Starting bootstrap node and webserver..."
 docker compose up -d bootstrap webserver
