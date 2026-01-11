@@ -901,24 +901,44 @@ relay_bytes_total{node="${NODE_ID}",direction="out"} ${relayBytesOut}
           protocols.push(...protoList);
         }
         
+        // Also try to get protocols from the node's getProtocols method
+        const nodeProtocols: string[] = [];
+        if (libp2pNode?.getProtocols) {
+          const protoList = libp2pNode.getProtocols();
+          nodeProtocols.push(...protoList);
+        }
+        
         // Check for circuit relay service
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const services = (libp2pNode as any)?.services;
         const hasCircuitRelay = !!services?.circuitRelay;
         
         // Check if HOP protocol is registered
-        const hasHopProtocol = protocols.some(p => p.includes('/hop'));
-        const hasStopProtocol = protocols.some(p => p.includes('/stop'));
+        const allProtocols = [...new Set([...protocols, ...nodeProtocols])];
+        const hasHopProtocol = allProtocols.some(p => p.includes('/hop'));
+        const hasStopProtocol = allProtocols.some(p => p.includes('/stop'));
+        
+        // Get circuit relay service details
+        const circuitRelayService = services?.circuitRelay;
+        const circuitRelayProps: string[] = [];
+        if (circuitRelayService) {
+          for (const key in circuitRelayService) {
+            circuitRelayProps.push(key);
+          }
+        }
         
         res.end(JSON.stringify({
           nodeId: NODE_ID,
           peerId: node?.peerId.toString(),
-          protocols,
-          protocolCount: protocols.length,
+          registrarProtocols: protocols,
+          nodeProtocols: nodeProtocols,
+          allProtocols,
+          protocolCount: allProtocols.length,
           circuitRelay: {
             serviceExists: hasCircuitRelay,
             hopProtocolRegistered: hasHopProtocol,
             stopProtocolRegistered: hasStopProtocol,
+            serviceProperties: circuitRelayProps,
           },
           services: Object.keys(services || {}),
         }, null, 2));
