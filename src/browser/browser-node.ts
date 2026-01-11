@@ -735,12 +735,32 @@ export class BrowserNode {
       throw new Error(`Failed to connect to any bootstrap peers. Attempted ${this.config.bootstrapUrls.length} peer(s).`);
     }
 
-    // Log our multiaddrs after connecting to relay - should include circuit relay addresses
-    // These addresses are what other browsers can use to dial us
+    // Wait for relay reservation to be established
+    // The relay reservation is asynchronous - we need to wait for addresses to appear
     if (this.libp2p && connectedCount > 0) {
-      // Wait a moment for relay reservation to be established
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('[BrowserNode] Waiting for relay reservation...');
       
+      // Wait for addresses with timeout
+      const maxWaitTime = 10000; // 10 seconds max
+      const checkInterval = 500; // Check every 500ms
+      const startTime = Date.now();
+      
+      let hasRelayAddr = false;
+      let hasWebRTCAddr = false;
+      
+      while (Date.now() - startTime < maxWaitTime) {
+        const myAddrs = this.libp2p.getMultiaddrs();
+        hasRelayAddr = myAddrs.some(a => a.toString().includes('/p2p-circuit'));
+        hasWebRTCAddr = myAddrs.some(a => a.toString().includes('/webrtc'));
+        
+        if (hasRelayAddr || hasWebRTCAddr) {
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, checkInterval));
+      }
+      
+      // Log final addresses
       const myAddrs = this.libp2p.getMultiaddrs();
       console.log(`[BrowserNode] Our multiaddrs after bootstrap (${myAddrs.length} total):`);
       for (const addr of myAddrs) {
@@ -755,11 +775,9 @@ export class BrowserNode {
       }
       
       // Check if we have relay addresses (required for browser-to-browser)
-      const hasRelayAddr = myAddrs.some(a => a.toString().includes('/p2p-circuit'));
-      const hasWebRTCAddr = myAddrs.some(a => a.toString().includes('/webrtc'));
-      
       if (!hasRelayAddr) {
         console.warn('[BrowserNode] ⚠️ No relay addresses - browser-to-browser connections may not work');
+        console.warn('[BrowserNode] This could mean the relay server rejected the reservation or is at capacity');
       }
       if (!hasWebRTCAddr) {
         console.warn('[BrowserNode] ⚠️ No WebRTC addresses - direct browser connections may not work');
@@ -885,6 +903,18 @@ export class BrowserNode {
       // Untrack disconnected peer from connection upgrader
       const peerId = event.detail.toString();
       this.connectionUpgrader.untrackConnection(peerId);
+    });
+
+    // Track address changes - useful for debugging relay reservations
+    this.libp2p.addEventListener('self:peer:update', (event) => {
+      const addrs = this.libp2p?.getMultiaddrs() || [];
+      console.log(`[BrowserNode] 🔄 Address update - now have ${addrs.length} addresses`);
+      for (const addr of addrs) {
+        const addrStr = addr.toString();
+        if (addrStr.includes('/p2p-circuit') || addrStr.includes('/webrtc')) {
+          console.log(`[BrowserNode]   New address: ${addrStr}`);
+        }
+      }
     });
   }
 
