@@ -749,8 +749,11 @@ export class BrowserNode {
           }
         }
         
+        console.log(`[BrowserNode] Calling libp2p.dial()...`);
+        const dialStartTime = Date.now();
         await this.libp2p.dial(ma);
-        console.log(`[BrowserNode] Successfully connected to: ${url}`);
+        const dialDuration = Date.now() - dialStartTime;
+        console.log(`[BrowserNode] Successfully connected to: ${url} (took ${dialDuration}ms)`);
         connectedCount++;
         
         // Log the protocols supported by the connected peer
