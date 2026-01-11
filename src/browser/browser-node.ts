@@ -19,7 +19,7 @@ import { createLibp2p, type Libp2p } from 'libp2p';
 import { noise } from '@chainsafe/libp2p-noise';
 import { yamux } from '@chainsafe/libp2p-yamux';
 import { kadDHT } from '@libp2p/kad-dht';
-import { identify } from '@libp2p/identify';
+import { identify, identifyPush } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
 import { webRTC } from '@libp2p/webrtc';
@@ -378,12 +378,21 @@ export class BrowserNode {
               iceServers: DEFAULT_ICE_SERVERS,
             },
           }) as any,
+          // Circuit relay transport with automatic relay discovery
+          // The RelayDiscovery class automatically makes reservations on
+          // connected peers that support the circuit v2 HOP protocol
           circuitRelayTransport() as any,
         ],
         connectionEncrypters: [noise()],
         streamMuxers: [yamux()],
         services: {
           identify: identify(),
+          // identifyPush pushes address updates to connected peers when our addresses change
+          // This is critical for relay reservations - when we get a relay address,
+          // we need to tell our peers so they can update their peer store
+          identifyPush: identifyPush({
+            runOnSelfUpdate: true, // Push when our addresses change
+          }),
           ping: ping(),
           dht: kadDHT({
             clientMode: false, // Full DHT participation
@@ -725,6 +734,32 @@ export class BrowserNode {
         await this.libp2p.dial(ma);
         console.log(`[BrowserNode] Successfully connected to: ${url}`);
         connectedCount++;
+        
+        // Log the protocols supported by the connected peer
+        // Extract peer ID from the multiaddr components
+        const components = ma.getComponents();
+        const p2pComponent = components.find(c => c.name === 'p2p');
+        const peerIdStr = p2pComponent?.value;
+        if (peerIdStr) {
+          try {
+            const peerData = await this.libp2p.peerStore.get(peerIdFromString(peerIdStr));
+            const protocols = peerData.protocols || [];
+            console.log(`[BrowserNode] Bootstrap peer protocols (${protocols.length}):`);
+            for (const proto of protocols) {
+              if (proto.includes('circuit') || proto.includes('relay') || proto.includes('hop')) {
+                console.log(`[BrowserNode]   🔌 ${proto}`);
+              }
+            }
+            const hasHop = protocols.some(p => p.includes('/hop'));
+            if (hasHop) {
+              console.log(`[BrowserNode] ✅ Bootstrap supports HOP protocol - relay reservations should work`);
+            } else {
+              console.warn(`[BrowserNode] ⚠️ Bootstrap does NOT support HOP protocol - relay reservations will fail`);
+            }
+          } catch (e) {
+            console.log(`[BrowserNode] Could not get peer protocols: ${e}`);
+          }
+        }
       } catch (error) {
         console.error(`[BrowserNode] Failed to connect to ${url}:`, error);
         errors.push(error instanceof Error ? error : new Error(String(error)));
@@ -932,11 +967,28 @@ export class BrowserNode {
       const protocols = event.detail.protocols || [];
       console.log(`[BrowserNode] 🔍 Identified peer ${peerId.slice(0, 16)}... with ${protocols.length} protocols`);
       
-      // Check if this peer supports circuit relay
-      const supportsRelay = protocols.some(p => p.includes('circuit') || p.includes('relay'));
-      if (supportsRelay) {
-        console.log(`[BrowserNode] ✅ Peer ${peerId.slice(0, 16)}... supports circuit relay!`);
+      // Check if this peer supports circuit relay HOP (server)
+      const hopProtocol = protocols.find(p => p.includes('/hop'));
+      if (hopProtocol) {
+        console.log(`[BrowserNode] ✅ Peer ${peerId.slice(0, 16)}... supports HOP: ${hopProtocol}`);
+        console.log(`[BrowserNode] 📡 Relay discovery should attempt reservation on this peer`);
       }
+      
+      // Check if this peer supports circuit relay STOP (client)
+      const stopProtocol = protocols.find(p => p.includes('/stop'));
+      if (stopProtocol) {
+        console.log(`[BrowserNode] 📥 Peer ${peerId.slice(0, 16)}... supports STOP: ${stopProtocol}`);
+      }
+    });
+
+    // Listen for transport:listening events to see when relay addresses are added
+    this.libp2p.addEventListener('transport:listening', (event) => {
+      console.log(`[BrowserNode] 🎧 Transport listening event:`, event);
+    });
+
+    // Listen for transport:close events
+    this.libp2p.addEventListener('transport:close', (event) => {
+      console.log(`[BrowserNode] 🔇 Transport close event:`, event);
     });
   }
 
