@@ -360,6 +360,16 @@ export class BrowserNode {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.libp2p = await createLibp2p({
         privateKey,
+        addresses: {
+          listen: [
+            // Listen on circuit relay to get a reservation and become dialable via relay
+            // This is REQUIRED for browser-to-browser connectivity
+            '/p2p-circuit',
+            // Listen for incoming WebRTC connections
+            // This enables direct browser-to-browser connections after relay signaling
+            '/webrtc',
+          ],
+        },
         transports: [
           // Use custom WebSocket transport that supports http-path for nginx routing
           webSocketsWithHttpPath() as any,
@@ -723,6 +733,40 @@ export class BrowserNode {
 
     if (connectedCount === 0 && this.config.bootstrapUrls.length > 0) {
       throw new Error(`Failed to connect to any bootstrap peers. Attempted ${this.config.bootstrapUrls.length} peer(s).`);
+    }
+
+    // Log our multiaddrs after connecting to relay - should include circuit relay addresses
+    // These addresses are what other browsers can use to dial us
+    if (this.libp2p && connectedCount > 0) {
+      // Wait a moment for relay reservation to be established
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const myAddrs = this.libp2p.getMultiaddrs();
+      console.log(`[BrowserNode] Our multiaddrs after bootstrap (${myAddrs.length} total):`);
+      for (const addr of myAddrs) {
+        const addrStr = addr.toString();
+        if (addrStr.includes('/p2p-circuit')) {
+          console.log(`[BrowserNode]   📡 Relay address: ${addrStr}`);
+        } else if (addrStr.includes('/webrtc')) {
+          console.log(`[BrowserNode]   🌐 WebRTC address: ${addrStr}`);
+        } else {
+          console.log(`[BrowserNode]   📍 Address: ${addrStr}`);
+        }
+      }
+      
+      // Check if we have relay addresses (required for browser-to-browser)
+      const hasRelayAddr = myAddrs.some(a => a.toString().includes('/p2p-circuit'));
+      const hasWebRTCAddr = myAddrs.some(a => a.toString().includes('/webrtc'));
+      
+      if (!hasRelayAddr) {
+        console.warn('[BrowserNode] ⚠️ No relay addresses - browser-to-browser connections may not work');
+      }
+      if (!hasWebRTCAddr) {
+        console.warn('[BrowserNode] ⚠️ No WebRTC addresses - direct browser connections may not work');
+      }
+      if (hasRelayAddr && hasWebRTCAddr) {
+        console.log('[BrowserNode] ✅ Ready for browser-to-browser connections via relay + WebRTC');
+      }
     }
   }
 
