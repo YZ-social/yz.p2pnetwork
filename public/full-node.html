@@ -420,7 +420,8 @@
         let dhtQueryCount = 0;
         let dhtResponseCount = 0;
         let selectedPeerId = null;
-        let overlayEnabled = false;
+        let overlayAvailable = false;  // Actual availability (initialized successfully)
+        let overlayConfigured = false; // Whether overlay was requested in config
 
         // DOM elements
         const startBtn = document.getElementById('start-btn');
@@ -521,9 +522,17 @@
             totalPeerCount.textContent = state.connectedPeers || 0;
             statPeers.textContent = state.connectedPeers || 0;
 
-            // Overlay status
-            overlayStatus.textContent = overlayEnabled ? 'Enabled' : 'Disabled';
-            overlayStatus.style.color = overlayEnabled ? '#68d391' : '#fc8181';
+            // Overlay status - show actual availability, not just config
+            if (overlayAvailable) {
+                overlayStatus.textContent = 'Ready';
+                overlayStatus.style.color = '#68d391';
+            } else if (overlayConfigured) {
+                overlayStatus.textContent = 'Initializing...';
+                overlayStatus.style.color = '#f6e05e';
+            } else {
+                overlayStatus.textContent = 'Disabled';
+                overlayStatus.style.color = '#a0aec0';
+            }
 
             // Bandwidth
             statDataIn.textContent = formatBytes(state.bytesIn || 0);
@@ -539,7 +548,8 @@
             storeBtn.disabled = !isConnected;
             getBtn.disabled = !isConnected;
             lookupBtn.disabled = !isConnected;
-            echoBtn.disabled = !isConnected || !overlayEnabled;
+            // Echo button only enabled when overlay is actually available (not just configured)
+            echoBtn.disabled = !isConnected || !overlayAvailable;
         }
 
         // Update connected peers list - show FULL peer IDs
@@ -651,7 +661,8 @@
                     enableOverlay: config.overlayEnabled,
                 });
                 
-                overlayEnabled = config.overlayEnabled;
+                overlayConfigured = config.overlayEnabled;
+                overlayAvailable = false;  // Not available until start() completes
                 
                 // Register state change callback
                 browserNode.onStateChange((state) => {
@@ -660,7 +671,7 @@
                 });
 
                 // Register message handler for overlay
-                if (overlayEnabled) {
+                if (overlayConfigured) {
                     browserNode.onMessage(async (payload, context) => {
                         const decoder = new TextDecoder();
                         const message = decoder.decode(payload);
@@ -682,11 +693,13 @@
                 log(`Peer ID: ${state.peerId}`, 'info');
                 
                 // Check actual overlay availability (not just config)
-                overlayEnabled = browserNode.isOverlayAvailable();
-                if (overlayEnabled) {
-                    log('🔐 Overlay network with E2E encryption is available', 'success');
-                } else if (config.overlayEnabled) {
+                overlayAvailable = browserNode.isOverlayAvailable();
+                if (overlayAvailable) {
+                    log('🔐 Overlay network with E2E encryption is ready', 'success');
+                } else if (overlayConfigured) {
                     log('⚠️ Overlay was enabled in config but failed to initialize. Check console for errors.', 'warn');
+                    overlayStatus.textContent = 'Failed';
+                    overlayStatus.style.color = '#fc8181';
                 }
 
                 // Start periodic updates
@@ -738,7 +751,8 @@
                 }
 
                 startTime = null;
-                overlayEnabled = false;
+                overlayAvailable = false;
+                overlayConfigured = false;
                 updateUI(null);
                 updateConnectedPeersList([]);
                 
@@ -942,7 +956,7 @@
                 if (browserNode) {
                     const state = browserNode.getState();
                     // Check overlay availability dynamically
-                    overlayEnabled = browserNode.isOverlayAvailable();
+                    overlayAvailable = browserNode.isOverlayAvailable();
                     updateUI(state);
                     updatePeersList();
                 }
