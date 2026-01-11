@@ -779,7 +779,19 @@ export class BrowserNode {
           }
         }
       } catch (error) {
-        console.error(`[BrowserNode] Failed to connect to ${url}:`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorName = error instanceof Error ? error.name : 'Unknown';
+        const errorStack = error instanceof Error ? error.stack : '';
+        console.error(`[BrowserNode] Failed to connect to ${url}:`);
+        console.error(`[BrowserNode]   Error name: ${errorName}`);
+        console.error(`[BrowserNode]   Error message: ${errorMessage}`);
+        console.error(`[BrowserNode]   Error stack: ${errorStack}`);
+        // Log any additional error properties
+        if (error && typeof error === 'object') {
+          const errorObj = error as Record<string, unknown>;
+          if (errorObj.code) console.error(`[BrowserNode]   Error code: ${errorObj.code}`);
+          if (errorObj.cause) console.error(`[BrowserNode]   Error cause: ${errorObj.cause}`);
+        }
         errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }
