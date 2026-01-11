@@ -731,6 +731,24 @@ export class BrowserNode {
         console.log(`[BrowserNode] Attempting to connect to bootstrap: ${url}`);
         const ma = multiaddr(url);
         console.log(`[BrowserNode] Parsed multiaddr: ${ma.toString()}`);
+        console.log(`[BrowserNode] Multiaddr protocols:`, ma.protoNames());
+        console.log(`[BrowserNode] Multiaddr tuples:`, ma.tuples().map(t => `${t[0]}=${t[1]}`));
+        
+        // Log available transports
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const transports = (this.libp2p as any).components?.transportManager?.transports;
+        if (transports) {
+          console.log(`[BrowserNode] Available transports: ${transports.size}`);
+          for (const [key, transport] of transports) {
+            console.log(`[BrowserNode]   Transport: ${key}`);
+            if (transport.dialFilter) {
+              const filtered = transport.dialFilter([ma]);
+              console.log(`[BrowserNode]   dialFilter result: ${filtered.length} addresses`);
+              filtered.forEach((a: { toString: () => string }) => console.log(`[BrowserNode]     - ${a.toString()}`));
+            }
+          }
+        }
+        
         await this.libp2p.dial(ma);
         console.log(`[BrowserNode] Successfully connected to: ${url}`);
         connectedCount++;
