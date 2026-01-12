@@ -378,8 +378,8 @@ export class BrowserNode {
               iceServers: DEFAULT_ICE_SERVERS,
             },
           }) as any,
-          // Circuit relay transport with automatic relay discovery
-          // The RelayDiscovery class automatically makes reservations on
+          // Circuit relay transport - relay discovery is automatic when listening on /p2p-circuit
+          // The RelayDiscovery class automatically discovers and makes reservations on
           // connected peers that support the circuit v2 HOP protocol
           circuitRelayTransport() as any,
         ],
@@ -408,6 +408,52 @@ export class BrowserNode {
 
       // Start libp2p
       await this.libp2p.start();
+
+      // Log the listen addresses after start
+      console.log('[BrowserNode] 🚀 libp2p started');
+      console.log('[BrowserNode] 📍 Listen addresses configured:', this.libp2p.getMultiaddrs().map(ma => ma.toString()));
+      
+      // Check if we're listening on /p2p-circuit
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const libp2pAny = this.libp2p as any;
+      if (libp2pAny.components?.transportManager?.listeners) {
+        const listeners = libp2pAny.components.transportManager.listeners;
+        console.log(`[BrowserNode] 🎧 Active listeners: ${listeners.size}`);
+        for (const [key, listener] of listeners) {
+          const addrs = listener.getAddrs?.() || [];
+          console.log(`[BrowserNode]   Listener ${key}: ${addrs.length} addresses`);
+          for (const addr of addrs) {
+            console.log(`[BrowserNode]     ${addr.toString()}`);
+          }
+        }
+      }
+      
+      // Check the circuit relay transport's reservation store
+      if (libp2pAny.components?.transportManager?.transports) {
+        const transports = libp2pAny.components.transportManager.transports;
+        for (const [name, transport] of transports) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const t = transport as any;
+          if (t.reservationStore) {
+            console.log(`[BrowserNode] 📋 Circuit relay transport reservation store:`);
+            console.log(`[BrowserNode]   Pending reservations: ${t.reservationStore.pendingReservations?.length || 0}`);
+            console.log(`[BrowserNode]   Current reservations: ${t.reservationStore.reservations?.size || 0}`);
+            
+            // Log the actual pending reservation IDs
+            if (t.reservationStore.pendingReservations?.length > 0) {
+              console.log(`[BrowserNode]   Pending IDs: ${t.reservationStore.pendingReservations.join(', ')}`);
+            }
+          }
+          
+          // Check discovery state
+          if (t.discovery) {
+            console.log(`[BrowserNode] 🔍 Relay discovery state:`);
+            console.log(`[BrowserNode]   Started: ${t.discovery.started}`);
+            console.log(`[BrowserNode]   Running: ${t.discovery.running}`);
+            console.log(`[BrowserNode]   TopologyId: ${t.discovery.topologyId}`);
+          }
+        }
+      }
 
       // Update state with peer ID
       this.updateState({
@@ -853,6 +899,71 @@ export class BrowserNode {
       if (!hasRelayAddr) {
         console.warn('[BrowserNode] ⚠️ No relay addresses - browser-to-browser connections may not work');
         console.warn('[BrowserNode] This could mean the relay server rejected the reservation or is at capacity');
+        
+        // Try manual relay reservation on connected HOP-supporting peers
+        console.log('[BrowserNode] 🔧 Attempting manual relay reservation...');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const reservationStore = (this as any)._reservationStore;
+        if (reservationStore) {
+          // Check current state
+          console.log(`[BrowserNode] 📋 Reservation store state before manual attempt:`);
+          console.log(`[BrowserNode]   Pending: ${reservationStore.pendingReservations?.length || 0}`);
+          console.log(`[BrowserNode]   Current: ${reservationStore.reservations?.size || 0}`);
+          
+          // If no pending reservations, the listener might not have called reserveRelay()
+          // This can happen if the listener wasn't set up correctly
+          if (reservationStore.pendingReservations?.length === 0) {
+            console.log('[BrowserNode] ⚠️ No pending reservations - listener may not have called reserveRelay()');
+            console.log('[BrowserNode] 🔧 Manually calling reserveRelay() to request a reservation slot');
+            try {
+              const reservationId = reservationStore.reserveRelay();
+              console.log(`[BrowserNode] ✅ Created pending reservation: ${reservationId}`);
+              console.log(`[BrowserNode] 📋 Pending reservations now: ${reservationStore.pendingReservations?.length || 0}`);
+            } catch (e) {
+              console.error('[BrowserNode] ❌ Failed to create pending reservation:', e);
+            }
+          }
+          
+          // Now try to add relay on each connected HOP-supporting peer
+          const connections = this.libp2p.getConnections();
+          for (const conn of connections) {
+            const peerId = conn.remotePeer;
+            try {
+              const peerData = await this.libp2p.peerStore.get(peerId);
+              const protocols = peerData.protocols || [];
+              const hasHop = protocols.some(p => p.includes('/hop'));
+              
+              if (hasHop) {
+                console.log(`[BrowserNode] 🔧 Attempting reservation on HOP peer: ${peerId.toString().slice(0, 16)}...`);
+                try {
+                  // Use 'configured' type to bypass the pendingReservations check
+                  const result = await reservationStore.addRelay(peerId, 'configured');
+                  console.log(`[BrowserNode] ✅ Manual reservation successful:`, result);
+                  
+                  // Check addresses again
+                  const newAddrs = this.libp2p.getMultiaddrs();
+                  const newRelayAddrs = newAddrs.filter(a => a.toString().includes('/p2p-circuit'));
+                  if (newRelayAddrs.length > 0) {
+                    console.log(`[BrowserNode] 🎉 Got relay addresses after manual reservation:`);
+                    for (const addr of newRelayAddrs) {
+                      console.log(`[BrowserNode]   ${addr.toString()}`);
+                    }
+                    hasRelayAddr = true;
+                    break; // Got a reservation, stop trying
+                  }
+                } catch (e) {
+                  const errorName = e instanceof Error ? e.name : 'Unknown';
+                  const errorMsg = e instanceof Error ? e.message : String(e);
+                  console.log(`[BrowserNode] ❌ Manual reservation failed on ${peerId.toString().slice(0, 16)}...: ${errorName}: ${errorMsg}`);
+                }
+              }
+            } catch (e) {
+              // Couldn't get peer data, skip
+            }
+          }
+        } else {
+          console.warn('[BrowserNode] ⚠️ Could not access reservation store for manual reservation');
+        }
       }
       if (!hasWebRTCAddr) {
         console.warn('[BrowserNode] ⚠️ No WebRTC addresses - direct browser connections may not work');
@@ -1021,6 +1132,70 @@ export class BrowserNode {
     this.libp2p.addEventListener('transport:close', (event) => {
       console.log(`[BrowserNode] 🔇 Transport close event:`, event);
     });
+
+    // Log all libp2p events for debugging relay issues
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const libp2pAny = this.libp2p as any;
+    
+    // Try to access the circuit relay transport's reservation store
+    if (libp2pAny.components?.transportManager) {
+      console.log('[BrowserNode] 🔧 TransportManager available');
+      const transports = libp2pAny.components.transportManager.transports;
+      if (transports) {
+        for (const [name, transport] of transports) {
+          console.log(`[BrowserNode] 🚗 Transport: ${name}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const t = transport as any;
+          if (t.reservationStore) {
+            console.log('[BrowserNode] 📋 Found reservation store on transport');
+            console.log(`[BrowserNode] 📋 Pending reservations: ${t.reservationStore.pendingReservations?.length || 0}`);
+            console.log(`[BrowserNode] 📋 Current reservations: ${t.reservationStore.reservations?.size || 0}`);
+            
+            // Listen for reservation events
+            t.reservationStore.addEventListener('relay:not-enough-relays', () => {
+              console.log('[BrowserNode] ⚠️ relay:not-enough-relays event fired');
+              console.log(`[BrowserNode] 📋 Pending reservations: ${t.reservationStore.pendingReservations?.length || 0}`);
+              console.log(`[BrowserNode] 📋 Current reservations: ${t.reservationStore.reservations?.size || 0}`);
+            });
+            t.reservationStore.addEventListener('relay:found-enough-relays', () => {
+              console.log('[BrowserNode] ✅ relay:found-enough-relays event fired');
+              console.log(`[BrowserNode] 📋 Pending reservations: ${t.reservationStore.pendingReservations?.length || 0}`);
+              console.log(`[BrowserNode] 📋 Current reservations: ${t.reservationStore.reservations?.size || 0}`);
+            });
+            t.reservationStore.addEventListener('relay:created-reservation', (evt: CustomEvent) => {
+              console.log('[BrowserNode] 🎉 relay:created-reservation event fired:', evt.detail);
+              // Log the new addresses
+              const addrs = this.libp2p?.getMultiaddrs() || [];
+              console.log(`[BrowserNode] 📍 New addresses after reservation: ${addrs.length}`);
+              for (const addr of addrs) {
+                console.log(`[BrowserNode]   ${addr.toString()}`);
+              }
+            });
+            t.reservationStore.addEventListener('relay:removed', (evt: CustomEvent) => {
+              console.log('[BrowserNode] ❌ relay:removed event fired:', evt.detail);
+            });
+            
+            // Store reference for manual reservation attempt
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this as any)._reservationStore = t.reservationStore;
+          }
+          
+          // Check for relay discovery
+          if (t.discovery) {
+            console.log('[BrowserNode] 🔍 Found relay discovery on transport');
+            t.discovery.addEventListener('relay:discover', (evt: CustomEvent) => {
+              const peerId = evt.detail?.toString?.() || 'unknown';
+              console.log(`[BrowserNode] 🔍 relay:discover event fired for peer: ${peerId.slice(0, 16)}...`);
+              console.log(`[BrowserNode] 📋 Pending reservations at discovery: ${t.reservationStore.pendingReservations?.length || 0}`);
+            });
+            
+            // Store reference for manual discovery trigger
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this as any)._relayDiscovery = t.discovery;
+          }
+        }
+      }
+    }
   }
 
   /**
