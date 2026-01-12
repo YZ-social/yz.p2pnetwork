@@ -900,73 +900,8 @@ export class BrowserNode {
       
       // Check if we have relay addresses (required for browser-to-browser)
       if (!hasRelayAddr) {
-        console.warn('[BrowserNode] ⚠️ No relay addresses - browser-to-browser connections may not work');
+        console.warn('[BrowserNode] ⚠️ No relay addresses after waiting - will retry on peer:identify');
         console.warn('[BrowserNode] This could mean the relay server rejected the reservation or is at capacity');
-        
-        // Try manual relay reservation on connected HOP-supporting peers
-        console.log('[BrowserNode] 🔧 Attempting manual relay reservation...');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const reservationStore = (this as any)._reservationStore;
-        if (reservationStore) {
-          // Check current state
-          console.log(`[BrowserNode] 📋 Reservation store state before manual attempt:`);
-          console.log(`[BrowserNode]   Pending: ${reservationStore.pendingReservations?.length || 0}`);
-          console.log(`[BrowserNode]   Current: ${reservationStore.reservations?.size || 0}`);
-          
-          // If no pending reservations, the listener might not have called reserveRelay()
-          // This can happen if the listener wasn't set up correctly
-          if (reservationStore.pendingReservations?.length === 0) {
-            console.log('[BrowserNode] ⚠️ No pending reservations - listener may not have called reserveRelay()');
-            console.log('[BrowserNode] 🔧 Manually calling reserveRelay() to request a reservation slot');
-            try {
-              const reservationId = reservationStore.reserveRelay();
-              console.log(`[BrowserNode] ✅ Created pending reservation: ${reservationId}`);
-              console.log(`[BrowserNode] 📋 Pending reservations now: ${reservationStore.pendingReservations?.length || 0}`);
-            } catch (e) {
-              console.error('[BrowserNode] ❌ Failed to create pending reservation:', e);
-            }
-          }
-          
-          // Now try to add relay on each connected HOP-supporting peer
-          const connections = this.libp2p.getConnections();
-          for (const conn of connections) {
-            const peerId = conn.remotePeer;
-            try {
-              const peerData = await this.libp2p.peerStore.get(peerId);
-              const protocols = peerData.protocols || [];
-              const hasHop = protocols.some(p => p.includes('/hop'));
-              
-              if (hasHop) {
-                console.log(`[BrowserNode] 🔧 Attempting reservation on HOP peer: ${peerId.toString().slice(0, 16)}...`);
-                try {
-                  // Use 'configured' type to bypass the pendingReservations check
-                  const result = await reservationStore.addRelay(peerId, 'configured');
-                  console.log(`[BrowserNode] ✅ Manual reservation successful:`, result);
-                  
-                  // Check addresses again
-                  const newAddrs = this.libp2p.getMultiaddrs();
-                  const newRelayAddrs = newAddrs.filter(a => a.toString().includes('/p2p-circuit'));
-                  if (newRelayAddrs.length > 0) {
-                    console.log(`[BrowserNode] 🎉 Got relay addresses after manual reservation:`);
-                    for (const addr of newRelayAddrs) {
-                      console.log(`[BrowserNode]   ${addr.toString()}`);
-                    }
-                    hasRelayAddr = true;
-                    break; // Got a reservation, stop trying
-                  }
-                } catch (e) {
-                  const errorName = e instanceof Error ? e.name : 'Unknown';
-                  const errorMsg = e instanceof Error ? e.message : String(e);
-                  console.log(`[BrowserNode] ❌ Manual reservation failed on ${peerId.toString().slice(0, 16)}...: ${errorName}: ${errorMsg}`);
-                }
-              }
-            } catch (e) {
-              // Couldn't get peer data, skip
-            }
-          }
-        } else {
-          console.warn('[BrowserNode] ⚠️ Could not access reservation store for manual reservation');
-        }
       }
       if (!hasWebRTCAddr) {
         console.warn('[BrowserNode] ⚠️ No WebRTC addresses - direct browser connections may not work');
@@ -1107,7 +1042,8 @@ export class BrowserNode {
     });
 
     // Track peer identification - needed for relay discovery
-    this.libp2p.addEventListener('peer:identify', (event) => {
+    // This is where we can manually trigger reservation if automatic discovery fails
+    this.libp2p.addEventListener('peer:identify', async (event) => {
       const peerId = event.detail.peerId.toString();
       const protocols = event.detail.protocols || [];
       console.log(`[BrowserNode] 🔍 Identified peer ${peerId.slice(0, 16)}... with ${protocols.length} protocols`);
@@ -1117,6 +1053,56 @@ export class BrowserNode {
       if (hopProtocol) {
         console.log(`[BrowserNode] ✅ Peer ${peerId.slice(0, 16)}... supports HOP: ${hopProtocol}`);
         console.log(`[BrowserNode] 📡 Relay discovery should attempt reservation on this peer`);
+        
+        // Check if we already have relay addresses
+        const currentAddrs = this.libp2p?.getMultiaddrs() || [];
+        const hasRelayAddr = currentAddrs.some(a => a.toString().includes('/p2p-circuit'));
+        
+        if (!hasRelayAddr) {
+          console.log(`[BrowserNode] 🔧 No relay addresses yet, attempting manual reservation on HOP peer...`);
+          
+          // Try to manually trigger reservation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const reservationStore = (this as any)._reservationStore;
+          if (reservationStore) {
+            try {
+              // Check pending reservations
+              const pendingCount = reservationStore.pendingReservations?.length || 0;
+              console.log(`[BrowserNode] 📋 Pending reservations: ${pendingCount}`);
+              
+              // If no pending reservations, create one first
+              if (pendingCount === 0) {
+                console.log(`[BrowserNode] 🔧 Creating pending reservation slot...`);
+                const reservationId = reservationStore.reserveRelay();
+                console.log(`[BrowserNode] ✅ Created pending reservation: ${reservationId}`);
+              }
+              
+              // Now try to add the relay
+              const targetPeerId = peerIdFromString(peerId);
+              console.log(`[BrowserNode] 🔧 Calling addRelay for ${peerId.slice(0, 16)}...`);
+              const result = await reservationStore.addRelay(targetPeerId, 'discovered');
+              console.log(`[BrowserNode] 🎉 Manual reservation successful!`, result);
+              
+              // Check addresses again
+              const newAddrs = this.libp2p?.getMultiaddrs() || [];
+              console.log(`[BrowserNode] 📍 Addresses after manual reservation: ${newAddrs.length}`);
+              for (const addr of newAddrs) {
+                console.log(`[BrowserNode]   ${addr.toString()}`);
+              }
+            } catch (e) {
+              const errorName = e instanceof Error ? e.name : 'Unknown';
+              const errorMsg = e instanceof Error ? e.message : String(e);
+              // HadEnoughRelaysError is expected if we already have a reservation
+              if (errorName !== 'HadEnoughRelaysError') {
+                console.log(`[BrowserNode] ⚠️ Manual reservation attempt: ${errorName}: ${errorMsg}`);
+              } else {
+                console.log(`[BrowserNode] ℹ️ Already have enough relays (HadEnoughRelaysError)`);
+              }
+            }
+          } else {
+            console.log(`[BrowserNode] ⚠️ Reservation store not available for manual reservation`);
+          }
+        }
       }
       
       // Check if this peer supports circuit relay STOP (client)
