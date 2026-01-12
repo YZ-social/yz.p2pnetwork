@@ -409,6 +409,9 @@ export class BrowserNode {
       // Start libp2p
       await this.libp2p.start();
 
+      // Capture reservation store reference AFTER start (transports are now initialized)
+      this.captureReservationStoreReference();
+
       // Log the listen addresses after start
       console.log('[BrowserNode] 🚀 libp2p started');
       console.log('[BrowserNode] 📍 Listen addresses configured:', this.libp2p.getMultiaddrs().map(ma => ma.toString()));
@@ -1134,12 +1137,24 @@ export class BrowserNode {
     });
 
     // Log all libp2p events for debugging relay issues
+    // Note: Transport-specific setup (reservation store, discovery) is done in
+    // captureReservationStoreReference() which is called AFTER libp2p.start()
+  }
+
+  /**
+   * Capture reference to the circuit relay transport's reservation store
+   * This must be called AFTER libp2p.start() because transports are only
+   * fully initialized after start.
+   */
+  private captureReservationStoreReference(): void {
+    if (!this.libp2p) return;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const libp2pAny = this.libp2p as any;
     
     // Try to access the circuit relay transport's reservation store
     if (libp2pAny.components?.transportManager) {
-      console.log('[BrowserNode] 🔧 TransportManager available');
+      console.log('[BrowserNode] 🔧 TransportManager available (after start)');
       const transports = libp2pAny.components.transportManager.transports;
       if (transports) {
         for (const [name, transport] of transports) {
@@ -1183,10 +1198,12 @@ export class BrowserNode {
           // Check for relay discovery
           if (t.discovery) {
             console.log('[BrowserNode] 🔍 Found relay discovery on transport');
+            console.log(`[BrowserNode] 🔍 Discovery started: ${t.discovery.started}`);
+            console.log(`[BrowserNode] 🔍 Discovery running: ${t.discovery.running}`);
             t.discovery.addEventListener('relay:discover', (evt: CustomEvent) => {
               const peerId = evt.detail?.toString?.() || 'unknown';
               console.log(`[BrowserNode] 🔍 relay:discover event fired for peer: ${peerId.slice(0, 16)}...`);
-              console.log(`[BrowserNode] 📋 Pending reservations at discovery: ${t.reservationStore.pendingReservations?.length || 0}`);
+              console.log(`[BrowserNode] 📋 Pending reservations at discovery: ${t.reservationStore?.pendingReservations?.length || 0}`);
             });
             
             // Store reference for manual discovery trigger
@@ -1195,6 +1212,8 @@ export class BrowserNode {
           }
         }
       }
+    } else {
+      console.warn('[BrowserNode] ⚠️ TransportManager not available after start');
     }
   }
 
