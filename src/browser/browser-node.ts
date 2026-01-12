@@ -917,6 +917,9 @@ export class BrowserNode {
    * 
    * This populates the routing table by doing a self-lookup and random lookups.
    * Only dials peers we're not already connected to, and respects connection limits.
+   * 
+   * For browser-to-browser connectivity, we also try to dial peers via circuit relay
+   * if they have relay addresses in the peer store.
    */
   private async discoverPeers(): Promise<void> {
     if (!this.libp2p) return;
@@ -937,21 +940,94 @@ export class BrowserNode {
       connectedPeerIds.add(conn.remotePeer.toString());
     }
     
+    // Track all discovered peers (even if we can't dial them directly)
+    const discoveredPeers = new Map<string, string[]>(); // peerId -> multiaddrs
+    
     console.log(`[BrowserNode] Starting peer discovery... (${connectedPeerIds.size} peers already connected)`);
     
     try {
-      // Perform self-lookup to find peers close to us
-      const selfKey = myPeerId.toMultihash().bytes;
       let discoveredCount = 0;
       let newConnectionCount = 0;
       
-      for await (const event of dht.getClosestPeers(selfKey)) {
+      // Perform self-lookup to find peers close to us
+      const selfKey = myPeerId.toMultihash().bytes;
+      await this.dhtLookupAndDial(dht, selfKey, myPeerId.toString(), connectedPeerIds, discoveredPeers);
+      
+      // Perform random lookups to discover more peers (including browsers)
+      // This helps find peers that aren't close to us in XOR distance
+      for (let i = 0; i < 3; i++) {
+        const randomKey = new Uint8Array(32);
+        crypto.getRandomValues(randomKey);
+        await this.dhtLookupAndDial(dht, randomKey, myPeerId.toString(), connectedPeerIds, discoveredPeers);
+      }
+      
+      discoveredCount = discoveredPeers.size;
+      
+      // Count new connections
+      for (const peerId of discoveredPeers.keys()) {
+        if (this.libp2p.getConnections().some(c => c.remotePeer.toString() === peerId)) {
+          newConnectionCount++;
+        }
+      }
+      
+      // Try to connect to discovered peers via circuit relay if we have relay addresses
+      // This is critical for browser-to-browser connectivity
+      const myAddrs = this.libp2p.getMultiaddrs();
+      const myRelayAddr = myAddrs.find(a => a.toString().includes('/p2p-circuit'));
+      
+      if (myRelayAddr) {
+        // We have a relay address, try to connect to other browsers via relay
+        await this.tryRelayConnections(discoveredPeers, connectedPeerIds);
+        
+        // Recount connections after relay attempts
+        newConnectionCount = 0;
+        for (const peerId of discoveredPeers.keys()) {
+          if (this.libp2p.getConnections().some(c => c.remotePeer.toString() === peerId)) {
+            newConnectionCount++;
+          }
+        }
+      }
+      
+      console.log(`[BrowserNode] Peer discovery complete: discovered ${discoveredCount} new peers, connected to ${newConnectionCount}`);
+      console.log(`[BrowserNode] Total connections: ${this.libp2p.getConnections().length}`);
+    } catch (error) {
+      console.log(`[BrowserNode] Peer discovery error: ${error}`);
+    }
+  }
+
+  /**
+   * Perform a DHT lookup and try to dial discovered peers
+   */
+  private async dhtLookupAndDial(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dht: any,
+    key: Uint8Array,
+    myPeerId: string,
+    connectedPeerIds: Set<string>,
+    discoveredPeers: Map<string, string[]>
+  ): Promise<void> {
+    if (!this.libp2p) return;
+    
+    try {
+      for await (const event of dht.getClosestPeers(key)) {
         if (event.name === 'PEER_RESPONSE') {
           for (const peer of event.closer) {
             const peerId = peer.id.toString();
             
             // Skip ourselves
-            if (peerId === myPeerId.toString()) continue;
+            if (peerId === myPeerId) continue;
+            
+            // Get addresses
+            const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
+            
+            // Track this peer
+            if (!discoveredPeers.has(peerId)) {
+              discoveredPeers.set(peerId, addrs);
+              console.log(`[BrowserNode] 🔍 Discovered peer ${peerId.slice(0, 16)}... with ${addrs.length} addresses`);
+              for (const addr of addrs) {
+                console.log(`[BrowserNode]   📍 ${addr}`);
+              }
+            }
             
             // Skip peers we're already connected to
             if (connectedPeerIds.has(peerId)) {
@@ -961,37 +1037,116 @@ export class BrowserNode {
             // Check connection limit before each dial attempt
             if (this.libp2p.getConnections().length >= this.config.maxConnections) {
               console.log(`[BrowserNode] Reached connection limit, stopping discovery`);
-              break;
+              return;
             }
             
-            discoveredCount++;
-            
             // Filter to dialable addresses and try to connect
-            const addrs = peer.multiaddrs.map((ma: { toString: () => string }) => ma.toString());
             const dialableAddrs = filterDialableAddresses(addrs);
             
             if (dialableAddrs.length > 0) {
-              // Try to connect to this peer (try only first dialable address to save resources)
-              const addr = dialableAddrs[0];
-              try {
-                await this.libp2p.dial(multiaddr(addr));
-                console.log(`[BrowserNode] ✅ Connected to discovered peer: ${peerId.slice(0, 16)}...`);
-                connectedPeerIds.add(peerId); // Track so we don't try again
-                newConnectionCount++;
-              } catch (dialError) {
-                // Don't log every failure - too noisy
-                // Just track that we tried this peer
-                connectedPeerIds.add(peerId);
+              // Try to connect to this peer
+              for (const addr of dialableAddrs) {
+                try {
+                  await this.libp2p.dial(multiaddr(addr));
+                  console.log(`[BrowserNode] ✅ Connected to discovered peer: ${peerId.slice(0, 16)}... via ${addr.slice(0, 50)}...`);
+                  connectedPeerIds.add(peerId);
+                  break; // Successfully connected, no need to try other addresses
+                } catch (dialError) {
+                  // Try next address
+                }
               }
             }
           }
         }
       }
-      
-      console.log(`[BrowserNode] Peer discovery complete: discovered ${discoveredCount} new peers, connected to ${newConnectionCount}`);
-      console.log(`[BrowserNode] Total connections: ${this.libp2p.getConnections().length}`);
     } catch (error) {
-      console.log(`[BrowserNode] Peer discovery error: ${error}`);
+      // DHT lookup can fail, that's okay
+      console.log(`[BrowserNode] DHT lookup error (non-fatal): ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  /**
+   * Try to connect to discovered peers via circuit relay
+   * 
+   * This is used when we discover peers that have relay addresses (other browsers).
+   * We construct a relay address using our known relay and try to dial through it.
+   */
+  private async tryRelayConnections(
+    discoveredPeers: Map<string, string[]>,
+    connectedPeerIds: Set<string>
+  ): Promise<void> {
+    if (!this.libp2p) return;
+    
+    // Get our relay peer ID (the server we have a reservation with)
+    const myAddrs = this.libp2p.getMultiaddrs();
+    const myRelayAddr = myAddrs.find(a => a.toString().includes('/p2p-circuit'));
+    if (!myRelayAddr) return;
+    
+    // Extract the relay peer ID from our relay address
+    // Format: /dns4/.../p2p/{relayPeerId}/p2p-circuit/p2p/{ourPeerId}
+    const relayAddrStr = myRelayAddr.toString();
+    const relayMatch = relayAddrStr.match(/\/p2p\/([^/]+)\/p2p-circuit/);
+    if (!relayMatch) return;
+    
+    const relayPeerId = relayMatch[1];
+    
+    // Get the base relay address (everything before /p2p-circuit)
+    const baseRelayAddr = relayAddrStr.split('/p2p-circuit')[0];
+    
+    console.log(`[BrowserNode] 🔄 Trying relay connections via ${relayPeerId.slice(0, 16)}...`);
+    
+    for (const [peerId, addrs] of discoveredPeers) {
+      // Skip if already connected
+      if (connectedPeerIds.has(peerId)) continue;
+      
+      // Skip if this is the relay itself
+      if (peerId === relayPeerId) continue;
+      
+      // Check if this peer has a relay address (indicating it's a browser)
+      const hasRelayAddr = addrs.some(a => a.includes('/p2p-circuit'));
+      
+      // Also check peer store for relay addresses
+      let peerStoreRelayAddr: string | null = null;
+      try {
+        const peerData = await this.libp2p.peerStore.get(peerIdFromString(peerId));
+        const peerAddrs = peerData.addresses.map(a => a.multiaddr.toString());
+        peerStoreRelayAddr = peerAddrs.find(a => a.includes('/p2p-circuit')) || null;
+        if (peerStoreRelayAddr) {
+          console.log(`[BrowserNode] 📋 Found relay address in peer store for ${peerId.slice(0, 16)}...: ${peerStoreRelayAddr}`);
+        }
+      } catch {
+        // Peer not in store, that's okay
+      }
+      
+      // If this peer has a relay address, try to dial it directly
+      if (peerStoreRelayAddr) {
+        try {
+          console.log(`[BrowserNode] 🔌 Dialing ${peerId.slice(0, 16)}... via their relay address`);
+          await this.libp2p.dial(multiaddr(peerStoreRelayAddr));
+          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via relay!`);
+          connectedPeerIds.add(peerId);
+          continue;
+        } catch (error) {
+          console.log(`[BrowserNode] ❌ Failed to dial ${peerId.slice(0, 16)}... via their relay: ${error instanceof Error ? error.message : error}`);
+        }
+      }
+      
+      // If the peer doesn't have a relay address but might be a browser,
+      // try constructing a relay address using our relay
+      if (!hasRelayAddr && !peerStoreRelayAddr) {
+        // Construct a relay address: baseRelayAddr/p2p-circuit/p2p/{targetPeerId}
+        const constructedRelayAddr = `${baseRelayAddr}/p2p-circuit/p2p/${peerId}`;
+        
+        try {
+          console.log(`[BrowserNode] 🔌 Trying constructed relay address for ${peerId.slice(0, 16)}...`);
+          await this.libp2p.dial(multiaddr(constructedRelayAddr));
+          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via constructed relay!`);
+          connectedPeerIds.add(peerId);
+        } catch (error) {
+          // This is expected to fail for server nodes that don't have relay reservations
+          // Don't log as error, just debug
+        }
+      }
     }
   }
 
