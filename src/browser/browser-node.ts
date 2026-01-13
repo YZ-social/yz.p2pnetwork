@@ -1134,26 +1134,59 @@ export class BrowserNode {
             }
           }
           
-          console.log(`[BrowserNode] 🔌 Dialing ${peerId.slice(0, 16)}... via their relay address`);
+          // First try WebRTC via relay signaling if the address doesn't already have /webrtc/
+          if (!dialAddr.includes('/webrtc/')) {
+            // Construct WebRTC address: insert /webrtc/ before the final /p2p/{peerId}
+            const webrtcAddr = dialAddr.replace(/\/p2p-circuit\/p2p\/([^/]+)$/, '/p2p-circuit/webrtc/p2p/$1');
+            if (webrtcAddr !== dialAddr) {
+              try {
+                console.log(`[BrowserNode] 🌐 Trying WebRTC via relay for ${peerId.slice(0, 16)}...: ${webrtcAddr}`);
+                await this.libp2p.dial(multiaddr(webrtcAddr));
+                console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via WebRTC!`);
+                connectedPeerIds.add(peerId);
+                continue;
+              } catch (webrtcError) {
+                console.log(`[BrowserNode] ❌ WebRTC failed for ${peerId.slice(0, 16)}..., trying circuit relay: ${webrtcError instanceof Error ? webrtcError.message : webrtcError}`);
+              }
+            }
+          }
+          
+          // Fall back to circuit relay
+          console.log(`[BrowserNode] 🔌 Dialing ${peerId.slice(0, 16)}... via circuit relay address`);
           await this.libp2p.dial(multiaddr(dialAddr));
-          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via relay!`);
+          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via circuit relay!`);
           connectedPeerIds.add(peerId);
           continue;
         } catch (error) {
-          console.log(`[BrowserNode] ❌ Failed to dial ${peerId.slice(0, 16)}... via their relay: ${error instanceof Error ? error.message : error}`);
+          console.log(`[BrowserNode] ❌ Failed to dial ${peerId.slice(0, 16)}... via relay: ${error instanceof Error ? error.message : error}`);
         }
       }
       
       // If the peer doesn't have a relay address but might be a browser,
       // try constructing a relay address using our relay
       if (!hasRelayAddr && !peerStoreRelayAddr) {
-        // Construct a relay address: baseRelayAddr/p2p-circuit/p2p/{targetPeerId}
+        // First try WebRTC via relay signaling - this establishes a direct WebRTC connection
+        // Format: baseRelayAddr/p2p-circuit/webrtc/p2p/{targetPeerId}
+        const webrtcRelayAddr = `${baseRelayAddr}/p2p-circuit/webrtc/p2p/${peerId}`;
+        
+        try {
+          console.log(`[BrowserNode] 🌐 Trying WebRTC via relay signaling for ${peerId.slice(0, 16)}...`);
+          await this.libp2p.dial(multiaddr(webrtcRelayAddr));
+          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via WebRTC!`);
+          connectedPeerIds.add(peerId);
+          continue;
+        } catch (webrtcError) {
+          console.log(`[BrowserNode] ❌ WebRTC connection failed for ${peerId.slice(0, 16)}...: ${webrtcError instanceof Error ? webrtcError.message : webrtcError}`);
+        }
+        
+        // Fall back to pure circuit relay (all traffic goes through relay)
+        // Format: baseRelayAddr/p2p-circuit/p2p/{targetPeerId}
         const constructedRelayAddr = `${baseRelayAddr}/p2p-circuit/p2p/${peerId}`;
         
         try {
-          console.log(`[BrowserNode] 🔌 Trying constructed relay address for ${peerId.slice(0, 16)}...`);
+          console.log(`[BrowserNode] 🔌 Trying circuit relay for ${peerId.slice(0, 16)}...`);
           await this.libp2p.dial(multiaddr(constructedRelayAddr));
-          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via constructed relay!`);
+          console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via circuit relay!`);
           connectedPeerIds.add(peerId);
         } catch (error) {
           // This is expected to fail for server nodes that don't have relay reservations

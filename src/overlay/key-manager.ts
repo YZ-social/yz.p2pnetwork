@@ -382,32 +382,64 @@ export class KeyManager {
         const peerInfo = await dht.findPeer(peerId);
         if (peerInfo && peerInfo.multiaddrs.length > 0) {
           console.log(`[KeyManager] Found peer ${peerId.slice(0, 16)}... with ${peerInfo.multiaddrs.length} addresses`);
-          // Try to dial the peer
-          for (const addr of peerInfo.multiaddrs) {
+          // Try to dial the peer - prioritize WebRTC addresses
+          const addrs = peerInfo.multiaddrs.map((a: { toString: () => string }) => a.toString());
+          
+          // Sort addresses: WebRTC first, then circuit relay, then others
+          const sortedAddrs = [...addrs].sort((a, b) => {
+            const aIsWebRTC = a.includes('/webrtc/');
+            const bIsWebRTC = b.includes('/webrtc/');
+            const aIsRelay = a.includes('/p2p-circuit');
+            const bIsRelay = b.includes('/p2p-circuit');
+            
+            if (aIsWebRTC && !bIsWebRTC) return -1;
+            if (!aIsWebRTC && bIsWebRTC) return 1;
+            if (aIsRelay && !bIsRelay) return -1;
+            if (!aIsRelay && bIsRelay) return 1;
+            return 0;
+          });
+          
+          for (const addrStr of sortedAddrs) {
             try {
-              let addrStr = addr.toString();
+              let dialAddr = addrStr;
               
               // Fix incomplete relay addresses - DHT may return addresses like:
               // /dns4/.../p2p/{relayPeerId}/p2p-circuit (missing /p2p/{targetPeerId})
               // We need to append the target peer ID for the relay to know who to connect to
-              if (addrStr.includes('/p2p-circuit') && !addrStr.endsWith(`/p2p/${peerId}`)) {
+              if (dialAddr.includes('/p2p-circuit') && !dialAddr.endsWith(`/p2p/${peerId}`)) {
                 // Check if it ends with just /p2p-circuit (no target peer)
-                if (addrStr.endsWith('/p2p-circuit') || !addrStr.split('/p2p-circuit')[1]?.includes('/p2p/')) {
-                  const fixedAddr = addrStr.endsWith('/p2p-circuit') 
-                    ? `${addrStr}/p2p/${peerId}`
-                    : `${addrStr.split('/p2p-circuit')[0]}/p2p-circuit/p2p/${peerId}`;
-                  console.log(`[KeyManager] Fixed incomplete relay address: ${addrStr} -> ${fixedAddr}`);
-                  addrStr = fixedAddr;
+                if (dialAddr.endsWith('/p2p-circuit') || !dialAddr.split('/p2p-circuit')[1]?.includes('/p2p/')) {
+                  const fixedAddr = dialAddr.endsWith('/p2p-circuit') 
+                    ? `${dialAddr}/p2p/${peerId}`
+                    : `${dialAddr.split('/p2p-circuit')[0]}/p2p-circuit/p2p/${peerId}`;
+                  console.log(`[KeyManager] Fixed incomplete relay address: ${dialAddr} -> ${fixedAddr}`);
+                  dialAddr = fixedAddr;
                 }
               }
               
-              console.log(`[KeyManager] Trying to connect to ${peerId.slice(0, 16)}... at ${addrStr}`);
+              // If this is a relay address without /webrtc/, try WebRTC first
+              if (dialAddr.includes('/p2p-circuit') && !dialAddr.includes('/webrtc/')) {
+                const webrtcAddr = dialAddr.replace(/\/p2p-circuit\/p2p\/([^/]+)$/, '/p2p-circuit/webrtc/p2p/$1');
+                if (webrtcAddr !== dialAddr) {
+                  try {
+                    console.log(`[KeyManager] Trying WebRTC connection to ${peerId.slice(0, 16)}... at ${webrtcAddr}`);
+                    const { multiaddr } = await import('@multiformats/multiaddr');
+                    await libp2p.dial(multiaddr(webrtcAddr));
+                    console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}... via WebRTC!`);
+                    break;
+                  } catch (webrtcErr) {
+                    console.log(`[KeyManager] WebRTC failed, trying circuit relay: ${webrtcErr instanceof Error ? webrtcErr.message : 'Unknown error'}`);
+                  }
+                }
+              }
+              
+              console.log(`[KeyManager] Trying to connect to ${peerId.slice(0, 16)}... at ${dialAddr}`);
               const { multiaddr } = await import('@multiformats/multiaddr');
-              await libp2p.dial(multiaddr(addrStr));
+              await libp2p.dial(multiaddr(dialAddr));
               console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}...`);
               break;
             } catch (dialErr) {
-              console.log(`[KeyManager] Failed to dial ${addr.toString()}: ${dialErr instanceof Error ? dialErr.message : 'Unknown error'}`);
+              console.log(`[KeyManager] Failed to dial ${addrStr}: ${dialErr instanceof Error ? dialErr.message : 'Unknown error'}`);
             }
           }
         }
