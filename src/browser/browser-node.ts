@@ -1121,8 +1121,21 @@ export class BrowserNode {
       // If this peer has a relay address, try to dial it directly
       if (peerStoreRelayAddr) {
         try {
+          // Fix incomplete relay addresses - peer store may have addresses like:
+          // /dns4/.../p2p/{relayPeerId}/p2p-circuit (missing /p2p/{targetPeerId})
+          let dialAddr = peerStoreRelayAddr;
+          if (dialAddr.includes('/p2p-circuit') && !dialAddr.endsWith(`/p2p/${peerId}`)) {
+            if (dialAddr.endsWith('/p2p-circuit') || !dialAddr.split('/p2p-circuit')[1]?.includes('/p2p/')) {
+              const fixedAddr = dialAddr.endsWith('/p2p-circuit')
+                ? `${dialAddr}/p2p/${peerId}`
+                : `${dialAddr.split('/p2p-circuit')[0]}/p2p-circuit/p2p/${peerId}`;
+              console.log(`[BrowserNode] Fixed incomplete relay address: ${dialAddr} -> ${fixedAddr}`);
+              dialAddr = fixedAddr;
+            }
+          }
+          
           console.log(`[BrowserNode] 🔌 Dialing ${peerId.slice(0, 16)}... via their relay address`);
-          await this.libp2p.dial(multiaddr(peerStoreRelayAddr));
+          await this.libp2p.dial(multiaddr(dialAddr));
           console.log(`[BrowserNode] ✅ Connected to ${peerId.slice(0, 16)}... via relay!`);
           connectedPeerIds.add(peerId);
           continue;

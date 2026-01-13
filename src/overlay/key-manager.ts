@@ -385,8 +385,25 @@ export class KeyManager {
           // Try to dial the peer
           for (const addr of peerInfo.multiaddrs) {
             try {
-              console.log(`[KeyManager] Trying to connect to ${peerId.slice(0, 16)}... at ${addr.toString()}`);
-              await libp2p.dial(addr);
+              let addrStr = addr.toString();
+              
+              // Fix incomplete relay addresses - DHT may return addresses like:
+              // /dns4/.../p2p/{relayPeerId}/p2p-circuit (missing /p2p/{targetPeerId})
+              // We need to append the target peer ID for the relay to know who to connect to
+              if (addrStr.includes('/p2p-circuit') && !addrStr.endsWith(`/p2p/${peerId}`)) {
+                // Check if it ends with just /p2p-circuit (no target peer)
+                if (addrStr.endsWith('/p2p-circuit') || !addrStr.split('/p2p-circuit')[1]?.includes('/p2p/')) {
+                  const fixedAddr = addrStr.endsWith('/p2p-circuit') 
+                    ? `${addrStr}/p2p/${peerId}`
+                    : `${addrStr.split('/p2p-circuit')[0]}/p2p-circuit/p2p/${peerId}`;
+                  console.log(`[KeyManager] Fixed incomplete relay address: ${addrStr} -> ${fixedAddr}`);
+                  addrStr = fixedAddr;
+                }
+              }
+              
+              console.log(`[KeyManager] Trying to connect to ${peerId.slice(0, 16)}... at ${addrStr}`);
+              const { multiaddr } = await import('@multiformats/multiaddr');
+              await libp2p.dial(multiaddr(addrStr));
               console.log(`[KeyManager] Connected to ${peerId.slice(0, 16)}...`);
               break;
             } catch (dialErr) {
