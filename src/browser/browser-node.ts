@@ -22,7 +22,7 @@ import { kadDHT } from '@libp2p/kad-dht';
 import { identify, identifyPush } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
-import { webRTC } from '@libp2p/webrtc';
+import { webRTCWithHttpPath, setLibp2pAddressGetter } from './webrtc-transport.js';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
 import type { PeerId, Connection } from '@libp2p/interface';
 import { peerIdFromString } from '@libp2p/peer-id';
@@ -373,7 +373,9 @@ export class BrowserNode {
         transports: [
           // Use custom WebSocket transport that supports http-path for nginx routing
           webSocketsWithHttpPath() as any,
-          webRTC({
+          // Use custom WebRTC transport that generates WebRTC addresses from circuit relay addresses
+          // This is REQUIRED for browser-to-browser WebRTC connectivity with http-path routing
+          webRTCWithHttpPath({
             rtcConfiguration: {
               iceServers: DEFAULT_ICE_SERVERS,
             },
@@ -408,6 +410,10 @@ export class BrowserNode {
 
       // Start libp2p
       await this.libp2p.start();
+
+      // Set up the address getter for the custom WebRTC transport
+      // This allows the WebRTC listener to generate WebRTC addresses from circuit relay addresses
+      setLibp2pAddressGetter(() => this.libp2p!.getMultiaddrs());
 
       // Capture reservation store reference AFTER start (transports are now initialized)
       this.captureReservationStoreReference();
