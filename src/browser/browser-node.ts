@@ -1096,9 +1096,115 @@ export class BrowserNode {
       
       console.log(`[BrowserNode] Peer discovery complete: discovered ${discoveredCount} new peers, connected to ${newConnectionCount}`);
       console.log(`[BrowserNode] Total connections: ${this.libp2p.getConnections().length}`);
+      
+      // Also scan peer store for other browsers (peers with relay addresses)
+      // This helps discover browsers that are connected to the same servers as us
+      await this.discoverBrowserPeers(connectedPeerIds);
+      
     } catch (error) {
       console.log(`[BrowserNode] Peer discovery error: ${error}`);
     }
+  }
+
+  /**
+   * Discover other browser peers by scanning the peer store
+   * 
+   * When browsers connect to the same server, the server learns about both browsers
+   * via identify. This method scans our peer store for peers that have relay addresses
+   * (indicating they're browsers) and attempts to connect to them via WebRTC.
+   */
+  private async discoverBrowserPeers(connectedPeerIds: Set<string>): Promise<void> {
+    if (!this.libp2p) return;
+    
+    const myPeerId = this.libp2p.peerId.toString();
+    const myAddrs = this.libp2p.getMultiaddrs();
+    const myRelayAddr = myAddrs.find(a => a.toString().includes('/p2p-circuit'));
+    
+    if (!myRelayAddr) {
+      console.log('[BrowserNode] No relay address, skipping browser peer discovery');
+      return;
+    }
+    
+    // Get the base relay address for constructing WebRTC addresses
+    const relayAddrStr = myRelayAddr.toString();
+    const baseRelayAddr = relayAddrStr.split('/p2p-circuit')[0];
+    
+    console.log('[BrowserNode] 🔍 Scanning peer store for other browsers...');
+    
+    let browserPeersFound = 0;
+    let connectionAttempts = 0;
+    
+    try {
+      // Get all peers from the peer store
+      const allPeers = await this.libp2p.peerStore.all();
+      
+      for (const peer of allPeers) {
+        const peerId = peer.id.toString();
+        
+        // Skip ourselves
+        if (peerId === myPeerId) continue;
+        
+        // Skip if already connected
+        if (connectedPeerIds.has(peerId)) continue;
+        
+        // Check if this peer has relay addresses (indicating it's a browser)
+        const peerAddrs = peer.addresses.map((a: { multiaddr: { toString: () => string } }) => a.multiaddr.toString());
+        const relayAddrs = peerAddrs.filter((a: string) => a.includes('/p2p-circuit'));
+        
+        if (relayAddrs.length === 0) continue;
+        
+        browserPeersFound++;
+        console.log(`[BrowserNode] 🌐 Found browser peer ${peerId.slice(0, 16)}... with ${relayAddrs.length} relay addresses`);
+        
+        // Check connection limit
+        if (this.libp2p.getConnections().length >= this.config.maxConnections) {
+          console.log('[BrowserNode] At connection limit, stopping browser discovery');
+          break;
+        }
+        
+        // Try to connect via WebRTC first, then fall back to circuit relay
+        for (const relayAddr of relayAddrs) {
+          connectionAttempts++;
+          
+          // Try WebRTC via relay signaling
+          // Convert: .../p2p-circuit/p2p/{peerId} -> .../p2p-circuit/webrtc/p2p/{peerId}
+          let webrtcAddr = relayAddr;
+          if (!relayAddr.includes('/webrtc/')) {
+            webrtcAddr = relayAddr.replace(/\/p2p-circuit\/p2p\/([^/]+)$/, '/p2p-circuit/webrtc/p2p/$1');
+          }
+          
+          if (webrtcAddr.includes('/webrtc/')) {
+            try {
+              console.log(`[BrowserNode] 🌐 Attempting WebRTC connection to ${peerId.slice(0, 16)}...`);
+              console.log(`[BrowserNode]   Address: ${webrtcAddr}`);
+              await this.libp2p.dial(multiaddr(webrtcAddr));
+              console.log(`[BrowserNode] ✅ WebRTC connection established to ${peerId.slice(0, 16)}...!`);
+              connectedPeerIds.add(peerId);
+              break;
+            } catch (webrtcError) {
+              const errMsg = webrtcError instanceof Error ? webrtcError.message : String(webrtcError);
+              console.log(`[BrowserNode] ❌ WebRTC failed: ${errMsg.slice(0, 100)}`);
+            }
+          }
+          
+          // Fall back to circuit relay
+          try {
+            console.log(`[BrowserNode] 🔌 Attempting circuit relay connection to ${peerId.slice(0, 16)}...`);
+            await this.libp2p.dial(multiaddr(relayAddr));
+            console.log(`[BrowserNode] ✅ Circuit relay connection established to ${peerId.slice(0, 16)}...!`);
+            connectedPeerIds.add(peerId);
+            break;
+          } catch (relayError) {
+            const errMsg = relayError instanceof Error ? relayError.message : String(relayError);
+            console.log(`[BrowserNode] ❌ Circuit relay failed: ${errMsg.slice(0, 100)}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(`[BrowserNode] Error scanning peer store: ${error}`);
+    }
+    
+    console.log(`[BrowserNode] Browser peer discovery: found ${browserPeersFound} browsers, attempted ${connectionAttempts} connections`);
   }
 
   /**
