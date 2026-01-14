@@ -473,25 +473,39 @@ export class BrowserNode {
           }
         }
         
-        // If still no addresses, try the address manager
+        // If still no addresses, try the reservation store directly
+        // NOTE: We CANNOT use addressManager.getAddresses() here because it calls
+        // transportManager.getAddrs() which calls listener.getAddrs() which calls
+        // getWebRTCAddresses() - creating an infinite loop / stack overflow!
         if (addrs.length === 0) {
           try {
-            const addressManager = libp2pAny.components?.addressManager;
-            if (addressManager?.getAddresses) {
-              const allAddrs = addressManager.getAddresses();
-              // Filter to only circuit relay addresses
-              for (const addr of allAddrs) {
-                if (addr.toString().includes('/p2p-circuit')) {
-                  // Only log once per session
-                  if (!hasLoggedAddressGetter) {
-                    console.log(`[WebRTC] Found circuit relay address from addressManager: ${addr.toString()}`);
+            // Access the circuit relay transport's reservation store directly
+            const transports = libp2pAny.components?.transportManager?.transports;
+            if (transports) {
+              for (const [, transport] of transports) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const t = transport as any;
+                if (t.reservationStore?.reservations) {
+                  // Get addresses from active reservations
+                  for (const [, reservation] of t.reservationStore.reservations) {
+                    if (reservation.relay && reservation.addr) {
+                      const addrStr = reservation.addr.toString();
+                      if (addrStr.includes('/p2p-circuit')) {
+                        if (!hasLoggedAddressGetter) {
+                          console.log(`[WebRTC] Found circuit relay address from reservation store: ${addrStr}`);
+                        }
+                        addrs.push(reservation.addr);
+                      }
+                    }
                   }
-                  addrs.push(addr);
                 }
               }
             }
           } catch (e) {
-            console.warn('[BrowserNode] Error getting addresses from address manager:', e);
+            // Don't log this error repeatedly - it's expected during startup
+            if (!hasLoggedAddressGetter) {
+              console.warn('[BrowserNode] Error getting addresses from reservation store:', e);
+            }
           }
         }
         
