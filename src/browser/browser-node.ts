@@ -465,8 +465,6 @@ export class BrowserNode {
       console.log('[BrowserNode] 📍 Listen addresses configured:', this.libp2p.getMultiaddrs().map(ma => ma.toString()));
       
       // Check if we're listening on /p2p-circuit
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const libp2pAny = this.libp2p as any;
       if (libp2pAny.components?.transportManager?.listeners) {
         const listeners = libp2pAny.components.transportManager.listeners;
         console.log(`[BrowserNode] 🎧 Active listeners: ${listeners.size}`);
