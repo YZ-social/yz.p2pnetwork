@@ -26,6 +26,20 @@ import type { Multiaddr } from '@multiformats/multiaddr';
 import { multiaddr } from '@multiformats/multiaddr';
 
 /**
+ * Debug logging control - set to true to enable verbose logging
+ */
+const DEBUG_WEBRTC = false;
+
+/**
+ * Log only when DEBUG_WEBRTC is enabled
+ */
+function debugLog(...args: unknown[]): void {
+  if (DEBUG_WEBRTC) {
+    console.log(...args);
+  }
+}
+
+/**
  * Configuration for the WebRTC transport
  */
 export interface WebRTCWithHttpPathConfig {
@@ -100,14 +114,14 @@ export function setLibp2pAddressGetter(getter: () => Multiaddr[]): void {
  */
 export function getWebRTCAddresses(): Multiaddr[] {
   if (!libp2pAddressGetter) {
-    console.log('[WebRTC] No address getter registered yet');
+    debugLog('[WebRTC] No address getter registered yet');
     return [];
   }
   
   const libp2pAddrs = libp2pAddressGetter();
   const webrtcAddrs: Multiaddr[] = [];
   
-  console.log(`[WebRTC] getWebRTCAddresses called, checking ${libp2pAddrs.length} addresses`);
+  debugLog(`[WebRTC] getWebRTCAddresses called, checking ${libp2pAddrs.length} addresses`);
   
   for (const addr of libp2pAddrs) {
     const addrStr = addr.toString();
@@ -117,11 +131,11 @@ export function getWebRTCAddresses(): Multiaddr[] {
       continue;
     }
     
-    console.log(`[WebRTC] Found circuit relay address: ${addrStr}`);
+    debugLog(`[WebRTC] Found circuit relay address: ${addrStr}`);
     
     // Skip if already has /webrtc/
     if (hasWebRTCComponent(addr)) {
-      console.log(`[WebRTC] Address already has /webrtc/, using as-is`);
+      debugLog(`[WebRTC] Address already has /webrtc/, using as-is`);
       webrtcAddrs.push(addr);
       continue;
     }
@@ -129,7 +143,7 @@ export function getWebRTCAddresses(): Multiaddr[] {
     // Convert to WebRTC address
     const webrtcAddr = toWebRTCAddress(addr);
     if (webrtcAddr) {
-      console.log(`[WebRTC] Converted to WebRTC address: ${webrtcAddr.toString()}`);
+      debugLog(`[WebRTC] Converted to WebRTC address: ${webrtcAddr.toString()}`);
       webrtcAddrs.push(webrtcAddr);
     }
   }
@@ -166,11 +180,11 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     // Override dialFilter to accept WebRTC addresses with http-path
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (transport as any).dialFilter = (multiaddrs: any[]): any[] => {
-      console.log(`[WebRTC] dialFilter called with ${multiaddrs.length} addresses`);
+      debugLog(`[WebRTC] dialFilter called with ${multiaddrs.length} addresses`);
       
       // Get standard matches from base transport
       const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
-      console.log(`[WebRTC] Base dialFilter matched ${standardMatches.length} addresses`);
+      debugLog(`[WebRTC] Base dialFilter matched ${standardMatches.length} addresses`);
       
       // Also accept WebRTC addresses with http-path that weren't matched
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,19 +197,19 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
         }
         // Accept if it has /webrtc/ and /p2p-circuit/ (WebRTC over relay)
         if (str.includes('/webrtc/') && str.includes('/p2p-circuit')) {
-          console.log(`[WebRTC] Accepting WebRTC-over-relay address: ${str}`);
+          debugLog(`[WebRTC] Accepting WebRTC-over-relay address: ${str}`);
           return true;
         }
         // Accept if it has /webrtc/ and http-path (direct WebRTC with path routing)
         if (str.includes('/webrtc/') && str.includes('/http-path/')) {
-          console.log(`[WebRTC] Accepting WebRTC with http-path address: ${str}`);
+          debugLog(`[WebRTC] Accepting WebRTC with http-path address: ${str}`);
           return true;
         }
         return false;
       });
       
       const result = [...standardMatches, ...additionalMatches];
-      console.log(`[WebRTC] dialFilter returning ${result.length} addresses (${standardMatches.length} standard + ${additionalMatches.length} additional)`);
+      debugLog(`[WebRTC] dialFilter returning ${result.length} addresses (${standardMatches.length} standard + ${additionalMatches.length} additional)`);
       
       return result;
     };
@@ -205,7 +219,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     const originalCreateListener = (transport as any).createListener.bind(transport);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (transport as any).createListener = (options: any) => {
-      console.log('[WebRTC] Creating WebRTC listener');
+      debugLog('[WebRTC] Creating WebRTC listener');
       const listener = originalCreateListener(options);
       
       // Wrap getAddrs to include generated WebRTC addresses
@@ -213,7 +227,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       listener.getAddrs = (): any[] => {
         const baseAddrs = originalGetAddrs();
-        console.log(`[WebRTC] listener.getAddrs() - base listener has ${baseAddrs.length} addresses`);
+        debugLog(`[WebRTC] listener.getAddrs() - base listener has ${baseAddrs.length} addresses`);
         
         // If base listener has addresses, use them
         if (baseAddrs.length > 0) {
@@ -222,7 +236,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
         
         // Otherwise, generate WebRTC addresses from circuit relay addresses
         const webrtcAddrs = getWebRTCAddresses();
-        console.log(`[WebRTC] listener.getAddrs() - generated ${webrtcAddrs.length} WebRTC addresses`);
+        debugLog(`[WebRTC] listener.getAddrs() - generated ${webrtcAddrs.length} WebRTC addresses`);
         
         return webrtcAddrs;
       };

@@ -416,6 +416,10 @@ export class BrowserNode {
       // We use a getter that accesses the circuit relay listener directly to avoid circular dependency
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const libp2pAny = this.libp2p as any;
+      
+      // Track if we've logged the address getter results (only log once)
+      let hasLoggedAddressGetter = false;
+      
       setLibp2pAddressGetter(() => {
         // Get addresses from the circuit relay transport's listener
         // This avoids circular dependency with libp2p.getMultiaddrs()
@@ -434,7 +438,9 @@ export class BrowserNode {
               
               if (isCircuitRelay) {
                 const listenerAddrs = listener.getAddrs?.() || [];
-                console.log(`[WebRTC] Found circuit relay listener '${keyStr}' with ${listenerAddrs.length} addresses`);
+                if (!hasLoggedAddressGetter && listenerAddrs.length > 0) {
+                  console.log(`[WebRTC] Found circuit relay listener '${keyStr}' with ${listenerAddrs.length} addresses`);
+                }
                 addrs.push(...listenerAddrs);
               }
             }
@@ -453,7 +459,10 @@ export class BrowserNode {
                 const listenerAddrs = listener.getAddrs?.() || [];
                 for (const addr of listenerAddrs) {
                   if (addr.toString().includes('/p2p-circuit')) {
-                    console.log(`[WebRTC] Found circuit relay address from listener '${key}': ${addr.toString()}`);
+                    // Only log once per session
+                    if (!hasLoggedAddressGetter) {
+                      console.log(`[WebRTC] Found circuit relay address from listener '${key}': ${addr.toString()}`);
+                    }
                     addrs.push(addr);
                   }
                 }
@@ -473,7 +482,10 @@ export class BrowserNode {
               // Filter to only circuit relay addresses
               for (const addr of allAddrs) {
                 if (addr.toString().includes('/p2p-circuit')) {
-                  console.log(`[WebRTC] Found circuit relay address from addressManager: ${addr.toString()}`);
+                  // Only log once per session
+                  if (!hasLoggedAddressGetter) {
+                    console.log(`[WebRTC] Found circuit relay address from addressManager: ${addr.toString()}`);
+                  }
                   addrs.push(addr);
                 }
               }
@@ -481,6 +493,11 @@ export class BrowserNode {
           } catch (e) {
             console.warn('[BrowserNode] Error getting addresses from address manager:', e);
           }
+        }
+        
+        // Mark that we've logged (only log on first successful retrieval)
+        if (addrs.length > 0 && !hasLoggedAddressGetter) {
+          hasLoggedAddressGetter = true;
         }
         
         return addrs;
