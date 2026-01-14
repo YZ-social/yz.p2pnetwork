@@ -425,9 +425,16 @@ export class BrowserNode {
           const listeners = libp2pAny.components?.transportManager?.listeners;
           if (listeners) {
             for (const [key, listener] of listeners) {
-              // Only get addresses from circuit relay listener
-              if (key.includes('circuit') || key.includes('relay')) {
+              const keyStr = String(key);
+              // Check for circuit relay listener by various possible names
+              const isCircuitRelay = keyStr.includes('circuit') || 
+                                     keyStr.includes('relay') ||
+                                     keyStr.includes('Circuit') ||
+                                     keyStr.includes('Relay');
+              
+              if (isCircuitRelay) {
                 const listenerAddrs = listener.getAddrs?.() || [];
+                console.log(`[WebRTC] Found circuit relay listener '${keyStr}' with ${listenerAddrs.length} addresses`);
                 addrs.push(...listenerAddrs);
               }
             }
@@ -436,7 +443,28 @@ export class BrowserNode {
           console.warn('[BrowserNode] Error getting circuit relay addresses:', e);
         }
         
-        // If no circuit relay addresses from listeners, try the address manager
+        // If no circuit relay addresses from listeners, try getting ALL listener addresses
+        // and filter for circuit relay addresses
+        if (addrs.length === 0) {
+          try {
+            const listeners = libp2pAny.components?.transportManager?.listeners;
+            if (listeners) {
+              for (const [key, listener] of listeners) {
+                const listenerAddrs = listener.getAddrs?.() || [];
+                for (const addr of listenerAddrs) {
+                  if (addr.toString().includes('/p2p-circuit')) {
+                    console.log(`[WebRTC] Found circuit relay address from listener '${key}': ${addr.toString()}`);
+                    addrs.push(addr);
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[BrowserNode] Error scanning all listeners:', e);
+          }
+        }
+        
+        // If still no addresses, try the address manager
         if (addrs.length === 0) {
           try {
             const addressManager = libp2pAny.components?.addressManager;
@@ -445,6 +473,7 @@ export class BrowserNode {
               // Filter to only circuit relay addresses
               for (const addr of allAddrs) {
                 if (addr.toString().includes('/p2p-circuit')) {
+                  console.log(`[WebRTC] Found circuit relay address from addressManager: ${addr.toString()}`);
                   addrs.push(addr);
                 }
               }
