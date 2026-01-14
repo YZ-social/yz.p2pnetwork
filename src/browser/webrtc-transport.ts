@@ -82,6 +82,9 @@ let libp2pAddressGetter: (() => Multiaddr[]) | null = null;
 /**
  * Set the libp2p address getter function
  * This should be called after libp2p is created but before starting
+ * 
+ * IMPORTANT: This getter should return addresses from the address manager,
+ * NOT from libp2p.getMultiaddrs() to avoid circular dependency.
  */
 export function setLibp2pAddressGetter(getter: () => Multiaddr[]): void {
   libp2pAddressGetter = getter;
@@ -90,23 +93,35 @@ export function setLibp2pAddressGetter(getter: () => Multiaddr[]): void {
 
 /**
  * Generate WebRTC addresses from current circuit relay addresses
+ * 
+ * This function is called by the WebRTC listener's getAddrs() to generate
+ * WebRTC addresses from circuit relay addresses. It filters for circuit
+ * relay addresses and converts them to WebRTC addresses.
  */
 export function getWebRTCAddresses(): Multiaddr[] {
   if (!libp2pAddressGetter) {
+    console.log('[WebRTC] No address getter registered yet');
     return [];
   }
   
   const libp2pAddrs = libp2pAddressGetter();
   const webrtcAddrs: Multiaddr[] = [];
   
+  console.log(`[WebRTC] getWebRTCAddresses called, checking ${libp2pAddrs.length} addresses`);
+  
   for (const addr of libp2pAddrs) {
+    const addrStr = addr.toString();
+    
     // Skip if not a circuit relay address
     if (!isCircuitRelayAddress(addr)) {
       continue;
     }
     
+    console.log(`[WebRTC] Found circuit relay address: ${addrStr}`);
+    
     // Skip if already has /webrtc/
     if (hasWebRTCComponent(addr)) {
+      console.log(`[WebRTC] Address already has /webrtc/, using as-is`);
       webrtcAddrs.push(addr);
       continue;
     }
@@ -114,6 +129,7 @@ export function getWebRTCAddresses(): Multiaddr[] {
     // Convert to WebRTC address
     const webrtcAddr = toWebRTCAddress(addr);
     if (webrtcAddr) {
+      console.log(`[WebRTC] Converted to WebRTC address: ${webrtcAddr.toString()}`);
       webrtcAddrs.push(webrtcAddr);
     }
   }

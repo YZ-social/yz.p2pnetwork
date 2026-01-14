@@ -413,7 +413,49 @@ export class BrowserNode {
 
       // Set up the address getter for the custom WebRTC transport
       // This allows the WebRTC listener to generate WebRTC addresses from circuit relay addresses
-      setLibp2pAddressGetter(() => this.libp2p!.getMultiaddrs());
+      // We use a getter that accesses the circuit relay listener directly to avoid circular dependency
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const libp2pAny = this.libp2p as any;
+      setLibp2pAddressGetter(() => {
+        // Get addresses from the circuit relay transport's listener
+        // This avoids circular dependency with libp2p.getMultiaddrs()
+        const addrs: Multiaddr[] = [];
+        
+        try {
+          const listeners = libp2pAny.components?.transportManager?.listeners;
+          if (listeners) {
+            for (const [key, listener] of listeners) {
+              // Only get addresses from circuit relay listener
+              if (key.includes('circuit') || key.includes('relay')) {
+                const listenerAddrs = listener.getAddrs?.() || [];
+                addrs.push(...listenerAddrs);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[BrowserNode] Error getting circuit relay addresses:', e);
+        }
+        
+        // If no circuit relay addresses from listeners, try the address manager
+        if (addrs.length === 0) {
+          try {
+            const addressManager = libp2pAny.components?.addressManager;
+            if (addressManager?.getAddresses) {
+              const allAddrs = addressManager.getAddresses();
+              // Filter to only circuit relay addresses
+              for (const addr of allAddrs) {
+                if (addr.toString().includes('/p2p-circuit')) {
+                  addrs.push(addr);
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[BrowserNode] Error getting addresses from address manager:', e);
+          }
+        }
+        
+        return addrs;
+      });
 
       // Capture reservation store reference AFTER start (transports are now initialized)
       this.captureReservationStoreReference();
