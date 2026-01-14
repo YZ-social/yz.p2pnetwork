@@ -4,6 +4,10 @@
  * Exports all browser-specific functionality for bundling
  */
 
+// IMPORTANT: Register custom multiaddr protocols FIRST, before any multiaddr parsing
+import './multiaddr-protocols.js';
+export { registerHttpPathProtocol, isHttpPathRegistered } from './multiaddr-protocols.js';
+
 export { BrowserNode, createBrowserNodeFromConfig, fetchBrowserConfig, BrowserDHTAdapter, canDialAddress, filterDialableAddresses } from './browser-node.js';
 export type { StateChangeCallback, MessageHandler, MessageContext, PeerInfo } from './browser-node.js';
 

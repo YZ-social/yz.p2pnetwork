@@ -15,6 +15,9 @@
  * Requirements: 1.1, 1.5, 1.6, 1.7, 4.1, 4.2, 5.1, 5.2, 5.3, 5.4, 5.5, 8.1, 8.2
  */
 
+// IMPORTANT: Register custom multiaddr protocols FIRST, before any multiaddr parsing
+import './multiaddr-protocols.js';
+
 import { createLibp2p, type Libp2p } from 'libp2p';
 import { noise } from '@chainsafe/libp2p-noise';
 import { yamux } from '@chainsafe/libp2p-yamux';
