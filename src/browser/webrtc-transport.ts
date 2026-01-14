@@ -157,6 +157,8 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
   return (components: any): any => {
     const transport = baseTransportFactory(components);
     
+    console.log('[WebRTC] Creating WebRTC transport with http-path support');
+    
     // Store original dialFilter
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const originalDialFilter = (transport as any).dialFilter?.bind(transport);
@@ -164,8 +166,11 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     // Override dialFilter to accept WebRTC addresses with http-path
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (transport as any).dialFilter = (multiaddrs: any[]): any[] => {
+      console.log(`[WebRTC] dialFilter called with ${multiaddrs.length} addresses`);
+      
       // Get standard matches from base transport
       const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
+      console.log(`[WebRTC] Base dialFilter matched ${standardMatches.length} addresses`);
       
       // Also accept WebRTC addresses with http-path that weren't matched
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,24 +183,19 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
         }
         // Accept if it has /webrtc/ and /p2p-circuit/ (WebRTC over relay)
         if (str.includes('/webrtc/') && str.includes('/p2p-circuit')) {
+          console.log(`[WebRTC] Accepting WebRTC-over-relay address: ${str}`);
           return true;
         }
         // Accept if it has /webrtc/ and http-path (direct WebRTC with path routing)
         if (str.includes('/webrtc/') && str.includes('/http-path/')) {
+          console.log(`[WebRTC] Accepting WebRTC with http-path address: ${str}`);
           return true;
         }
         return false;
       });
       
       const result = [...standardMatches, ...additionalMatches];
-      
-      if (additionalMatches.length > 0) {
-        console.log(`[WebRTC] dialFilter accepted ${additionalMatches.length} additional addresses with http-path`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        for (const ma of additionalMatches) {
-          console.log(`[WebRTC]   ${ma.toString()}`);
-        }
-      }
+      console.log(`[WebRTC] dialFilter returning ${result.length} addresses (${standardMatches.length} standard + ${additionalMatches.length} additional)`);
       
       return result;
     };
@@ -205,6 +205,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     const originalCreateListener = (transport as any).createListener.bind(transport);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (transport as any).createListener = (options: any) => {
+      console.log('[WebRTC] Creating WebRTC listener');
       const listener = originalCreateListener(options);
       
       // Wrap getAddrs to include generated WebRTC addresses
@@ -212,6 +213,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       listener.getAddrs = (): any[] => {
         const baseAddrs = originalGetAddrs();
+        console.log(`[WebRTC] listener.getAddrs() - base listener has ${baseAddrs.length} addresses`);
         
         // If base listener has addresses, use them
         if (baseAddrs.length > 0) {
@@ -220,12 +222,7 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
         
         // Otherwise, generate WebRTC addresses from circuit relay addresses
         const webrtcAddrs = getWebRTCAddresses();
-        if (webrtcAddrs.length > 0) {
-          console.log(`[WebRTC] Generated ${webrtcAddrs.length} WebRTC addresses from circuit relay addresses`);
-          for (const addr of webrtcAddrs) {
-            console.log(`[WebRTC]   ${addr.toString()}`);
-          }
-        }
+        console.log(`[WebRTC] listener.getAddrs() - generated ${webrtcAddrs.length} WebRTC addresses`);
         
         return webrtcAddrs;
       };
