@@ -211,7 +211,7 @@ async function dialWebSocketWithPath(
   components: any
 ): Promise<Connection> {
   return new Promise((resolve, reject) => {
-    log('Creating WebSocket to: %s', wsUrl);
+    console.log(`[WebSocket] Creating WebSocket to: ${wsUrl}`);
     
     const ws = new WebSocket(wsUrl);
     ws.binaryType = 'arraybuffer';
@@ -223,11 +223,14 @@ async function dialWebSocketWithPath(
     
     ws.onopen = async () => {
       clearTimeout(timeout);
-      log('Connected to: %s', wsUrl);
+      console.log(`[WebSocket] Connected to: ${wsUrl}`);
       
       try {
         // Create a maConn (MultiaddrConnection) from the WebSocket
+        console.log('[WebSocket] Creating maConn...');
         const maConn = createMaConnFromWebSocket(ws, originalMa);
+        console.log('[WebSocket] maConn created, log type:', typeof maConn.log);
+        console.log('[WebSocket] maConn.log.newScope type:', typeof maConn.log?.newScope);
         
         // Upgrade the connection using libp2p's upgrader
         const upgrader = components.upgrader;
@@ -235,9 +238,12 @@ async function dialWebSocketWithPath(
           throw new Error('No upgrader available');
         }
         
+        console.log('[WebSocket] Calling upgrader.upgradeOutbound...');
         const connection = await upgrader.upgradeOutbound(maConn, options);
+        console.log('[WebSocket] Upgrade successful!');
         resolve(connection);
       } catch (err) {
+        console.error('[WebSocket] Error during upgrade:', err);
         ws.close();
         reject(err);
       }
@@ -245,7 +251,7 @@ async function dialWebSocketWithPath(
     
     ws.onerror = (event) => {
       clearTimeout(timeout);
-      log.error('Error connecting to %s: %o', wsUrl, event);
+      console.error(`[WebSocket] Error connecting to ${wsUrl}:`, event);
       reject(new Error(`WebSocket error connecting to ${wsUrl}`));
     };
     
