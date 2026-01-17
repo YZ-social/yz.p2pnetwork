@@ -16,8 +16,12 @@
  */
 
 import { webSockets } from '@libp2p/websockets';
-import type { Transport, Connection, ComponentLogger, Logger } from '@libp2p/interface';
+import type { Transport, Connection } from '@libp2p/interface';
+import { logger } from '@libp2p/logger';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
+
+// Create a logger using @libp2p/logger - this creates a proper Logger with newScope
+const log = logger('libp2p:websocket:http-path');
 
 /**
  * Check if a multiaddr contains WebSocket protocols
@@ -112,9 +116,6 @@ function multiaddrWithHttpPathToUrl(ma: Multiaddr): string | null {
   return `${protocol}://${host}${portStr}${path}`;
 }
 
-// Store the logger from components for use in dial
-let componentLogger: ComponentLogger | undefined;
-
 /**
  * Create a WebSocket transport with http-path support
  * 
@@ -131,9 +132,6 @@ export function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
   const baseTransport = webSockets();
   
   return (components) => {
-    // Store the logger from components for use in createMaConnFromWebSocket
-    componentLogger = components.logger;
-    
     const transport = baseTransport(components) as Transport;
     
     // Override the dialFilter to accept http-path multiaddrs
@@ -212,11 +210,8 @@ async function dialWebSocketWithPath(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components: any
 ): Promise<Connection> {
-  // Get the logger from components - this is libp2p's ComponentLogger
-  const logger: ComponentLogger = components.logger;
-  
   return new Promise((resolve, reject) => {
-    console.log(`[WebSocket] Creating WebSocket to: ${wsUrl}`);
+    log('Creating WebSocket to: %s', wsUrl);
     
     const ws = new WebSocket(wsUrl);
     ws.binaryType = 'arraybuffer';
@@ -228,12 +223,11 @@ async function dialWebSocketWithPath(
     
     ws.onopen = async () => {
       clearTimeout(timeout);
-      console.log(`[WebSocket] Connected to: ${wsUrl}`);
+      log('Connected to: %s', wsUrl);
       
       try {
         // Create a maConn (MultiaddrConnection) from the WebSocket
-        // Pass the ComponentLogger so it can create a proper Logger
-        const maConn = createMaConnFromWebSocket(ws, originalMa, logger);
+        const maConn = createMaConnFromWebSocket(ws, originalMa);
         
         // Upgrade the connection using libp2p's upgrader
         const upgrader = components.upgrader;
@@ -251,7 +245,7 @@ async function dialWebSocketWithPath(
     
     ws.onerror = (event) => {
       clearTimeout(timeout);
-      console.error(`[WebSocket] Error connecting to ${wsUrl}:`, event);
+      log.error('Error connecting to %s: %o', wsUrl, event);
       reject(new Error(`WebSocket error connecting to ${wsUrl}`));
     };
     
@@ -277,7 +271,7 @@ async function dialWebSocketWithPath(
  * - log: Logger with newScope method (required by upgrader)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger: ComponentLogger): any {
+function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
   let closed = false;
   const closePromise = new Promise<void>((resolve) => {
     ws.onclose = () => {
@@ -352,10 +346,6 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger:
     }
   };
   
-  // Use libp2p's ComponentLogger to create a proper Logger
-  // The forComponent method returns a Logger with the required newScope method
-  const log: Logger = logger.forComponent('libp2p:websocket:http-path');
-  
   return {
     source,
     sink,
@@ -371,11 +361,11 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger:
     },
     abort: (err?: Error) => {
       if (!closed) {
-        console.log('[WebSocket] Aborting connection:', err?.message);
+        log('Aborting connection:', err?.message);
         ws.close();
       }
     },
-    // Required by libp2p upgrader - must be a proper Logger from ComponentLogger
+    // Use the logger from @libp2p/logger - it has the proper newScope method
     log,
   };
 }
