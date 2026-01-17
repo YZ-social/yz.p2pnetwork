@@ -18,7 +18,9 @@
 import { webSockets } from '@libp2p/websockets';
 import type { Transport, Connection } from '@libp2p/interface';
 import { logger } from '@libp2p/logger';
+import { AbstractMultiaddrConnection } from '@libp2p/utils';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string';
 
 // Create a logger using @libp2p/logger - this creates a proper Logger with newScope
 const log = logger('libp2p:websocket:http-path');
@@ -265,95 +267,97 @@ async function dialWebSocketWithPath(
 }
 
 /**
- * Create a MultiaddrConnection from a WebSocket
+ * WebSocket MultiaddrConnection that extends AbstractMultiaddrConnection
  * 
- * This wraps a WebSocket in the interface that libp2p expects.
- * The MultiaddrConnection interface requires:
- * - source: AsyncIterable for incoming data
- * - sink: Function to send data
- * - remoteAddr: The remote multiaddr
- * - timeline: Connection timing info
- * - close/abort: Connection lifecycle methods
- * - log: Logger with newScope method (required by upgrader)
+ * This properly implements the Stream interface that libp2p's upgrader expects.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
-  let closed = false;
-  const closePromise = new Promise<void>((resolve) => {
-    ws.onclose = () => {
-      closed = true;
-      resolve();
-    };
-  });
-  
-  // Create async iterator for incoming data
-  const messageQueue: Uint8Array[] = [];
-  let messageResolve: ((value: IteratorResult<Uint8Array>) => void) | null = null;
-  let done = false;
-  
-  ws.onmessage = (event) => {
-    const data = new Uint8Array(event.data as ArrayBuffer);
-    if (messageResolve) {
-      messageResolve({ value: data, done: false });
-      messageResolve = null;
-    } else {
-      messageQueue.push(data);
-    }
-  };
-  
-  ws.onclose = () => {
-    done = true;
-    closed = true;
-    if (messageResolve) {
-      messageResolve({ value: undefined as any, done: true });
-      messageResolve = null;
-    }
-  };
-  
-  const source: AsyncIterable<Uint8Array> = {
-    [Symbol.asyncIterator]() {
-      return {
-        async next(): Promise<IteratorResult<Uint8Array>> {
-          if (messageQueue.length > 0) {
-            return { value: messageQueue.shift()!, done: false };
-          }
-          if (done) {
-            return { value: undefined as any, done: true };
-          }
-          return new Promise((resolve) => {
-            messageResolve = resolve;
-          });
-        },
-      };
-    },
-  };
-  
-  const sink = async (source: AsyncIterable<Uint8Array | Uint8Array[]>): Promise<void> => {
-    for await (const chunk of source) {
-      if (closed) break;
-      
-      // Handle both Uint8Array and Uint8Array[] (Uint8ArrayList)
-      if (Array.isArray(chunk)) {
-        for (const c of chunk) {
-          ws.send(c);
-        }
-      } else if (chunk instanceof Uint8Array) {
-        ws.send(chunk);
-      } else {
-        // Might be Uint8ArrayList - try to get subarray
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const c = chunk as any;
-        if (typeof c.subarray === 'function') {
-          ws.send(c.subarray());
-        } else if (typeof c.slice === 'function') {
-          ws.send(c.slice());
-        }
+class WebSocketMultiaddrConnection extends AbstractMultiaddrConnection {
+  private websocket: WebSocket;
+
+  constructor(init: {
+    websocket: WebSocket;
+    remoteAddr: Multiaddr;
+    logger: ReturnType<typeof logger>;
+  }) {
+    super({
+      remoteAddr: init.remoteAddr,
+      log: init.logger,
+      direction: 'outbound',
+    });
+    
+    this.websocket = init.websocket;
+    
+    // Handle WebSocket close
+    this.websocket.addEventListener('close', (evt) => {
+      this.log('closed - code %d, reason "%s", wasClean %s', evt.code, evt.reason, evt.wasClean);
+      if (!evt.wasClean) {
+        this.onRemoteReset();
+        return;
       }
+      this.onTransportClosed();
+    }, { once: true });
+    
+    // Handle incoming messages
+    this.websocket.addEventListener('message', (evt) => {
+      try {
+        let buf: Uint8Array;
+        if (typeof evt.data === 'string') {
+          buf = uint8ArrayFromString(evt.data);
+        } else if (evt.data instanceof ArrayBuffer) {
+          buf = new Uint8Array(evt.data, 0, evt.data.byteLength);
+        } else {
+          this.abort(new Error('Incorrect binary type'));
+          return;
+        }
+        this.onData(buf);
+      } catch (err) {
+        this.log.error('error receiving data - %e', err);
+      }
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sendData(data: any): { sentBytes: number; canSendMore: boolean } {
+    // Handle Uint8ArrayList by iterating
+    if (typeof data[Symbol.iterator] === 'function' && !(data instanceof Uint8Array)) {
+      for (const buf of data) {
+        this.websocket.send(buf);
+      }
+    } else {
+      this.websocket.send(data);
     }
-  };
-  
-  // Create a fresh logger for this connection using @libp2p/logger
-  // This ensures the logger has the newScope method that the upgrader requires
+    
+    const maxBufferedAmount = 1024 * 1024 * 4; // 4MB
+    const canSendMore = this.websocket.bufferedAmount < maxBufferedAmount;
+    
+    return {
+      sentBytes: data.byteLength,
+      canSendMore,
+    };
+  }
+
+  sendReset(): void {
+    this.websocket.close(1006); // abnormal closure
+  }
+
+  async sendClose(): Promise<void> {
+    this.websocket.close();
+  }
+
+  sendPause(): void {
+    // read backpressure is not supported
+  }
+
+  sendResume(): void {
+    // read backpressure is not supported
+  }
+}
+
+/**
+ * Create a MultiaddrConnection from a WebSocket using AbstractMultiaddrConnection
+ */
+function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): WebSocketMultiaddrConnection {
+  // Create a fresh logger for this connection
   const connLog = logger('libp2p:websocket:maconn');
   
   // Debug: log what the logger looks like
@@ -361,26 +365,9 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
   console.log('[WebSocket] Logger.newScope:', typeof connLog.newScope);
   console.log('[WebSocket] Logger keys:', Object.keys(connLog));
   
-  return {
-    source,
-    sink,
+  return new WebSocketMultiaddrConnection({
+    websocket: ws,
     remoteAddr,
-    timeline: {
-      open: Date.now(),
-    },
-    close: async () => {
-      if (!closed) {
-        ws.close();
-        await closePromise;
-      }
-    },
-    abort: (err?: Error) => {
-      if (!closed) {
-        connLog('Aborting connection:', err?.message);
-        ws.close();
-      }
-    },
-    // Use a fresh logger from @libp2p/logger - it has the proper newScope method
-    log: connLog,
-  };
+    logger: connLog,
+  });
 }
