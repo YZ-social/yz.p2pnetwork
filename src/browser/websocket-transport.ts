@@ -16,7 +16,7 @@
  */
 
 import { webSockets } from '@libp2p/websockets';
-import type { Transport, Connection } from '@libp2p/interface';
+import type { Transport, Connection, ComponentLogger, Logger } from '@libp2p/interface';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
 
 /**
@@ -112,6 +112,9 @@ function multiaddrWithHttpPathToUrl(ma: Multiaddr): string | null {
   return `${protocol}://${host}${portStr}${path}`;
 }
 
+// Store the logger from components for use in dial
+let componentLogger: ComponentLogger | undefined;
+
 /**
  * Create a WebSocket transport with http-path support
  * 
@@ -128,6 +131,9 @@ export function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
   const baseTransport = webSockets();
   
   return (components) => {
+    // Store the logger from components for use in createMaConnFromWebSocket
+    componentLogger = components.logger;
+    
     const transport = baseTransport(components) as Transport;
     
     // Override the dialFilter to accept http-path multiaddrs
@@ -206,6 +212,9 @@ async function dialWebSocketWithPath(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components: any
 ): Promise<Connection> {
+  // Get the logger from components - this is libp2p's ComponentLogger
+  const logger: ComponentLogger = components.logger;
+  
   return new Promise((resolve, reject) => {
     console.log(`[WebSocket] Creating WebSocket to: ${wsUrl}`);
     
@@ -222,10 +231,8 @@ async function dialWebSocketWithPath(
       console.log(`[WebSocket] Connected to: ${wsUrl}`);
       
       try {
-        // Get the logger from components (libp2p provides this)
-        const logger = components.logger;
-        
         // Create a maConn (MultiaddrConnection) from the WebSocket
+        // Pass the ComponentLogger so it can create a proper Logger
         const maConn = createMaConnFromWebSocket(ws, originalMa, logger);
         
         // Upgrade the connection using libp2p's upgrader
@@ -258,22 +265,6 @@ async function dialWebSocketWithPath(
 }
 
 /**
- * Create a simple logger that satisfies libp2p's ComponentLogger interface
- */
-function createLogger(namespace: string) {
-  const log = (...args: unknown[]) => {
-    console.log(`[${namespace}]`, ...args);
-  };
-  log.enabled = true;
-  log.error = (...args: unknown[]) => console.error(`[${namespace}]`, ...args);
-  log.trace = (...args: unknown[]) => console.debug(`[${namespace}]`, ...args);
-  // newScope creates a child logger with a sub-namespace
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (log as any).newScope = (subNamespace: string) => createLogger(`${namespace}:${subNamespace}`);
-  return log;
-}
-
-/**
  * Create a MultiaddrConnection from a WebSocket
  * 
  * This wraps a WebSocket in the interface that libp2p expects.
@@ -286,7 +277,7 @@ function createLogger(namespace: string) {
  * - log: Logger with newScope method (required by upgrader)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger?: any): any {
+function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger: ComponentLogger): any {
   let closed = false;
   const closePromise = new Promise<void>((resolve) => {
     ws.onclose = () => {
@@ -361,16 +352,9 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger?
     }
   };
   
-  // Use the logger from components if available, otherwise create our own
-  // The logger must have a newScope method for the upgrader
-  let log;
-  if (logger && typeof logger.forComponent === 'function') {
-    // libp2p's ComponentLogger interface
-    log = logger.forComponent('websocket-http-path');
-  } else {
-    // Fallback to our custom logger
-    log = createLogger('websocket-http-path');
-  }
+  // Use libp2p's ComponentLogger to create a proper Logger
+  // The forComponent method returns a Logger with the required newScope method
+  const log: Logger = logger.forComponent('libp2p:websocket:http-path');
   
   return {
     source,
@@ -391,7 +375,7 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr, logger?
         ws.close();
       }
     },
-    // Required by libp2p upgrader
+    // Required by libp2p upgrader - must be a proper Logger from ComponentLogger
     log,
   };
 }
