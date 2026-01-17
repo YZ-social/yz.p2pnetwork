@@ -172,7 +172,7 @@ export function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
         if (wsUrl) {
           try {
             // Create WebSocket connection with the correct URL (including path)
-            const connection = await dialWebSocketWithPath(ma, wsUrl, cleanMultiaddr, options, components);
+            const connection = await dialWebSocketWithPath(ma, wsUrl, options, components);
             return connection;
           } catch (err) {
             console.error(`[WebSocket] Failed to dial with http-path:`, err);
@@ -201,7 +201,6 @@ export function webSocketsWithHttpPath(): ReturnType<typeof webSockets> {
 async function dialWebSocketWithPath(
   originalMa: Multiaddr,
   wsUrl: string,
-  cleanMa: Multiaddr,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -256,9 +255,32 @@ async function dialWebSocketWithPath(
 }
 
 /**
+ * Create a simple logger that satisfies libp2p's ComponentLogger interface
+ */
+function createLogger(namespace: string) {
+  const log = (...args: unknown[]) => {
+    console.log(`[${namespace}]`, ...args);
+  };
+  log.enabled = true;
+  log.error = (...args: unknown[]) => console.error(`[${namespace}]`, ...args);
+  log.trace = (...args: unknown[]) => console.debug(`[${namespace}]`, ...args);
+  // newScope creates a child logger with a sub-namespace
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (log as any).newScope = (subNamespace: string) => createLogger(`${namespace}:${subNamespace}`);
+  return log;
+}
+
+/**
  * Create a MultiaddrConnection from a WebSocket
  * 
  * This wraps a WebSocket in the interface that libp2p expects.
+ * The MultiaddrConnection interface requires:
+ * - source: AsyncIterable for incoming data
+ * - sink: Function to send data
+ * - remoteAddr: The remote multiaddr
+ * - timeline: Connection timing info
+ * - close/abort: Connection lifecycle methods
+ * - log: Logger with newScope method (required by upgrader)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
@@ -336,6 +358,9 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
     }
   };
   
+  // Create a logger that satisfies libp2p's requirements
+  const log = createLogger('websocket-http-path');
+  
   return {
     source,
     sink,
@@ -355,5 +380,7 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
         ws.close();
       }
     },
+    // Required by libp2p upgrader
+    log,
   };
 }
