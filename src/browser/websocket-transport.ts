@@ -346,6 +346,15 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
     }
   };
   
+  // Create a fresh logger for this connection using @libp2p/logger
+  // This ensures the logger has the newScope method that the upgrader requires
+  const connLog = logger('libp2p:websocket:maconn');
+  
+  // Debug: log what the logger looks like
+  console.log('[WebSocket] Logger created:', typeof connLog);
+  console.log('[WebSocket] Logger.newScope:', typeof connLog.newScope);
+  console.log('[WebSocket] Logger keys:', Object.keys(connLog));
+  
   return {
     source,
     sink,
@@ -361,11 +370,11 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): any {
     },
     abort: (err?: Error) => {
       if (!closed) {
-        log('Aborting connection:', err?.message);
+        connLog('Aborting connection:', err?.message);
         ws.close();
       }
     },
-    // Use the logger from @libp2p/logger - it has the proper newScope method
-    log,
+    // Use a fresh logger from @libp2p/logger - it has the proper newScope method
+    log: connLog,
   };
 }
