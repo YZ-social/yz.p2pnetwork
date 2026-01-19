@@ -16,6 +16,7 @@
  */
 
 import { webSockets } from '@libp2p/websockets';
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
 import type { Transport, Connection } from '@libp2p/interface';
 import { logger } from '@libp2p/logger';
 import { AbstractMultiaddrConnection } from '@libp2p/utils';
@@ -370,4 +371,51 @@ function createMaConnFromWebSocket(ws: WebSocket, remoteAddr: Multiaddr): WebSoc
     remoteAddr,
     logger: connLog,
   });
+}
+
+
+/**
+ * Create a circuit relay transport with http-path support
+ * 
+ * The standard circuit relay transport's dialFilter doesn't recognize
+ * multiaddrs with http-path component. This wrapper overrides the dialFilter
+ * to accept circuit relay addresses that contain http-path.
+ * 
+ * Example address that needs to be accepted:
+ * /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3.../p2p-circuit/p2p/12D3...
+ * 
+ * @returns A circuit relay transport factory function
+ */
+export function circuitRelayTransportWithHttpPath(): ReturnType<typeof circuitRelayTransport> {
+  const baseTransport = circuitRelayTransport();
+  
+  return (components) => {
+    const transport = baseTransport(components) as Transport;
+    
+    // Override the dialFilter to accept http-path multiaddrs
+    const originalDialFilter = transport.dialFilter?.bind(transport);
+    transport.dialFilter = (multiaddrs: Multiaddr[]): Multiaddr[] => {
+      // First try the original filter
+      const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
+      
+      // Then add any circuit relay multiaddrs that weren't matched (e.g., with http-path)
+      const additionalMatches = multiaddrs.filter(ma => {
+        // Skip if already matched by standard filter
+        if (standardMatches.some(m => m.toString() === ma.toString())) {
+          return false;
+        }
+        // Check if it's a circuit relay multiaddr (contains /p2p-circuit/)
+        const str = ma.toString();
+        return str.includes('/p2p-circuit/');
+      });
+      
+      if (additionalMatches.length > 0) {
+        console.log('[CircuitRelay] dialFilter accepting http-path addresses:', additionalMatches.map(m => m.toString()));
+      }
+      
+      return [...standardMatches, ...additionalMatches];
+    };
+    
+    return transport;
+  };
 }

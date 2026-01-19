@@ -24,8 +24,8 @@ import { yamux } from '@chainsafe/libp2p-yamux';
 import { kadDHT } from '@libp2p/kad-dht';
 import { identify, identifyPush } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
-import { circuitRelayTransport } from '@libp2p/circuit-relay-v2';
 import { webRTCWithHttpPath, setLibp2pAddressGetter } from './webrtc-transport.js';
+import { webSocketsWithHttpPath, circuitRelayTransportWithHttpPath } from './websocket-transport.js';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
 import type { PeerId, Connection } from '@libp2p/interface';
 import { peerIdFromString } from '@libp2p/peer-id';
@@ -43,7 +43,6 @@ import { RelaySelector } from './relay-selector.js';
 import { ConnectionUpgrader, type ConnectionUpgraderConfig } from './connection-upgrader.js';
 import { DEFAULT_ICE_SERVERS } from './transport-config.js';
 import { OverlayNetwork, type MessageHandler as OverlayMessageHandler, type MessageContext as OverlayMessageContext } from '../overlay/index.js';
-import { webSocketsWithHttpPath } from './websocket-transport.js';
 
 /**
  * Check if a browser can dial the given multiaddr.
@@ -383,10 +382,11 @@ export class BrowserNode {
               iceServers: DEFAULT_ICE_SERVERS,
             },
           }) as any,
-          // Circuit relay transport - relay discovery is automatic when listening on /p2p-circuit
+          // Circuit relay transport with http-path support - relay discovery is automatic when listening on /p2p-circuit
           // The RelayDiscovery class automatically discovers and makes reservations on
           // connected peers that support the circuit v2 HOP protocol
-          circuitRelayTransport() as any,
+          // We use the custom transport to accept relay addresses that contain http-path
+          circuitRelayTransportWithHttpPath() as any,
         ],
         connectionEncrypters: [noise()],
         streamMuxers: [yamux()],
