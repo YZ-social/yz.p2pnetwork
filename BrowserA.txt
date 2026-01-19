@@ -1,0 +1,289 @@
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+key-manager.ts:479 [KeyManager] Our registered protocols: /ipfs/id/1.0.0, /ipfs/id/push/1.0.0, /ipfs/kad/1.0.0, /ipfs/ping/1.0.0, /libp2p/circuit/relay/0.2.0/stop, /overlay/1.0.0, /overlay/keyexchange/1.0.0, /webrtc-signaling/0.0.1
+webrtc-transport.ts:147 [WebRTC] Removed relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:147 [WebRTC] Removed relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
+webrtc-transport.ts:132 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:133 [WebRTC] Total stored relay addresses: 1
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+browser-node.ts:1655 [BrowserNode]   /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+browser-node.ts:909 [BrowserNode]   Transport: @libp2p/webrtc
+webrtc-transport.ts:38 [WebRTC] dialFilter called with 1 addresses
+webrtc-transport.ts:38 [WebRTC] Base dialFilter matched 0 addresses
+webrtc-transport.ts:38 [WebRTC] dialFilter returning 0 addresses (0 standard + 0 additional)
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+browser-node.ts:999 [BrowserNode] Got relay/WebRTC addresses after 0ms
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
+webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
+webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
+browser-node.ts:1012 [BrowserNode]   📡 Relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:132 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+webrtc-transport.ts:133 [WebRTC] Total stored relay addresses: 2
+webrtc-transport.ts:38 [WebRTC] Relay address already stored: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
+browser-node.ts:1031 [BrowserNode] ✅ Ready for browser-to-browser connections via relay + WebRTC

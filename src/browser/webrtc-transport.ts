@@ -28,7 +28,7 @@ import { multiaddr } from '@multiformats/multiaddr';
 /**
  * Debug logging control - set to true to enable verbose logging
  */
-const DEBUG_WEBRTC = true;
+const DEBUG_WEBRTC = false;
 
 /**
  * Log only when DEBUG_WEBRTC is enabled
@@ -116,6 +116,10 @@ export function setLibp2pAddressGetter(getter: () => Multiaddr[]): void {
  * Add a circuit relay address to the stored addresses
  * This should be called when a relay reservation is created
  * 
+ * When adding a new relay address from a different relay peer, this will
+ * replace any existing addresses from other relays to avoid accumulating
+ * stale addresses.
+ * 
  * @param addr - The circuit relay address (as string or Multiaddr)
  */
 export function addRelayAddress(addr: string | Multiaddr): void {
@@ -128,6 +132,36 @@ export function addRelayAddress(addr: string | Multiaddr): void {
     return;
   }
   
+  // Extract the relay peer ID from the new address
+  // Format: .../p2p/{relayPeerId}/p2p-circuit/...
+  const relayMatch = addrStr.match(/\/p2p\/([^/]+)\/p2p-circuit/);
+  const newRelayPeerId = relayMatch ? relayMatch[1] : null;
+  
+  // If we have a new relay peer ID, remove addresses from other relays
+  // This handles the case where relay discovery switches to a different relay
+  if (newRelayPeerId) {
+    const addressesToRemove: Multiaddr[] = [];
+    for (const existingAddr of storedRelayAddresses) {
+      const existingStr = existingAddr.toString();
+      const existingMatch = existingStr.match(/\/p2p\/([^/]+)\/p2p-circuit/);
+      const existingRelayPeerId = existingMatch ? existingMatch[1] : null;
+      
+      // If this address is from a different relay, mark for removal
+      if (existingRelayPeerId && existingRelayPeerId !== newRelayPeerId) {
+        addressesToRemove.push(existingAddr);
+      }
+    }
+    
+    // Remove addresses from other relays
+    for (const addrToRemove of addressesToRemove) {
+      const idx = storedRelayAddresses.findIndex(a => a.toString() === addrToRemove.toString());
+      if (idx !== -1) {
+        storedRelayAddresses.splice(idx, 1);
+        console.log(`[WebRTC] Replaced old relay address: ${addrToRemove.toString()}`);
+      }
+    }
+  }
+  
   storedRelayAddresses.push(ma);
   console.log(`[WebRTC] ✅ Stored relay address: ${addrStr}`);
   console.log(`[WebRTC] Total stored relay addresses: ${storedRelayAddresses.length}`);
@@ -137,12 +171,24 @@ export function addRelayAddress(addr: string | Multiaddr): void {
  * Remove a circuit relay address from the stored addresses
  * This should be called when a relay reservation is removed
  * 
+ * NOTE: We only remove addresses if we have other addresses remaining,
+ * to avoid a race condition where the old relay is removed before the
+ * new relay address is added. If this is the last address, we keep it
+ * until a new address is added (which will replace it).
+ * 
  * @param addr - The circuit relay address to remove (as string or Multiaddr)
+ * @param force - If true, remove even if it's the last address
  */
-export function removeRelayAddress(addr: string | Multiaddr): void {
+export function removeRelayAddress(addr: string | Multiaddr, force: boolean = false): void {
   const addrStr = typeof addr === 'string' ? addr : addr.toString();
   const index = storedRelayAddresses.findIndex(a => a.toString() === addrStr);
   if (index !== -1) {
+    // Don't remove the last address unless forced - this prevents a race condition
+    // where we have 0 addresses during relay switchover
+    if (storedRelayAddresses.length <= 1 && !force) {
+      console.log(`[WebRTC] Keeping last relay address (will be replaced when new relay is added): ${addrStr}`);
+      return;
+    }
     storedRelayAddresses.splice(index, 1);
     console.log(`[WebRTC] Removed relay address: ${addrStr}`);
   }
@@ -312,6 +358,15 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (transport as any).dialFilter = (multiaddrs: any[]): any[] => {
       debugLog(`[WebRTC] dialFilter called with ${multiaddrs.length} addresses`);
+      
+      // Log each address for debugging
+      for (const ma of multiaddrs) {
+        const str = ma.toString();
+        debugLog(`[WebRTC] dialFilter checking: ${str}`);
+        debugLog(`[WebRTC]   has /webrtc/: ${str.includes('/webrtc/')}`);
+        debugLog(`[WebRTC]   has /p2p-circuit: ${str.includes('/p2p-circuit')}`);
+        debugLog(`[WebRTC]   has /http-path/: ${str.includes('/http-path/')}`);
+      }
       
       // Get standard matches from base transport
       const standardMatches = originalDialFilter ? originalDialFilter(multiaddrs) : [];
