@@ -34,9 +34,13 @@ const log = logger('libp2p:websocket:http-path');
  */
 function isWebSocketMultiaddr(ma: Multiaddr): boolean {
   const str = ma.toString();
-  // Check for /ws/ or /wss/ patterns, but exclude WebRTC addresses
+  // Check for /ws/ or /wss/ patterns, but exclude WebRTC and circuit relay addresses
   // WebRTC addresses contain /webrtc/ and should be handled by the WebRTC transport
+  // Circuit relay addresses contain /p2p-circuit/ and should be handled by the circuit relay transport
   if (str.includes('/webrtc/') || str.includes('/webrtc-direct/')) {
+    return false;
+  }
+  if (str.includes('/p2p-circuit/') || str.includes('/p2p-circuit')) {
     return false;
   }
   return str.includes('/ws/') || str.includes('/wss/') || 
