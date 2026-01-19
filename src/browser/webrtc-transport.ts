@@ -243,6 +243,20 @@ export function getWebRTCAddresses(): Multiaddr[] {
 }
 
 /**
+ * Strip http-path component from a multiaddr string
+ * 
+ * The @libp2p/webrtc package has its own bundled multiaddr that doesn't
+ * recognize http-path. We need to strip it before passing to the base transport.
+ * 
+ * Input:  /dns4/example.com/tcp/443/wss/http-path/libp2p/p2p/{relayId}/p2p-circuit/webrtc/p2p/{targetId}
+ * Output: /dns4/example.com/tcp/443/wss/p2p/{relayId}/p2p-circuit/webrtc/p2p/{targetId}
+ */
+function stripHttpPath(addrStr: string): string {
+  // Match /http-path/{value}/ and remove it
+  return addrStr.replace(/\/http-path\/[^/]+/, '');
+}
+
+/**
  * Create a WebRTC transport with support for http-path in circuit relay addresses
  * 
  * This transport wrapper ensures that WebRTC addresses are properly generated
@@ -263,6 +277,32 @@ export function webRTCWithHttpPath(config?: WebRTCWithHttpPathConfig): ReturnTyp
     const transport = baseTransportFactory(components);
     
     console.log('[WebRTC] Creating WebRTC transport with http-path support');
+    
+    // Store original dial method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalDial = (transport as any).dial?.bind(transport);
+    
+    // Override dial to strip http-path before passing to base transport
+    // The base transport's bundled multiaddr doesn't recognize http-path
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (transport as any).dial = async (ma: any, options?: any): Promise<any> => {
+      const addrStr = ma.toString();
+      
+      if (addrStr.includes('/http-path/')) {
+        const strippedAddrStr = stripHttpPath(addrStr);
+        debugLog(`[WebRTC] Stripping http-path for dial:`);
+        debugLog(`[WebRTC]   Original: ${addrStr}`);
+        debugLog(`[WebRTC]   Stripped: ${strippedAddrStr}`);
+        
+        // Create a new multiaddr without http-path
+        // We use the base transport's multiaddr parsing which doesn't know http-path
+        // So we pass the stripped string directly
+        const strippedMa = multiaddr(strippedAddrStr);
+        return originalDial(strippedMa, options);
+      }
+      
+      return originalDial(ma, options);
+    };
     
     // Store original dialFilter
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

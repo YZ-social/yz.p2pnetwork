@@ -612,7 +612,7 @@
         async function loadBrowserModule() {
             try {
                 // Add cache-busting version parameter
-                const module = await import('./browser-node.js?v=0.13');
+                const module = await import('./browser-node.js?v=0.14');
                 BrowserNode = module.BrowserNode;
                 createBrowserNodeFromConfig = module.createBrowserNodeFromConfig;
                 

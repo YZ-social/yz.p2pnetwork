@@ -259,8 +259,8 @@ test.describe('WebRTC Browser-to-Browser Connectivity', () => {
           await pageA.evaluate(async (addr) => {
             // @ts-ignore - accessing global browserNode and multiaddr
             const node = (window as any).browserNode;
-            const { multiaddr } = await import('./browser-node.js?v=0.12');
-            if (node && node.libp2p) {
+            const multiaddr = (window as any).multiaddr;
+            if (node && node.libp2p && multiaddr) {
               await node.libp2p.dial(multiaddr(addr));
             }
           }, webrtcAddrB);
