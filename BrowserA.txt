@@ -1,289 +1,1987 @@
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
-browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 2 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] Stored address already has /webrtc/, using as-is: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 2 WebRTC addresses
+[Violation] Forced reflow while executing JavaScript took 92ms
+multiaddr-protocols.ts:53 [Multiaddr] Registered http-path protocol (code: 0x1F0)
+webrtc-transport.ts:325 [WebRTC] Creating WebRTC transport with http-path support
+webrtc-transport.ts:112 [WebRTC] Address getter registered
+browser-node.ts:1717 [BrowserNode] 🔧 TransportManager available (after start)
+browser-node.ts:1721 [BrowserNode] 🚗 Transport: @libp2p/websockets
+browser-node.ts:1721 [BrowserNode] 🚗 Transport: @libp2p/webrtc
+browser-node.ts:1721 [BrowserNode] 🚗 Transport: @libp2p/circuit-relay-v2-transport
+browser-node.ts:1725 [BrowserNode] 📋 Found reservation store on transport
+browser-node.ts:1726 [BrowserNode] 📋 Pending reservations: 1
+browser-node.ts:1727 [BrowserNode] 📋 Current reservations: 0
+browser-node.ts:1778 [BrowserNode] 🔍 Found relay discovery on transport
+browser-node.ts:1779 [BrowserNode] 🔍 Discovery started: true
+browser-node.ts:1780 [BrowserNode] 🔍 Discovery running: true
+browser-node.ts:536 [BrowserNode] 🚀 libp2p started
+browser-node.ts:537 [BrowserNode] 📍 Listen addresses configured: []
+browser-node.ts:542 [BrowserNode] 🎧 Active listeners: 3
+browser-node.ts:545 [BrowserNode]   Listener @libp2p/websockets: 0 addresses
+browser-node.ts:545 [BrowserNode]   Listener @libp2p/webrtc: 0 addresses
+browser-node.ts:545 [BrowserNode]   Listener @libp2p/circuit-relay-v2-transport: 0 addresses
+browser-node.ts:559 [BrowserNode] 📋 Circuit relay transport reservation store:
+browser-node.ts:560 [BrowserNode]   Pending reservations: 1
+browser-node.ts:561 [BrowserNode]   Current reservations: 0
+browser-node.ts:565 [BrowserNode]   Pending IDs: KmjFr4ubiK1e9z0NU2Zrh
+browser-node.ts:571 [BrowserNode] 🔍 Relay discovery state:
+browser-node.ts:572 [BrowserNode]   Started: true
+browser-node.ts:573 [BrowserNode]   Running: true
+browser-node.ts:574 [BrowserNode]   TopologyId: b2lyr4.i9rah1768850580278
+browser-node.ts:908 [BrowserNode] Attempting to connect to bootstrap: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ
+browser-node.ts:910 [BrowserNode] Parsed multiaddr: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ
+browser-node.ts:916 [BrowserNode] Available transports: 3
+browser-node.ts:918 [BrowserNode]   Transport: @libp2p/websockets
+browser-node.ts:921 [BrowserNode]   dialFilter result: 1 addresses
+browser-node.ts:922 [BrowserNode]     - /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ
+browser-node.ts:918 [BrowserNode]   Transport: @libp2p/webrtc
+browser-node.ts:921 [BrowserNode]   dialFilter result: 0 addresses
+browser-node.ts:918 [BrowserNode]   Transport: @libp2p/circuit-relay-v2-transport
+browser-node.ts:921 [BrowserNode]   dialFilter result: 0 addresses
+browser-node.ts:927 [BrowserNode] Calling libp2p.dial()...
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ
+websocket-transport.ts:179 [WebSocket]   Path: /libp2p
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/libp2p
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/libp2p
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/libp2p
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:931 [BrowserNode] Successfully connected to: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ (took 2041ms)
+browser-node.ts:943 [BrowserNode] Bootstrap peer protocols (0):
+browser-node.ts:953 [BrowserNode] ⚠️ Bootstrap does NOT support HOP protocol - relay reservations will fail
+bootstrap @ browser-node.ts:953
+await in bootstrap
+start @ browser-node.ts:586
+await in start
+startNode @ full-node.html:693
+browser-node.ts:984 [BrowserNode] Waiting for relay reservation...
+browser-node.ts:985 [BrowserNode] Connected to relay, waiting for identify exchange...
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWSRFZSCQq... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWSRFZSCQq... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1636 [BrowserNode] 🔧 No relay addresses yet, attempting manual reservation on HOP peer...
+browser-node.ts:1645 [BrowserNode] 📋 Pending reservations: 1
+browser-node.ts:1656 [BrowserNode] 🔧 Calling addRelay for 12D3KooWSRFZSCQq...
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWSRFZSCQq...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 1
+browser-node.ts:1736 [BrowserNode] ✅ relay:found-enough-relays event fired
+browser-node.ts:1737 [BrowserNode] 📋 Pending reservations: 0
+browser-node.ts:1738 [BrowserNode] 📋 Current reservations: 1
+browser-node.ts:1741 [BrowserNode] 🎉 relay:created-reservation event fired: {relay: Ed25519PeerId, details: {…}}
+browser-node.ts:1744 [BrowserNode] 📍 New addresses after reservation: 1
+browser-node.ts:1747 [BrowserNode]   /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+webrtc-transport.ts:166 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+webrtc-transport.ts:167 [WebRTC] Total stored relay addresses: 1
+browser-node.ts:1691 [BrowserNode] 🎧 Transport listening event: CustomEvent {isTrusted: false, detail: CircuitRelayTransportListener, type: 'transport:listening', target: Libp2p, currentTarget: Libp2p, …}
+browser-node.ts:1658 [BrowserNode] 🎉 Manual reservation successful! {relay: Ed25519PeerId, details: {…}}
+browser-node.ts:1662 [BrowserNode] 📍 Addresses after manual reservation: 2
+browser-node.ts:1664 [BrowserNode]   /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1664 [BrowserNode]   /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWSRFZSCQq... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1003 [BrowserNode] Address count changed: 0 -> 2
+browser-node.ts:1008 [BrowserNode] Got relay/WebRTC addresses after 506ms
+browser-node.ts:1017 [BrowserNode] Our multiaddrs after bootstrap (2 total):
+browser-node.ts:1021 [BrowserNode]   📡 Relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+webrtc-transport.ts:166 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+webrtc-transport.ts:167 [WebRTC] Total stored relay addresses: 2
+browser-node.ts:1021 [BrowserNode]   📡 Relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1040 [BrowserNode] ✅ Ready for browser-to-browser connections via relay + WebRTC
+browser-node.ts:1076 [BrowserNode] Starting peer discovery... (1 peers already connected)
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWQx2WtWGjQcV3mbDdPBnNzrTKChsRRZugxkr9YncmChPR
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWQx2WtWGjQcV3mbDdPBnNzrTKChsRRZugxkr9YncmChPR
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-8
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-3/p2p/12D3KooWB9dJvpWbKAMaADvErPqkw1z6xJDtFVuban89bd3baWxy
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWB9dJvpWbKAMaADvErPqkw1z6xJDtFVuban89bd3baWxy
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-3
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-3
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-3
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-5/p2p/12D3KooWSNQqfAjkFLe9jgWb3DAWwnwhUnEFpqxcL4QMHL8M6nxw
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWSNQqfAjkFLe9jgWb3DAWwnwhUnEFpqxcL4QMHL8M6nxw
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-5
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-5
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-5
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-12/p2p/12D3KooWHRip4YAvSKigci1Ks9DiMLT2WWYTAiZLDwu7osH6VAZQ
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWHRip4YAvSKigci1Ks9DiMLT2WWYTAiZLDwu7osH6VAZQ
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-12
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-2/p2p/12D3KooWJQwuzPb19udiR1XwLZKvtqvsyXzq144KkHAhf3oKadmg
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWJQwuzPb19udiR1XwLZKvtqvsyXzq144KkHAhf3oKadmg
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-2
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-2
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-2
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-4
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-14/p2p/12D3KooWESE474pT3bMkvn5zR7WoiJbRsorPdRPAW5Tg7Log7NY8
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWESE474pT3bMkvn5zR7WoiJbRsorPdRPAW5Tg7Log7NY8
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-14
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-9
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1/p2p/12D3KooWCZpEQPYf4frsavKrNYiSKHkgbqwdYbUHvRyhbQTpPuai
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWCZpEQPYf4frsavKrNYiSKHkgbqwdYbUHvRyhbQTpPuai
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-1
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-11/p2p/12D3KooWHMHyp9Se8gFVzGa5xss7AQ9JNEYj712wfD1YLsDdevFz
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWHMHyp9Se8gFVzGa5xss7AQ9JNEYj712wfD1YLsDdevFz
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-11
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-13/p2p/12D3KooWDB88A7KDbzB4AQ21co1v6pHM3sqyGkcaep6WxLXSEteG
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWDB88A7KDbzB4AQ21co1v6pHM3sqyGkcaep6WxLXSEteG
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-13
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-7/p2p/12D3KooWRWeudUH7tvDkNAnQYcoL2J4ivMTUcMc9Ykj49LfMxnR1
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWRWeudUH7tvDkNAnQYcoL2J4ivMTUcMc9Ykj49LfMxnR1
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-7
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-6/p2p/12D3KooWLUFMxRC5y6SnZRa6LmJ85Zqu7JYbDWvL6zmGDkoMz4pf
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWLUFMxRC5y6SnZRa6LmJ85Zqu7JYbDWvL6zmGDkoMz4pf
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-6
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-10/p2p/12D3KooWQFWvr541W5CZDNAaL64asDAkHVd2TCHwDo5xTvBnuCxy
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWQFWvr541W5CZDNAaL64asDAkHVd2TCHwDo5xTvBnuCxy
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-10
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-3
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1609 [BrowserNode] 🔄 Address update - now have 2 addresses
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWB9dJvpWb... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWB9dJvpWb... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWB9dJvpWb... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWB9dJvpWb...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWQx2WtWGj... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWQx2WtWGj... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWQx2WtWGj... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWQx2WtWGj...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-5
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWSNQqfAjk... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWSNQqfAjk... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWSNQqfAjk... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWSNQqfAjk...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: EncryptionFailedError: The operation was aborted
+    at Upgrader._encryptOutbound (upgrader.ts:442:13)
+    at async Upgrader._performUpgrade (upgrader.ts:302:13)
+    at async Upgrader.upgradeOutbound (upgrader.ts:241:14)
+    at async ws.onopen (websocket-transport.ts:253:28)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-2
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWJQwuzPb1... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWJQwuzPb1... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWJQwuzPb1... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWJQwuzPb1...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-4
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-9
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at Job.onAbort (job.ts:57:23)
+    at AbortSignal.onAbort (index.ts:54:16)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at Job.onAbort (job.ts:57:23)
+    at AbortSignal.onAbort (index.ts:54:16)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+onPeerConnect @ kad-dht.ts:409
+(anonymous) @ kad-dht.ts:303
+dispatchEvent @ index.ts:147
+safeDispatchEvent @ index.ts:162
+(anonymous) @ network.ts:290
+_writeReadMessage @ network.ts:289
+await in _writeReadMessage
+sendRequest @ network.ts:185
+getCloserPeersQuery @ index.ts:254
+queue.add.distance @ query-path.ts:135
+await in queue.add.distance
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+queryPeer @ query-path.ts:133
+(anonymous) @ query-path.ts:216
+await in (anonymous)
+queryPath @ query-path.ts:215
+await in queryPath
+(anonymous) @ index.ts:54
+addAllToPushable @ index.ts:53
+mergeSources @ index.ts:78
+run @ manager.ts:218
+await in run
+getClosestPeers @ index.ts:264
+await in getClosestPeers
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at Job.onAbort (job.ts:57:23)
+    at AbortSignal.onAbort (index.ts:54:16)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+run @ manager.ts:232
+await in run
+getClosestPeers @ index.ts:264
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+await in (anonymous)
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1/p2p/12D3KooWCZpEQPYf4frsavKrNYiSKHkgbqwdYbUHvRyhbQTpPuai
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWCZpEQPYf4frsavKrNYiSKHkgbqwdYbUHvRyhbQTpPuai
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-1
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at Job.onAbort (job.ts:57:23)
+    at AbortSignal.onAbort (index.ts:54:16)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+await in transport.dial
+dial @ transport-manager.ts:139
+dialPeer @ dial-queue.ts:284
+await in dialPeer
+queue.add.peerId.peerId @ dial-queue.ts:203
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+dial @ dial-queue.ts:192
+openConnection @ index.ts:554
+openStream @ index.ts:600
+ping @ ping.ts:100
+pingContact @ index.ts:411
+pingNewContactQueue.add.peerId @ index.ts:389
+run @ job.ts:78
+tryToStartAnother @ index.ts:218
+add @ index.ts:260
+verifyNewContact @ index.ts:385
+_add @ k-bucket.ts:256
+add @ k-bucket.ts:220
+await in add
+add @ index.ts:479
+run @ manager.ts:232
+await in run
+getClosestPeers @ index.ts:264
+(anonymous) @ index.ts:54
+(anonymous) @ index.ts:50
+await in (anonymous)
+length3 @ index.ts:55
+(anonymous) @ query-self.ts:133
+rawPipe @ index.ts:297
+pipe @ index.ts:291
+querySelf @ query-self.ts:127
+(anonymous) @ utils.ts:192
+(anonymous) @ query-self.ts:77
+setTimeout
+start @ query-self.ts:76
+(anonymous) @ startable.ts:98
+start @ startable.ts:97
+await in start
+start @ kad-dht.ts:487
+await in start
+(anonymous) @ components.ts:79
+_invokeStartableMethod @ components.ts:78
+start @ components.ts:89
+start @ libp2p.ts:235
+await in start
+createLibp2p @ index.ts:210
+await in createLibp2p
+start @ browser-node.ts:372
+await in start
+startNode @ full-node.html:693
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWCZpEQPYf... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWCZpEQPYf... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWCZpEQPYf... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWCZpEQPYf...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-7/p2p/12D3KooWRWeudUH7tvDkNAnQYcoL2J4ivMTUcMc9Ykj49LfMxnR1
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWRWeudUH7tvDkNAnQYcoL2J4ivMTUcMc9Ykj49LfMxnR1
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-7
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWRWeudUH7... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWRWeudUH7... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWRWeudUH7... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWRWeudUH7...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-6/p2p/12D3KooWLUFMxRC5y6SnZRa6LmJ85Zqu7JYbDWvL6zmGDkoMz4pf
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWLUFMxRC5y6SnZRa6LmJ85Zqu7JYbDWvL6zmGDkoMz4pf
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-6
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWLUFMxRC5... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWLUFMxRC5... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWLUFMxRC5... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWLUFMxRC5...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-10/p2p/12D3KooWQFWvr541W5CZDNAaL64asDAkHVd2TCHwDo5xTvBnuCxy
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWQFWvr541W5CZDNAaL64asDAkHVd2TCHwDo5xTvBnuCxy
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-10
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWQFWvr541... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWQFWvr541... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWQFWvr541... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWQFWvr541...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWKr6UkfZ4WQ2TpxMxyM8bTRVHidNytpAxRmFNBdhDKD37
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-4
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWKr6UkfZ4... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWKr6UkfZ4... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWKr6UkfZ4... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWKr6UkfZ4...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWFrcXZdozuAi4M18tDz32nzsTxB1MVdRbcPtLke6jdmmV
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-9
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWFrcXZdoz... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWFrcXZdoz... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWFrcXZdoz... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWFrcXZdoz...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-12/p2p/12D3KooWHRip4YAvSKigci1Ks9DiMLT2WWYTAiZLDwu7osH6VAZQ
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWHRip4YAvSKigci1Ks9DiMLT2WWYTAiZLDwu7osH6VAZQ
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-12
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-14/p2p/12D3KooWESE474pT3bMkvn5zR7WoiJbRsorPdRPAW5Tg7Log7NY8
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWESE474pT3bMkvn5zR7WoiJbRsorPdRPAW5Tg7Log7NY8
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-14
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-11/p2p/12D3KooWHMHyp9Se8gFVzGa5xss7AQ9JNEYj712wfD1YLsDdevFz
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWHMHyp9Se8gFVzGa5xss7AQ9JNEYj712wfD1YLsDdevFz
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-11
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-13/p2p/12D3KooWDB88A7KDbzB4AQ21co1v6pHM3sqyGkcaep6WxLXSEteG
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWDB88A7KDbzB4AQ21co1v6pHM3sqyGkcaep6WxLXSEteG
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-13
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-15/p2p/12D3KooWFKCps66uNP9bmPqzQJ7okQ7LAKvARiUX1AfNLpuCyLkS
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWFKCps66uNP9bmPqzQJ7okQ7LAKvARiUX1AfNLpuCyLkS
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-15
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWHRip4YAv... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWHRip4YAv... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWHRip4YAv... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWHRip4YAv...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWESE474pT... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWESE474pT... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWESE474pT... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWESE474pT...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWHMHyp9Se... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWHMHyp9Se... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWHMHyp9Se... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWHMHyp9Se...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWDB88A7KD... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWDB88A7KD... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWDB88A7KD... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWDB88A7KD...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWQx2WtWGj... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-8
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:193 [WebSocket] Failed to dial with http-path: AbortError: The operation was aborted
+    at Job.onAbort (job.ts:57:29)
+    at Job.onAbort (job.ts:57:23)
+    at AbortSignal.onAbort (index.ts:54:16)
+    at AbortSignal.onAbort (index.ts:54:16)
+transport.dial @ websocket-transport.ts:193
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWQx2WtWGj... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWB9dJvpWb... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-3
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-3
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-3
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-3
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-3
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWQx2WtWGj... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWQx2WtWGj... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWQx2WtWGj... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-3
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWB9dJvpWb... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWSNQqfAjk... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-5
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-5
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-5
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-5
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-5
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWB9dJvpWb... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWB9dJvpWb... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWB9dJvpWb... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-5
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWSNQqfAjk... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWHRip4YAv... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-12
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-12
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-12
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-12
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWHRip4YAv... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWJQwuzPb1... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-2
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-2
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-2
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-2
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-2
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWHRip4YAv... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWHRip4YAv... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWHRip4YAv... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWSNQqfAjk... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWSNQqfAjk... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWSNQqfAjk... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-2
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWJQwuzPb1... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWESE474pT... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-14
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-14
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-14
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-14
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWJQwuzPb1... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWJQwuzPb1... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWJQwuzPb1... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-14
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWESE474pT... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWFrcXZdoz... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-9
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-9
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWESE474pT... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWESE474pT... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWESE474pT... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-9
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWFrcXZdoz... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWCZpEQPYf... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-1
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-1
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWFrcXZdoz... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWFrcXZdoz... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWFrcXZdoz... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-1
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWCZpEQPYf... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWHMHyp9Se... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-11
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-11
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-11
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-11
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWCZpEQPYf... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWCZpEQPYf... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWCZpEQPYf... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-11
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWHMHyp9Se... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWDB88A7KD... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-13
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-13
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-13
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-13
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWHMHyp9Se... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWHMHyp9Se... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWHMHyp9Se... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-13
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWDB88A7KD... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWRWeudUH7... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-7
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-7
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-7
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-7
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWDB88A7KD... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWDB88A7KD... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWDB88A7KD... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-7
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWRWeudUH7... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWSRFZSCQq... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWLUFMxRC5... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-6
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-6
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-6
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-6
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWLUFMxRC5... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWQFWvr541... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-10
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-10
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-10
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-10
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWRWeudUH7... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWRWeudUH7... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWRWeudUH7... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWLUFMxRC5... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWLUFMxRC5... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWLUFMxRC5... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-10
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWQFWvr541... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-15/p2p/12D3KooWFKCps66uNP9bmPqzQJ7okQ7LAKvARiUX1AfNLpuCyLkS
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWFKCps66uNP9bmPqzQJ7okQ7LAKvARiUX1AfNLpuCyLkS
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-15
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-15
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWQFWvr541... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWQFWvr541... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWQFWvr541... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWFKCps66u... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWFKCps66u... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWFKCps66u... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWFKCps66u...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWKr6UkfZ4... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-4
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-4
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWKr6UkfZ4... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWFKCps66u... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-15
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-15
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-15
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-15
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWKr6UkfZ4... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWKr6UkfZ4... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWKr6UkfZ4... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-15
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1424 [BrowserNode] ✅ Connected to discovered peer: 12D3KooWFKCps66u... via /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnod...
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWFKCps66u... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWFKCps66u... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWFKCps66u... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1469 [BrowserNode] 🔄 Trying relay connections via 12D3KooWSRFZSCQq...
+browser-node.ts:1261 [BrowserNode] 🔍 Querying connected peers for other browsers...
+browser-node.ts:1368 [BrowserNode] Browser discovery via connected peers: found 0 potential browsers, attempted 0 connections
+browser-node.ts:1125 [BrowserNode] Peer discovery complete: discovered 16 new peers, connected to 16
+browser-node.ts:1127 [BrowserNode] Total: 16 unique peers (31 connections)
+browser-node.ts:1161 [BrowserNode] 🔍 Scanning peer store for other browsers...
+browser-node.ts:1236 [BrowserNode] Browser peer discovery: found 0 browsers, attempted 0 connections
+browser-node.ts:2032 [BrowserNode] Initializing overlay network...
+browser-node.ts:2038 [BrowserNode] Created DHT adapter for overlay
+browser-node.ts:2043 [BrowserNode] Created overlay network instance
+key-manager.ts:260 [KeyManager] Publishing public key to DHT with key: /overlay/pubkey/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+key-manager.ts:267 [KeyManager] Serialized public key record: 1310 bytes
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+browser-node.ts:177 [BrowserDHTAdapter] PUT: stored at peer
+key-manager.ts:271 [KeyManager] Successfully published public key to DHT for 12D3KooWSpWzVgew...
+key-manager.ts:627 [KeyManager] Registering key exchange handler for protocol: /overlay/keyexchange/1.0.0
+key-manager.ts:628 [KeyManager] Registering for peer: 12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1609 [BrowserNode] 🔄 Address update - now have 2 addresses
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+key-manager.ts:680 [KeyManager] Successfully registered key exchange handler for protocol: /overlay/keyexchange/1.0.0
+overlay.ts:453 [Overlay] Registering protocol handler for /overlay/1.0.0
+browser-node.ts:2047 [BrowserNode] Overlay network started successfully
+browser-node.ts:2058 [BrowserNode] Registered message handler with overlay
+browser-node.ts:1609 [BrowserNode] 🔄 Address update - now have 2 addresses
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/webrtc/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+browser-node.ts:1613 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWSRFZSCQqvhYEfQKo61P4hPXQ1C3nRnsWhdeoSAFXV2SQ/p2p-circuit/p2p/12D3KooWSpWzVgewZUGuaTzh2rKHmjMWz8m7WbfQdTfRh8vnsaPT
+websocket-transport.ts:176 [WebSocket] Dialing with http-path:
+websocket-transport.ts:177 [WebSocket]   Original: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWQx2WtWGjQcV3mbDdPBnNzrTKChsRRZugxkr9YncmChPR
+websocket-transport.ts:178 [WebSocket]   Clean: /dns4/imeyouwe.com/tcp/443/wss/p2p/12D3KooWQx2WtWGjQcV3mbDdPBnNzrTKChsRRZugxkr9YncmChPR
+websocket-transport.ts:179 [WebSocket]   Path: /dht/node-8
+websocket-transport.ts:180 [WebSocket]   URL: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:225 [WebSocket] Creating WebSocket to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:237 [WebSocket] Connected to: wss://imeyouwe.com/dht/node-8
+websocket-transport.ts:241 [WebSocket] Creating maConn...
+websocket-transport.ts:379 [WebSocket] Logger created: function
+websocket-transport.ts:380 [WebSocket] Logger.newScope: function
+websocket-transport.ts:381 [WebSocket] Logger keys: (9) ['namespace', 'useColors', 'color', 'extend', 'destroy', 'enabled', 'error', 'trace', 'newScope']
+websocket-transport.ts:243 [WebSocket] maConn created, log type: function
+websocket-transport.ts:244 [WebSocket] maConn.log.newScope type: function
+websocket-transport.ts:252 [WebSocket] Calling upgrader.upgradeOutbound...
+websocket-transport.ts:254 [WebSocket] Upgrade successful!
+browser-node.ts:1623 [BrowserNode] 🔍 Identified peer 12D3KooWQx2WtWGj... with 7 protocols
+browser-node.ts:1628 [BrowserNode] ✅ Peer 12D3KooWQx2WtWGj... supports HOP: /libp2p/circuit/relay/0.2.0/hop
+browser-node.ts:1629 [BrowserNode] 📡 Relay discovery should attempt reservation on this peer
+browser-node.ts:1685 [BrowserNode] 📥 Peer 12D3KooWQx2WtWGj... supports STOP: /libp2p/circuit/relay/0.2.0/stop
+browser-node.ts:1783 [BrowserNode] 🔍 relay:discover event fired for peer: 12D3KooWQx2WtWGj...
+browser-node.ts:1784 [BrowserNode] 📋 Pending reservations at discovery: 0
+key-manager.ts:289 [KeyManager] Looking up public key for 12D3KooWNFpKCL6o...
+key-manager.ts:309 [KeyManager] Trying DHT lookup for key: /overlay/pubkey/12D3KooWNFpKCL6onf5TzSmov7aizBu1r66UT4r5Fj7FPnhVkTYS
+key-manager.ts:334 [KeyManager] DHT lookup failed for 12D3KooWNFpKCL6o...: Key not found in DHT
+key-manager.ts:339 [KeyManager] Trying direct key request to 12D3KooWNFpKCL6o...
+key-manager.ts:370 [KeyManager] Attempting direct key request to 12D3KooWNFpKCL6o...
+key-manager.ts:374 [KeyManager] Have 0 connections to 12D3KooWNFpKCL6o...
+key-manager.ts:378 [KeyManager] Not connected to 12D3KooWNFpKCL6o..., trying to find peer...
+key-manager.ts:452 [KeyManager] After connection attempt, have 0 connections to 12D3KooWNFpKCL6o...
+key-manager.ts:467 [KeyManager] Still not connected, trying to dial peer directly...
+key-manager.ts:473 [KeyManager] Direct dial failed: The dial request has no valid addresses
 key-manager.ts:479 [KeyManager] Our registered protocols: /ipfs/id/1.0.0, /ipfs/id/push/1.0.0, /ipfs/kad/1.0.0, /ipfs/ping/1.0.0, /libp2p/circuit/relay/0.2.0/stop, /overlay/1.0.0, /overlay/keyexchange/1.0.0, /webrtc-signaling/0.0.1
-webrtc-transport.ts:147 [WebRTC] Removed relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:147 [WebRTC] Removed relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p/p2p/12D3KooWQyxhPvzpfVwY2QHhfFxx1zWcMfvJPCQ84tgjn1pxZW4t/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses fallback - checking 0 addresses from getter
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 0 WebRTC addresses
-webrtc-transport.ts:132 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:133 [WebRTC] Total stored relay addresses: 1
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-browser-node.ts:1655 [BrowserNode]   /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-browser-node.ts:1604 [BrowserNode]   New address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-browser-node.ts:909 [BrowserNode]   Transport: @libp2p/webrtc
-webrtc-transport.ts:38 [WebRTC] dialFilter called with 1 addresses
-webrtc-transport.ts:38 [WebRTC] Base dialFilter matched 0 addresses
-webrtc-transport.ts:38 [WebRTC] dialFilter returning 0 addresses (0 standard + 0 additional)
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-browser-node.ts:999 [BrowserNode] Got relay/WebRTC addresses after 0ms
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - base listener has 0 addresses
-webrtc-transport.ts:38 [WebRTC] getWebRTCAddresses using 1 stored relay addresses
-webrtc-transport.ts:38 [WebRTC] Converted stored relay to WebRTC: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:38 [WebRTC] listener.getAddrs() - generated 1 WebRTC addresses
-browser-node.ts:1012 [BrowserNode]   📡 Relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:132 [WebRTC] ✅ Stored relay address: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/webrtc/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-webrtc-transport.ts:133 [WebRTC] Total stored relay addresses: 2
-webrtc-transport.ts:38 [WebRTC] Relay address already stored: /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8/p2p/12D3KooWSHHZEVtYuHyqwmgRjRUjqJKFiv9ofPyghAqsf53Mz2vA/p2p-circuit/p2p/12D3KooWNViiT7pab7vLP9F8aozybjmH1AbtMLyRZQMJJC3LvRCk
-browser-node.ts:1031 [BrowserNode] ✅ Ready for browser-to-browser connections via relay + WebRTC
+key-manager.ts:494 [KeyManager] Could not get target peer protocols: Not Found
+key-manager.ts:499 [KeyManager] Dialing protocol /overlay/keyexchange/1.0.0 to 12D3KooWNFpKCL6o... (attempt 1/3)
+key-manager.ts:578 [KeyManager] Direct key request attempt 1 failed for 12D3KooWNFpKCL6o...
+requestKeyDirectly @ key-manager.ts:578
+key-manager.ts:579 [KeyManager]   Error name: NoValidAddressesError
+requestKeyDirectly @ key-manager.ts:579
+key-manager.ts:580 [KeyManager]   Error message: The dial request has no valid addresses
+requestKeyDirectly @ key-manager.ts:580
+key-manager.ts:581 [KeyManager]   Error stack: NoValidAddressesError: The dial request has no valid addresses
+    at DialQueue.calculateMultiaddrs (dial-queue.ts:476:13)
+    at async DialQueue.dialPeer (dial-queue.ts:254:31)
+requestKeyDirectly @ key-manager.ts:581
+key-manager.ts:345 [KeyManager] Direct key request also failed for 12D3KooWNFpKCL6o...: OverlayError: Direct key request failed for peer 12D3KooWNFpKCL6onf5TzSmov7aizBu1r66UT4r5Fj7FPnhVkTYS: The dial request has no valid addresses
+    at KeyManager.requestKeyDirectly (key-manager.ts:600:17)
+    at async KeyManager.lookupPublicKey (key-manager.ts:340:25)
+    at async OverlayNetwork.sendMessage (overlay.ts:271:25)
+    at async HTMLButtonElement.sendEcho (full-node.html:838:39)Caused by: NoValidAddressesError: The dial request has no valid addresses
+    at DialQueue.calculateMultiaddrs (dial-queue.ts:476:13)
+    at async DialQueue.dialPeer (dial-queue.ts:254:31)
+    at async queue.add.peerId.peerId [as fn] (dial-queue.ts:203:16)
+    at async raceSignal (index.ts:91:12)
+    at async Job.run (job.ts:78:22)
+lookupPublicKey @ key-manager.ts:345
+browser-node.ts:1076 [BrowserNode] Starting peer discovery... (16 peers already connected)
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWQx2WtWGj... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-8
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWB9dJvpWb... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-3
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWSNQqfAjk... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-5
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWHRip4YAv... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-12
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWJQwuzPb1... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-2
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWESE474pT... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-14
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWFrcXZdoz... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-9
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWCZpEQPYf... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-1
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWHMHyp9Se... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-11
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWDB88A7KD... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-13
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWRWeudUH7... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-7
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWSRFZSCQq... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/libp2p
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWLUFMxRC5... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-6
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWQFWvr541... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-10
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWFKCps66u... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-15
+browser-node.ts:1399 [BrowserNode] 🔍 Discovered peer 12D3KooWKr6UkfZ4... with 1 addresses
+browser-node.ts:1401 [BrowserNode]   📍 /dns4/imeyouwe.com/tcp/443/wss/http-path/dht%2Fnode-4
+browser-node.ts:1469 [BrowserNode] 🔄 Trying relay connections via 12D3KooWSRFZSCQq...
+browser-node.ts:1261 [BrowserNode] 🔍 Querying connected peers for other browsers...
+browser-node.ts:1368 [BrowserNode] Browser discovery via connected peers: found 0 potential browsers, attempted 0 connections
+browser-node.ts:1125 [BrowserNode] Peer discovery complete: discovered 16 new peers, connected to 16
+browser-node.ts:1127 [BrowserNode] Total: 16 unique peers (30 connections)
+browser-node.ts:1161 [BrowserNode] 🔍 Scanning peer store for other browsers...
+browser-node.ts:1236 [BrowserNode] Browser peer discovery: found 0 browsers, attempted 0 connections

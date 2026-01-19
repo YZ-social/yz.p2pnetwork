@@ -259,8 +259,20 @@ export class KeyManager {
     const keyString = new TextDecoder().decode(dhtKey);
     console.log(`[KeyManager] Publishing public key to DHT with key: ${keyString}`);
 
-    // Create the public key record
-    const record = this.createPublicKeyRecord(this.peerId, this.keyPair.publicKey);
+    // Get current addresses from libp2p (for browser nodes with relay addresses)
+    let addresses: string[] = [];
+    try {
+      const libp2p = this.dht.getLibp2pNode();
+      addresses = libp2p.getMultiaddrs().map(ma => ma.toString());
+      if (addresses.length > 0) {
+        console.log(`[KeyManager] Including ${addresses.length} addresses in public key record`);
+      }
+    } catch {
+      // Ignore - addresses are optional
+    }
+
+    // Create the public key record with addresses
+    const record = this.createPublicKeyRecord(this.peerId, this.keyPair.publicKey, addresses);
 
     // Serialize and store in DHT
     const serializedRecord = this.serializePublicKeyRecord(record);
@@ -323,6 +335,25 @@ export class KeyManager {
         x25519: record.x25519,
         mlkem768: record.mlkem768,
       };
+
+      // If the record includes addresses, add them to the peer store for future connections
+      if (record.addresses && record.addresses.length > 0) {
+        console.log(`[KeyManager] Record includes ${record.addresses.length} addresses for ${peerId.slice(0, 16)}...`);
+        try {
+          const libp2p = this.dht.getLibp2pNode();
+          const { peerIdFromString } = await import('@libp2p/peer-id');
+          const { multiaddr } = await import('@multiformats/multiaddr');
+          const targetPeerId = peerIdFromString(peerId);
+          
+          // Add addresses to peer store
+          const multiaddrs = record.addresses.map(addr => multiaddr(addr));
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (libp2p as any).peerStore.merge(targetPeerId, { multiaddrs });
+          console.log(`[KeyManager] Added ${multiaddrs.length} addresses to peer store for ${peerId.slice(0, 16)}...`);
+        } catch (e) {
+          console.warn(`[KeyManager] Failed to add addresses to peer store:`, e instanceof Error ? e.message : 'Unknown error');
+        }
+      }
 
       // Cache the key
       this.publicKeyCache.set(peerId, publicKey);
@@ -640,11 +671,19 @@ export class KeyManager {
         console.log(`[KeyManager] Received key exchange request from ${remotePeer.slice(0, 16)}...`);
 
         try {
-          // Create the public key record
-          const record = self.createPublicKeyRecord(self.peerId!, self.keyPair!.publicKey);
+          // Get current addresses to include in the record
+          let addresses: string[] = [];
+          try {
+            addresses = libp2p.getMultiaddrs().map(ma => ma.toString());
+          } catch {
+            // Ignore - addresses are optional
+          }
+
+          // Create the public key record with addresses
+          const record = self.createPublicKeyRecord(self.peerId!, self.keyPair!.publicKey, addresses);
           const serialized = self.serializePublicKeyRecord(record);
           
-          console.log(`[KeyManager] Sending public key (${serialized.length} bytes) to ${remotePeer.slice(0, 16)}...`);
+          console.log(`[KeyManager] Sending public key (${serialized.length} bytes, ${addresses.length} addresses) to ${remotePeer.slice(0, 16)}...`);
 
           // In libp2p 3.x with yamux, use sendData with Uint8ArrayList
           const { Uint8ArrayList } = await import('uint8arraylist');
@@ -727,7 +766,7 @@ export class KeyManager {
   /**
    * Create a public key record for DHT storage
    */
-  private createPublicKeyRecord(peerId: string, publicKey: HybridPublicKey): PublicKeyRecord {
+  private createPublicKeyRecord(peerId: string, publicKey: HybridPublicKey, addresses?: string[]): PublicKeyRecord {
     // Create a simple signature placeholder (in production, sign with identity key)
     const dataToSign = new Uint8Array([
       ...new TextEncoder().encode(peerId),
@@ -742,20 +781,36 @@ export class KeyManager {
       mlkem768: publicKey.mlkem768,
       timestamp: Date.now(),
       signature,
+      addresses: addresses && addresses.length > 0 ? addresses : undefined,
     };
   }
 
   /**
    * Serialize a public key record for DHT storage
+   * Format v2: [version (1)][peerIdLength (2)][peerId][x25519 (32)][mlkem768 (1184)][timestamp (8)][signature (32)][addressCount (2)][addresses...]
    */
   private serializePublicKeyRecord(record: PublicKeyRecord): Uint8Array {
     const peerIdBytes = new TextEncoder().encode(record.peerId);
     const peerIdLength = peerIdBytes.length;
 
-    // Format: [peerIdLength (2 bytes)][peerId][x25519 (32)][mlkem768 (1184)][timestamp (8)][signature (32)]
-    const totalSize = 2 + peerIdLength + 32 + 1184 + 8 + 32;
+    // Serialize addresses
+    const addressBytes: Uint8Array[] = [];
+    let addressesTotalLength = 0;
+    if (record.addresses && record.addresses.length > 0) {
+      for (const addr of record.addresses) {
+        const addrBytes = new TextEncoder().encode(addr);
+        addressBytes.push(addrBytes);
+        addressesTotalLength += 2 + addrBytes.length; // 2 bytes for length + address
+      }
+    }
+
+    // Format v2: [version (1)][peerIdLength (2)][peerId][x25519 (32)][mlkem768 (1184)][timestamp (8)][signature (32)][addressCount (2)][addresses...]
+    const totalSize = 1 + 2 + peerIdLength + 32 + 1184 + 8 + 32 + 2 + addressesTotalLength;
     const result = new Uint8Array(totalSize);
     let offset = 0;
+
+    // Version (1 byte) - version 2 includes addresses
+    result[offset++] = 2;
 
     // Peer ID length (2 bytes, big-endian)
     result[offset++] = (peerIdLength >> 8) & 0xff;
@@ -774,29 +829,47 @@ export class KeyManager {
     offset += 1184;
 
     // Timestamp (8 bytes, big-endian)
-    const timestamp = BigInt(record.timestamp);
-    for (let i = 7; i >= 0; i--) {
-      result[offset + i] = Number(timestamp & BigInt(0xff));
-      // eslint-disable-next-line no-param-reassign
-      record.timestamp = Number(BigInt(record.timestamp) >> BigInt(8));
-    }
-    // Restore timestamp and write correctly
-    const ts = BigInt(Date.now());
+    const ts = BigInt(record.timestamp);
     const view = new DataView(result.buffer, result.byteOffset + offset, 8);
     view.setBigUint64(0, ts, false);
     offset += 8;
 
     // Signature
     result.set(record.signature, offset);
+    offset += 32;
+
+    // Address count (2 bytes, big-endian)
+    const addressCount = addressBytes.length;
+    result[offset++] = (addressCount >> 8) & 0xff;
+    result[offset++] = addressCount & 0xff;
+
+    // Addresses (each: [length (2)][address bytes])
+    for (const addrBytes of addressBytes) {
+      const addrLen = addrBytes.length;
+      result[offset++] = (addrLen >> 8) & 0xff;
+      result[offset++] = addrLen & 0xff;
+      result.set(addrBytes, offset);
+      offset += addrLen;
+    }
 
     return result;
   }
 
   /**
    * Deserialize a public key record from DHT storage
+   * Supports both v1 (no version byte, no addresses) and v2 (with version and addresses)
    */
   private deserializePublicKeyRecord(data: Uint8Array): PublicKeyRecord {
     let offset = 0;
+
+    // Check version - v1 records start with peer ID length (typically 52-56 for base58 peer IDs)
+    // v2 records start with version byte (2)
+    const firstByte = data[0];
+    const isV2 = firstByte === 2;
+
+    if (isV2) {
+      offset = 1; // Skip version byte
+    }
 
     // Peer ID length (2 bytes, big-endian)
     const peerIdLength = (data[offset] << 8) | data[offset + 1];
@@ -822,6 +895,25 @@ export class KeyManager {
 
     // Signature
     const signature = data.slice(offset, offset + 32);
+    offset += 32;
+
+    // Addresses (v2 only)
+    let addresses: string[] | undefined;
+    if (isV2 && offset < data.length) {
+      const addressCount = (data[offset] << 8) | data[offset + 1];
+      offset += 2;
+
+      if (addressCount > 0) {
+        addresses = [];
+        for (let i = 0; i < addressCount && offset < data.length; i++) {
+          const addrLen = (data[offset] << 8) | data[offset + 1];
+          offset += 2;
+          const addrBytes = data.slice(offset, offset + addrLen);
+          addresses.push(new TextDecoder().decode(addrBytes));
+          offset += addrLen;
+        }
+      }
+    }
 
     return {
       peerId,
@@ -829,6 +921,7 @@ export class KeyManager {
       mlkem768,
       timestamp,
       signature,
+      addresses,
     };
   }
 }

@@ -1082,7 +1082,10 @@ describe('Property 11: Public Key Publication', () => {
         fc.uint8Array({ minLength: 1, maxLength: 100 }),
         fc.uint8Array({ minLength: 1, maxLength: 1000 }),
         async (key, value) => {
-          const putMock = vi.fn().mockResolvedValue(undefined);
+          // dht.put() returns an async iterable that must be consumed
+          const putMock = vi.fn(async function* () {
+            yield { name: 'PEER_RESPONSE' };
+          });
           const mockLibp2p = {
             peerId: { toString: () => 'test-peer' },
             status: 'started',

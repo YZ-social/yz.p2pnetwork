@@ -287,4 +287,6 @@ export interface PublicKeyRecord {
   timestamp: number;
   /** Signature by node's identity key */
   signature: Uint8Array;
+  /** Optional: Multiaddrs where this peer can be reached (for browser nodes) */
+  addresses?: string[];
 }
