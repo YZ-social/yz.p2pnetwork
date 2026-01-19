@@ -612,9 +612,15 @@
         async function loadBrowserModule() {
             try {
                 // Add cache-busting version parameter
-                const module = await import('./browser-node.js?v=0.8');
+                const module = await import('./browser-node.js?v=0.10');
                 BrowserNode = module.BrowserNode;
                 createBrowserNodeFromConfig = module.createBrowserNodeFromConfig;
+                
+                // Expose multiaddr globally for testing
+                if (module.multiaddr) {
+                    window.multiaddr = module.multiaddr;
+                }
+                
                 log('Browser node module loaded successfully', 'success');
                 return true;
             } catch (error) {
@@ -685,6 +691,9 @@
 
                 log('Starting libp2p with WebRTC and WebSocket transports...', 'info');
                 await browserNode.start();
+                
+                // Expose browserNode globally for testing
+                window.browserNode = browserNode;
                 
                 startTime = Date.now();
                 

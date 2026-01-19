@@ -408,13 +408,10 @@ export class BrowserNode {
         },
       });
 
-      // Set up event listeners
+      // Set up event listeners BEFORE start
       this.setupEventListeners();
 
-      // Start libp2p
-      await this.libp2p.start();
-
-      // Set up the address getter for the custom WebRTC transport
+      // Set up the address getter for the custom WebRTC transport BEFORE start
       // This allows the WebRTC listener to generate WebRTC addresses from circuit relay addresses
       // We use a getter that accesses the circuit relay listener directly to avoid circular dependency
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -519,6 +516,9 @@ export class BrowserNode {
         
         return addrs;
       });
+
+      // Start libp2p
+      await this.libp2p.start();
 
       // Capture reservation store reference AFTER start (transports are now initialized)
       this.captureReservationStoreReference();
@@ -855,11 +855,18 @@ export class BrowserNode {
   }
 
   /**
-   * Get the number of active connections
+   * Get the number of unique connected peers
+   * 
+   * Note: libp2p can have multiple connections to the same peer.
+   * This returns the count of unique peers, not total connections.
    */
   getConnectionCount(): number {
     if (!this.libp2p) return 0;
-    return this.libp2p.getConnections().length;
+    const uniquePeers = new Set<string>();
+    for (const conn of this.libp2p.getConnections()) {
+      uniquePeers.add(conn.remotePeer.toString());
+    }
+    return uniquePeers.size;
   }
 
   /**
@@ -1088,6 +1095,10 @@ export class BrowserNode {
         // We have a relay address, try to connect to other browsers via relay
         await this.tryRelayConnections(discoveredPeers, connectedPeerIds);
         
+        // Query connected DHT nodes for other browsers they know about
+        // This is how Browser A discovers Browser B - by asking the shared relay/DHT nodes
+        await this.discoverBrowsersViaConnectedPeers(connectedPeerIds);
+        
         // Recount connections after relay attempts
         newConnectionCount = 0;
         for (const peerId of discoveredPeers.keys()) {
@@ -1098,7 +1109,8 @@ export class BrowserNode {
       }
       
       console.log(`[BrowserNode] Peer discovery complete: discovered ${discoveredCount} new peers, connected to ${newConnectionCount}`);
-      console.log(`[BrowserNode] Total connections: ${this.libp2p.getConnections().length}`);
+      const uniquePeers = new Set(this.libp2p.getConnections().map(c => c.remotePeer.toString()));
+      console.log(`[BrowserNode] Total: ${uniquePeers.size} unique peers (${this.libp2p.getConnections().length} connections)`);
       
       // Also scan peer store for other browsers (peers with relay addresses)
       // This helps discover browsers that are connected to the same servers as us
@@ -1208,6 +1220,138 @@ export class BrowserNode {
     }
     
     console.log(`[BrowserNode] Browser peer discovery: found ${browserPeersFound} browsers, attempted ${connectionAttempts} connections`);
+  }
+
+  /**
+   * Discover other browsers by querying connected DHT nodes
+   * 
+   * When Browser B connects to a DHT node and gets a relay reservation,
+   * the DHT node learns Browser B's relay address via identify.
+   * This method queries connected DHT nodes for peers with relay addresses.
+   * 
+   * The approach: For each connected peer, check if they know about any peers
+   * with relay addresses (which indicates a browser).
+   */
+  private async discoverBrowsersViaConnectedPeers(connectedPeerIds: Set<string>): Promise<void> {
+    if (!this.libp2p) return;
+    
+    const myPeerId = this.libp2p.peerId.toString();
+    const myAddrs = this.libp2p.getMultiaddrs();
+    const myRelayAddr = myAddrs.find(a => a.toString().includes('/p2p-circuit'));
+    
+    if (!myRelayAddr) {
+      console.log('[BrowserNode] No relay address, skipping browser discovery via connected peers');
+      return;
+    }
+    
+    console.log('[BrowserNode] 🔍 Querying connected peers for other browsers...');
+    
+    // Get the base relay address for constructing relay addresses to other browsers
+    const relayAddrStr = myRelayAddr.toString();
+    const baseRelayAddr = relayAddrStr.split('/p2p-circuit')[0];
+    
+    let browsersFound = 0;
+    let connectionAttempts = 0;
+    
+    try {
+      // Get all peers from our peer store - these include peers we've learned about
+      // via identify from connected nodes
+      const allPeers = await this.libp2p.peerStore.all();
+      
+      for (const peer of allPeers) {
+        const peerId = peer.id.toString();
+        
+        // Skip ourselves
+        if (peerId === myPeerId) continue;
+        
+        // Skip if already connected
+        if (connectedPeerIds.has(peerId)) continue;
+        
+        // Check if this peer has relay addresses (indicating it's a browser)
+        const peerAddrs = peer.addresses.map((a: { multiaddr: { toString: () => string } }) => a.multiaddr.toString());
+        const relayAddrs = peerAddrs.filter((a: string) => a.includes('/p2p-circuit'));
+        
+        // Also check for peers that ONLY have relay addresses (definitely browsers)
+        // Server nodes have WSS addresses, browsers only have relay addresses
+        const wssAddrs = peerAddrs.filter((a: string) => a.includes('/wss/') && !a.includes('/p2p-circuit'));
+        const isBrowser = relayAddrs.length > 0 || (peerAddrs.length > 0 && wssAddrs.length === 0);
+        
+        if (!isBrowser) continue;
+        
+        browsersFound++;
+        console.log(`[BrowserNode] 🌐 Found potential browser ${peerId.slice(0, 16)}... with addresses:`);
+        for (const addr of peerAddrs) {
+          console.log(`[BrowserNode]   📍 ${addr}`);
+        }
+        
+        // Check connection limit
+        const uniqueConnectedPeers = new Set(this.libp2p.getConnections().map(c => c.remotePeer.toString()));
+        if (uniqueConnectedPeers.size >= this.config.maxConnections) {
+          console.log('[BrowserNode] At connection limit, stopping browser discovery');
+          break;
+        }
+        
+        connectionAttempts++;
+        
+        // Try to connect using the peer's relay address if available
+        if (relayAddrs.length > 0) {
+          for (const relayAddr of relayAddrs) {
+            try {
+              // Try WebRTC first
+              const webrtcAddr = relayAddr.replace(/\/p2p-circuit\/p2p\/([^/]+)$/, '/p2p-circuit/webrtc/p2p/$1');
+              if (webrtcAddr !== relayAddr && webrtcAddr.includes('/webrtc/')) {
+                try {
+                  console.log(`[BrowserNode] 🌐 Trying WebRTC to browser ${peerId.slice(0, 16)}...`);
+                  await this.libp2p.dial(multiaddr(webrtcAddr));
+                  console.log(`[BrowserNode] ✅ Connected to browser ${peerId.slice(0, 16)}... via WebRTC!`);
+                  connectedPeerIds.add(peerId);
+                  break;
+                } catch (webrtcErr) {
+                  // Fall through to circuit relay
+                }
+              }
+              
+              // Try circuit relay
+              console.log(`[BrowserNode] 🔌 Trying circuit relay to browser ${peerId.slice(0, 16)}...`);
+              await this.libp2p.dial(multiaddr(relayAddr));
+              console.log(`[BrowserNode] ✅ Connected to browser ${peerId.slice(0, 16)}... via circuit relay!`);
+              connectedPeerIds.add(peerId);
+              break;
+            } catch (err) {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              console.log(`[BrowserNode] ❌ Failed to connect to browser: ${errMsg.slice(0, 100)}`);
+            }
+          }
+        } else {
+          // No relay address known, try constructing one using our relay
+          const constructedRelayAddr = `${baseRelayAddr}/p2p-circuit/p2p/${peerId}`;
+          try {
+            // Try WebRTC first
+            const webrtcAddr = `${baseRelayAddr}/p2p-circuit/webrtc/p2p/${peerId}`;
+            try {
+              console.log(`[BrowserNode] 🌐 Trying WebRTC to browser ${peerId.slice(0, 16)}... (constructed addr)`);
+              await this.libp2p.dial(multiaddr(webrtcAddr));
+              console.log(`[BrowserNode] ✅ Connected to browser ${peerId.slice(0, 16)}... via WebRTC!`);
+              connectedPeerIds.add(peerId);
+              continue;
+            } catch (webrtcErr) {
+              // Fall through to circuit relay
+            }
+            
+            console.log(`[BrowserNode] 🔌 Trying circuit relay to browser ${peerId.slice(0, 16)}... (constructed addr)`);
+            await this.libp2p.dial(multiaddr(constructedRelayAddr));
+            console.log(`[BrowserNode] ✅ Connected to browser ${peerId.slice(0, 16)}... via circuit relay!`);
+            connectedPeerIds.add(peerId);
+          } catch (err) {
+            // Expected to fail if peer doesn't have a reservation on our relay
+          }
+        }
+      }
+    } catch (error) {
+      console.log(`[BrowserNode] Error discovering browsers via connected peers: ${error}`);
+    }
+    
+    console.log(`[BrowserNode] Browser discovery via connected peers: found ${browsersFound} potential browsers, attempted ${connectionAttempts} connections`);
   }
 
   /**
@@ -1651,17 +1795,34 @@ export class BrowserNode {
 
   /**
    * Update connection counts in state
+   * 
+   * Note: libp2p can have multiple connections to the same peer (e.g., one via
+   * WebSocket, one via circuit relay). We count unique peers, not total connections.
    */
   private updateConnectionCounts(): void {
     if (!this.libp2p) return;
 
     const connections = this.libp2p.getConnections();
+    
+    // Count unique peers, not total connections
+    // A peer is classified as "browser" if ANY of its connections are via WebRTC or circuit relay
+    const peerTypes = new Map<string, 'browser' | 'server'>();
+    
+    for (const conn of connections) {
+      const peerId = conn.remotePeer.toString();
+      const remoteAddr = conn.remoteAddr.toString();
+      const isBrowserConnection = remoteAddr.includes('/webrtc/') || remoteAddr.includes('/p2p-circuit/');
+      
+      // If we haven't seen this peer, or if this is a browser connection (upgrade from server)
+      if (!peerTypes.has(peerId) || isBrowserConnection) {
+        peerTypes.set(peerId, isBrowserConnection ? 'browser' : 'server');
+      }
+    }
+    
     let browserPeers = 0;
     let serverPeers = 0;
-
-    for (const conn of connections) {
-      const remoteAddr = conn.remoteAddr.toString();
-      if (remoteAddr.includes('/webrtc/') || remoteAddr.includes('/p2p-circuit/')) {
+    for (const type of peerTypes.values()) {
+      if (type === 'browser') {
         browserPeers++;
       } else {
         serverPeers++;
@@ -1669,7 +1830,7 @@ export class BrowserNode {
     }
 
     this.updateState({
-      connectedPeers: connections.length,
+      connectedPeers: peerTypes.size, // Unique peer count
       browserPeers,
       serverPeers,
     });

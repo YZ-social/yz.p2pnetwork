@@ -19,6 +19,10 @@ export { BrowserStorage } from './storage.js';
 export { DEFAULT_ICE_SERVERS, createBrowserTransports, DEFAULT_TRANSPORT_CONFIG } from './transport-config.js';
 export { webSocketsWithHttpPath } from './websocket-transport.js';
 
+// Re-export multiaddr for convenience
+export { multiaddr } from '@multiformats/multiaddr';
+export type { Multiaddr } from '@multiformats/multiaddr';
+
 export type {
   BrowserNodeConfig,
   BrowserNodeState,

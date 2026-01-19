@@ -28,7 +28,7 @@ import { multiaddr } from '@multiformats/multiaddr';
 /**
  * Debug logging control - set to true to enable verbose logging
  */
-const DEBUG_WEBRTC = false;
+const DEBUG_WEBRTC = true;
 
 /**
  * Log only when DEBUG_WEBRTC is enabled
