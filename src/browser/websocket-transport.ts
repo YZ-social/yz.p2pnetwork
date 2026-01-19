@@ -34,7 +34,11 @@ const log = logger('libp2p:websocket:http-path');
  */
 function isWebSocketMultiaddr(ma: Multiaddr): boolean {
   const str = ma.toString();
-  // Check for /ws/ or /wss/ or /ws/http-path or /wss/http-path patterns
+  // Check for /ws/ or /wss/ patterns, but exclude WebRTC addresses
+  // WebRTC addresses contain /webrtc/ and should be handled by the WebRTC transport
+  if (str.includes('/webrtc/') || str.includes('/webrtc-direct/')) {
+    return false;
+  }
   return str.includes('/ws/') || str.includes('/wss/') || 
          str.endsWith('/ws') || str.endsWith('/wss');
 }
@@ -246,7 +250,13 @@ async function dialWebSocketWithPath(
         console.log('[WebSocket] Upgrade successful!');
         resolve(connection);
       } catch (err) {
-        console.error('[WebSocket] Error during upgrade:', err);
+        // AbortError is expected when libp2p cancels redundant dial attempts
+        // Only log non-abort errors as they indicate real problems
+        const isAbortError = err instanceof Error && 
+          (err.name === 'AbortError' || err.message.includes('aborted'));
+        if (!isAbortError) {
+          console.error('[WebSocket] Error during upgrade:', err);
+        }
         ws.close();
         reject(err);
       }

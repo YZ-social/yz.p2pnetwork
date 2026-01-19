@@ -202,6 +202,15 @@ test.describe('WebRTC Browser-to-Browser Connectivity', () => {
       await pageA.click('#start-btn');
       await waitForConnection(pageA);
       
+      // Wait for overlay to be ready (indicates node is fully started)
+      await pageA.waitForFunction(
+        () => {
+          const overlayEl = document.getElementById('overlay-status');
+          return overlayEl?.textContent === 'Ready';
+        },
+        { timeout: 30000 }
+      );
+      
       const peerIdA = await getPeerId(pageA);
       console.log('Browser A peer ID:', peerIdA);
       
@@ -215,6 +224,15 @@ test.describe('WebRTC Browser-to-Browser Connectivity', () => {
       await pageB.goto(FULL_NODE_URL);
       await pageB.click('#start-btn');
       await waitForConnection(pageB);
+      
+      // Wait for overlay to be ready (indicates node is fully started)
+      await pageB.waitForFunction(
+        () => {
+          const overlayEl = document.getElementById('overlay-status');
+          return overlayEl?.textContent === 'Ready';
+        },
+        { timeout: 30000 }
+      );
       
       const peerIdB = await getPeerId(pageB);
       console.log('Browser B peer ID:', peerIdB);
@@ -231,6 +249,29 @@ test.describe('WebRTC Browser-to-Browser Connectivity', () => {
       // Wait for peer discovery to find each other
       // Browser A should discover Browser B and vice versa
       console.log('Waiting for browsers to discover each other...');
+      
+      // Try to have Browser A dial Browser B directly using the WebRTC address
+      // This tests the WebRTC connectivity directly
+      const webrtcAddrB = addrsB.find(a => a.includes('/webrtc/'));
+      if (webrtcAddrB) {
+        console.log('Browser A attempting to dial Browser B via WebRTC:', webrtcAddrB);
+        try {
+          await pageA.evaluate(async (addr) => {
+            // @ts-ignore - accessing global browserNode and multiaddr
+            const node = (window as any).browserNode;
+            const { multiaddr } = await import('./browser-node.js?v=0.12');
+            if (node && node.libp2p) {
+              await node.libp2p.dial(multiaddr(addr));
+            }
+          }, webrtcAddrB);
+          console.log('Browser A successfully dialed Browser B!');
+        } catch (e) {
+          console.log('Browser A failed to dial Browser B:', e);
+        }
+      }
+      
+      // Wait a bit for connection to establish
+      await pageA.waitForTimeout(5000);
       
       // Check Browser A's connected peers for Browser B
       let browserAFoundB = false;
