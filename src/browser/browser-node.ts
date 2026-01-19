@@ -164,10 +164,19 @@ export class BrowserDHTAdapter {
 
   /**
    * Store a key-value pair in the DHT
+   * 
+   * Note: dht.put() returns an async iterable that must be consumed
+   * for the operation to actually execute.
    */
   async put(key: Uint8Array, value: Uint8Array): Promise<void> {
     const dht = this.getDHTService();
-    await dht.put(key, value);
+    // Must iterate over the async iterable for the PUT to execute
+    for await (const event of dht.put(key, value)) {
+      // Log progress events for debugging
+      if (event.name === 'PEER_RESPONSE') {
+        console.log(`[BrowserDHTAdapter] PUT: stored at peer`);
+      }
+    }
   }
 
   /**
