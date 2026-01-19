@@ -31,8 +31,8 @@ const WEBRTC_TIMEOUT = 60000;
 async function waitForConnection(page: Page, minPeers: number = 1): Promise<void> {
   await page.waitForFunction(
     (min) => {
-      const statusEl = document.getElementById('status');
-      const peersEl = document.getElementById('connected-peers');
+      const statusEl = document.getElementById('connection-status');
+      const peersEl = document.getElementById('total-peer-count');
       if (!statusEl || !peersEl) return false;
       const status = statusEl.textContent || '';
       const peers = parseInt(peersEl.textContent || '0', 10);
@@ -58,9 +58,35 @@ async function getPeerId(page: Page): Promise<string> {
  */
 async function getMultiaddrs(page: Page): Promise<string[]> {
   return page.evaluate(() => {
-    const el = document.getElementById('multiaddrs');
-    if (!el) return [];
-    return el.textContent?.split('\n').filter(a => a.trim()) || [];
+    // Get addresses from the browserNode object exposed on window
+    const browserNode = (window as any).browserNode;
+    if (!browserNode) {
+      console.log('[Test] browserNode not found on window');
+      return [];
+    }
+    
+    // Check if node is started by checking state
+    const state = browserNode.getState?.();
+    if (!state || state.status !== 'connected') {
+      console.log('[Test] browserNode not connected, status:', state?.status);
+      return [];
+    }
+    
+    try {
+      // Access libp2p directly from the private field since getLibp2pNode throws if not started
+      const libp2p = (browserNode as any).libp2p;
+      if (!libp2p) {
+        console.log('[Test] libp2p not available');
+        return [];
+      }
+      
+      const addrs = libp2p.getMultiaddrs();
+      console.log('[Test] getMultiaddrs returned:', addrs.length, 'addresses');
+      return addrs.map((a: any) => a.toString());
+    } catch (e) {
+      console.error('[Test] Error getting multiaddrs:', e);
+      return [];
+    }
   });
 }
 
@@ -107,6 +133,32 @@ test.describe('WebRTC Browser-to-Browser Connectivity', () => {
     
     // Wait for connection
     await waitForConnection(page);
+    
+    // Wait for overlay to be ready (indicates node is fully started)
+    await page.waitForFunction(
+      () => {
+        const overlayEl = document.getElementById('overlay-status');
+        return overlayEl?.textContent === 'Ready';
+      },
+      { timeout: 30000 }
+    );
+    
+    // Debug: Log all addresses immediately after connection
+    const initialAddrs = await getMultiaddrs(page);
+    console.log('Initial addresses after connection:', initialAddrs.length);
+    for (const addr of initialAddrs) {
+      console.log('  ', addr);
+    }
+    
+    // Wait a bit for relay reservation to complete
+    await page.waitForTimeout(5000);
+    
+    // Debug: Log addresses after waiting
+    const addrsAfterWait = await getMultiaddrs(page);
+    console.log('Addresses after 5s wait:', addrsAfterWait.length);
+    for (const addr of addrsAfterWait) {
+      console.log('  ', addr);
+    }
     
     // Check for relay address first
     const hasRelay = await hasRelayAddress(page);

@@ -24,7 +24,7 @@ import { yamux } from '@chainsafe/libp2p-yamux';
 import { kadDHT } from '@libp2p/kad-dht';
 import { identify, identifyPush } from '@libp2p/identify';
 import { ping } from '@libp2p/ping';
-import { webRTCWithHttpPath, setLibp2pAddressGetter } from './webrtc-transport.js';
+import { webRTCWithHttpPath, setLibp2pAddressGetter, addRelayAddress, removeRelayAddress, clearRelayAddresses, getStoredRelayAddresses } from './webrtc-transport.js';
 import { webSocketsWithHttpPath, circuitRelayTransportWithHttpPath } from './websocket-transport.js';
 import { multiaddr, type Multiaddr } from '@multiformats/multiaddr';
 import type { PeerId, Connection } from '@libp2p/interface';
@@ -654,6 +654,9 @@ export class BrowserNode {
     await this.libp2p.stop();
     this.libp2p = null;
 
+    // Clear stored relay addresses
+    clearRelayAddresses();
+
     // Update state
     this.updateState({
       status: 'disconnected',
@@ -1007,6 +1010,8 @@ export class BrowserNode {
         const addrStr = addr.toString();
         if (addrStr.includes('/p2p-circuit')) {
           console.log(`[BrowserNode]   📡 Relay address: ${addrStr}`);
+          // Store relay address for WebRTC address generation
+          addRelayAddress(addr);
         } else if (addrStr.includes('/webrtc')) {
           console.log(`[BrowserNode]   🌐 WebRTC address: ${addrStr}`);
         } else {
@@ -1729,11 +1734,29 @@ export class BrowserNode {
               const addrs = this.libp2p?.getMultiaddrs() || [];
               console.log(`[BrowserNode] 📍 New addresses after reservation: ${addrs.length}`);
               for (const addr of addrs) {
-                console.log(`[BrowserNode]   ${addr.toString()}`);
+                const addrStr = addr.toString();
+                console.log(`[BrowserNode]   ${addrStr}`);
+                
+                // Store circuit relay addresses for WebRTC address generation
+                if (addrStr.includes('/p2p-circuit')) {
+                  addRelayAddress(addr);
+                }
               }
             });
             t.reservationStore.addEventListener('relay:removed', (evt: CustomEvent) => {
               console.log('[BrowserNode] ❌ relay:removed event fired:', evt.detail);
+              // Remove the relay address from storage
+              // The event detail should contain the relay peer ID
+              if (evt.detail?.relay) {
+                const relayPeerId = evt.detail.relay.toString();
+                // Find and remove any stored addresses that go through this relay
+                const storedAddrs = getStoredRelayAddresses();
+                for (const addr of storedAddrs) {
+                  if (addr.toString().includes(relayPeerId)) {
+                    removeRelayAddress(addr);
+                  }
+                }
+              }
             });
             
             // Store reference for manual reservation attempt

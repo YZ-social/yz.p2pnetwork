@@ -94,6 +94,13 @@ function toWebRTCAddress(circuitRelayAddr: Multiaddr): Multiaddr | null {
 let libp2pAddressGetter: (() => Multiaddr[]) | null = null;
 
 /**
+ * Direct storage for circuit relay addresses
+ * This is populated when relay:created-reservation events fire
+ * and provides a reliable source of relay addresses for WebRTC address generation
+ */
+const storedRelayAddresses: Multiaddr[] = [];
+
+/**
  * Set the libp2p address getter function
  * This should be called after libp2p is created but before starting
  * 
@@ -106,22 +113,106 @@ export function setLibp2pAddressGetter(getter: () => Multiaddr[]): void {
 }
 
 /**
+ * Add a circuit relay address to the stored addresses
+ * This should be called when a relay reservation is created
+ * 
+ * @param addr - The circuit relay address (as string or Multiaddr)
+ */
+export function addRelayAddress(addr: string | Multiaddr): void {
+  const ma = typeof addr === 'string' ? multiaddr(addr) : addr;
+  const addrStr = ma.toString();
+  
+  // Check if already stored
+  if (storedRelayAddresses.some(a => a.toString() === addrStr)) {
+    debugLog(`[WebRTC] Relay address already stored: ${addrStr}`);
+    return;
+  }
+  
+  storedRelayAddresses.push(ma);
+  console.log(`[WebRTC] ✅ Stored relay address: ${addrStr}`);
+  console.log(`[WebRTC] Total stored relay addresses: ${storedRelayAddresses.length}`);
+}
+
+/**
+ * Remove a circuit relay address from the stored addresses
+ * This should be called when a relay reservation is removed
+ * 
+ * @param addr - The circuit relay address to remove (as string or Multiaddr)
+ */
+export function removeRelayAddress(addr: string | Multiaddr): void {
+  const addrStr = typeof addr === 'string' ? addr : addr.toString();
+  const index = storedRelayAddresses.findIndex(a => a.toString() === addrStr);
+  if (index !== -1) {
+    storedRelayAddresses.splice(index, 1);
+    console.log(`[WebRTC] Removed relay address: ${addrStr}`);
+  }
+}
+
+/**
+ * Clear all stored relay addresses
+ * This should be called when the node stops
+ */
+export function clearRelayAddresses(): void {
+  storedRelayAddresses.length = 0;
+  debugLog('[WebRTC] Cleared all stored relay addresses');
+}
+
+/**
+ * Get all stored relay addresses
+ */
+export function getStoredRelayAddresses(): Multiaddr[] {
+  return [...storedRelayAddresses];
+}
+
+/**
  * Generate WebRTC addresses from current circuit relay addresses
  * 
  * This function is called by the WebRTC listener's getAddrs() to generate
  * WebRTC addresses from circuit relay addresses. It filters for circuit
  * relay addresses and converts them to WebRTC addresses.
+ * 
+ * Address sources (in order of priority):
+ * 1. Stored relay addresses (from relay:created-reservation events)
+ * 2. Addresses from the libp2p address getter (fallback)
  */
 export function getWebRTCAddresses(): Multiaddr[] {
+  const webrtcAddrs: Multiaddr[] = [];
+  
+  // First, use stored relay addresses (most reliable source)
+  if (storedRelayAddresses.length > 0) {
+    debugLog(`[WebRTC] getWebRTCAddresses using ${storedRelayAddresses.length} stored relay addresses`);
+    
+    for (const addr of storedRelayAddresses) {
+      const addrStr = addr.toString();
+      
+      // Skip if already has /webrtc/
+      if (hasWebRTCComponent(addr)) {
+        debugLog(`[WebRTC] Stored address already has /webrtc/, using as-is: ${addrStr}`);
+        webrtcAddrs.push(addr);
+        continue;
+      }
+      
+      // Convert to WebRTC address
+      const webrtcAddr = toWebRTCAddress(addr);
+      if (webrtcAddr) {
+        debugLog(`[WebRTC] Converted stored relay to WebRTC: ${webrtcAddr.toString()}`);
+        webrtcAddrs.push(webrtcAddr);
+      }
+    }
+    
+    if (webrtcAddrs.length > 0) {
+      return webrtcAddrs;
+    }
+  }
+  
+  // Fallback: try the address getter
   if (!libp2pAddressGetter) {
-    debugLog('[WebRTC] No address getter registered yet');
+    debugLog('[WebRTC] No address getter registered and no stored addresses');
     return [];
   }
   
   const libp2pAddrs = libp2pAddressGetter();
-  const webrtcAddrs: Multiaddr[] = [];
-  
-  debugLog(`[WebRTC] getWebRTCAddresses called, checking ${libp2pAddrs.length} addresses`);
+  debugLog(`[WebRTC] getWebRTCAddresses fallback - checking ${libp2pAddrs.length} addresses from getter`);
   
   for (const addr of libp2pAddrs) {
     const addrStr = addr.toString();

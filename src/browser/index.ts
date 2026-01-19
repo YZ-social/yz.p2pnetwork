@@ -18,6 +18,15 @@ export { ConnectionUpgrader } from './connection-upgrader.js';
 export { BrowserStorage } from './storage.js';
 export { DEFAULT_ICE_SERVERS, createBrowserTransports, DEFAULT_TRANSPORT_CONFIG } from './transport-config.js';
 export { webSocketsWithHttpPath } from './websocket-transport.js';
+export { 
+  webRTCWithHttpPath, 
+  setLibp2pAddressGetter, 
+  addRelayAddress, 
+  removeRelayAddress, 
+  clearRelayAddresses, 
+  getStoredRelayAddresses,
+  getWebRTCAddresses 
+} from './webrtc-transport.js';
 
 // Re-export multiaddr for convenience
 export { multiaddr } from '@multiformats/multiaddr';
